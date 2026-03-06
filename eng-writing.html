@@ -3,452 +3,890 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hong Kong DSE English Writing Practice Platform</title>
-    <!-- Tailwind CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- docx.js CDN for DOCX export -->
-    <script src="https://unpkg.com/docx@7.2.0/build/index.js"></script>
-    <!-- FileSaver.js CDN for saving files -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <!-- Custom CSS -->
+    <title>EduGenius – English Writing Practice</title>
+    <link rel="manifest" href="./manifest.json">
     <style>
+        /* ============================================================
+           EduGenius English Writing Practice
+           Self-contained styles – no external dependencies
+           ============================================================ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --secondary: #7c3aed;
+            --secondary-light: #f5f3ff;
+            --bg-start: #eef2ff;
+            --bg-end: #fdf4ff;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --text-secondary: #374151;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 14px;
+            --radius-sm: 8px;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #e0e7ff, #f3f4f6);
-            color: #1f2937;
-            margin: 0;
+            background: linear-gradient(135deg, var(--bg-start) 0%, #f5f3ff 50%, var(--bg-end) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
         }
+
+        /* ---- Header ---- */
+        .site-header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            color: var(--text);
+            flex-shrink: 0;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.3);
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--primary-light);
+            padding: 0.2rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+            flex-shrink: 0;
+        }
+
+        .back-btn:hover {
+            background: #e0e7ff;
+            transform: translateX(-2px);
+        }
+
+        .back-arrow {
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        /* ---- Main layout ---- */
         .container {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 1.5rem;
-            min-height: calc(100vh - 80px);
+            padding: 2rem 1.5rem 3rem;
         }
-        .card {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            transition: transform 0.2s;
+
+        /* ---- Hero ---- */
+        .hero {
+            text-align: center;
+            padding: 2.5rem 1rem 2rem;
         }
-        .card:hover {
-            transform: translateY(-4px);
-        }
-        .btn {
-            background: #4f46e5;
-            color: #ffffff;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: background 0.3s, transform 0.2s;
-        }
-        .btn:hover {
-            background: #4338ca;
-            transform: scale(1.05);
-        }
-        .btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .form-label {
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 1rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 9999px;
+            font-size: 0.8rem;
             font-weight: 600;
-            color: #374151;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
         }
-        .form-input, .form-select, .form-textarea {
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 0.75rem;
+
+        .hero h1 {
+            font-size: clamp(1.75rem, 5vw, 2.75rem);
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 580px;
+            margin: 0 auto;
+        }
+
+        /* ---- Grid layout ---- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* ---- Card ---- */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.75rem;
+            transition: box-shadow 0.25s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .icon-indigo { background: var(--primary-light); }
+        .icon-purple { background: var(--secondary-light); }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        /* ---- Form elements ---- */
+        .form-group {
+            margin-bottom: 1.125rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.375rem;
+            letter-spacing: 0.01em;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
             width: 100%;
-            transition: border-color 0.3s;
+            padding: 0.625rem 0.875rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            color: var(--text);
+            background: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: #4f46e5;
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.875rem center;
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
             outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
         }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+            line-height: 1.5;
+        }
+
+        .input-mt {
+            margin-top: 0.5rem;
+        }
+
+        /* ---- Buttons ---- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.675rem 1.25rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            line-height: 1.4;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--primary-hover), #6d28d9);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1.5px solid #c7d2fe;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e7ff;
+            border-color: #a5b4fc;
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* ---- Output box ---- */
         .output-box {
             background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 1.5rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1.125rem 1.25rem;
             margin-top: 1rem;
-            white-space: pre-wrap;
+            min-height: 80px;
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text);
         }
-        .footer {
-            text-align: center;
-            padding: 1rem;
-            background: #1f2937;
-            color: #d1d5db;
+
+        .output-empty {
+            color: var(--text-muted);
+            font-style: italic;
             font-size: 0.875rem;
-            position: relative;
-            bottom: 0;
-            width: 100%;
         }
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            .card {
-                padding: 1.5rem;
-            }
-            .btn {
-                width: 100%;
-                text-align: center;
-            }
-            .form-input, .form-select, .form-textarea {
-                font-size: 0.875rem;
-            }
+
+        /* ---- Action row ---- */
+        .action-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
         }
+
+        /* ---- Status bar ---- */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #166534;
+        }
+
+        .status-bar.hidden { display: none; }
+
+        /* ---- Loading ---- */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(79, 70, 229, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: 0.75rem 0;
+        }
+
+        /* ---- Footer ---- */
+        footer {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer strong {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ---- Utility classes (used by dynamic content from AI responses) ---- */
+        .hidden { display: none !important; }
+        .prose { }
+        .max-w-none { max-width: none; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-800 { color: #1f2937; }
+        .text-gray-600 { color: #4b5563; }
+        .text-red-600 { color: #dc2626; }
+        .font-semibold { font-weight: 600; }
+        .list-decimal { list-style-type: decimal; }
+        .pl-6 { padding-left: 1.5rem; }
+        .pl-5 { padding-left: 1.25rem; }
+        .leading-relaxed { line-height: 1.625; }
+
+        /* Output prose formatting */
+        .output-box p { margin-bottom: 0.5rem; }
+        .output-box p:last-child { margin-bottom: 0; }
+        .output-box ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+        .output-box li { margin-bottom: 0.25rem; }
+        .output-box strong { font-weight: 600; }
+        .output-box em { font-style: italic; }
+
+        /* ---- Responsive ---- */
         @media (max-width: 640px) {
+            .header-inner {
+                padding: 0.75rem 1rem;
+            }
+
+            .header-subtitle {
+                display: none;
+            }
+
+            .container {
+                padding: 1.5rem 1rem 2rem;
+            }
+
+            .hero {
+                padding: 1.75rem 0.5rem 1.5rem;
+            }
+
             .card {
-                padding: 1rem;
+                padding: 1.25rem;
+            }
+
+            .action-row {
+                flex-direction: column;
+            }
+
+            .action-row .btn {
+                width: 100%;
+            }
+
+            .brand-name {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (min-width: 641px) and (max-width: 1023px) {
+            .container {
+                padding: 1.75rem 1.25rem 2.5rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-gray-900">Hong Kong DSE English Writing Practice</h1>
-            <p class="text-gray-600 mt-3 text-lg">Create custom DSE writing tasks and generate sample essays with formatted responses.</p>
-        </header>
 
-        <!-- Task Generation Section -->
-        <div class="card">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Generate Custom Writing Task</h2>
-            <form id="taskForm" class="space-y-6">
-                <div>
-                    <label for="genre" class="form-label block mb-2">Genre</label>
-                    <select id="genre" class="form-select" onchange="toggleCustomGenre()">
-                        <option value="argumentative essay">Argumentative Essay</option>
-                        <option value="narrative">Narrative</option>
-                        <option value="descriptive essay">Descriptive Essay</option>
-                        <option value="letter">Letter</option>
-                        <option value="article">Article</option>
-                        <option value="speech">Speech</option>
-                        <option value="report">Report</option>
-                        <option value="other">Other (Specify)</option>
-                    </select>
-                    <input type="text" id="customGenre" class="form-input mt-2 hidden" placeholder="Enter custom genre">
-                </div>
-                <div>
-                    <label for="context" class="form-label block mb-2">Context (e.g., school magazine, public event)</label>
-                    <textarea id="context" class="form-textarea" rows="4" placeholder="e.g., You are writing for a school magazine read by students and teachers in Hong Kong..."></textarea>
-                </div>
-                <div>
-                    <label for="topic" class="form-label block mb-2">Topic or Theme</label>
-                    <input type="text" id="topic" class="form-input" placeholder="e.g., Balancing technology and mental well-being">
-                </div>
-                <div>
-                    <label for="wordLimit" class="form-label block mb-2">Word Limit</label>
-                    <select id="wordLimit" class="form-select">
-                        <option value="240-300">Part A: 240–300 words</option>
-                        <option value="400-500">Part B: 400–500 words</option>
-                    </select>
-                </div>
-                <button type="submit" id="generateTask" class="btn">Generate Task</button>
-            </form>
-            <div id="taskOutput" class="output-box"></div>
-            <button id="exportTask" class="btn mt-4" disabled>Export Task to DOCX</button>
+    <!-- ===== Sticky Header ===== -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="./index.html" class="brand" aria-label="EduGenius Home">
+                <div class="brand-icon">🧠</div>
+                <span class="brand-name">EduGenius</span>
+            </a>
+            <span class="header-subtitle">✍️ English Writing Practice</span>
+            <a href="./index.html" class="back-btn" aria-label="Back to EduGenius">
+                <span class="back-arrow">←</span> Back
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== Main Content ===== -->
+    <main class="container">
+
+        <!-- Hero section -->
+        <div class="hero">
+            <div class="hero-badge">✍️ DSE Writing Practice</div>
+            <h1>English Writing<br><span>Task Generator</span></h1>
+            <p>Create custom DSE writing tasks and generate Level&nbsp;7 sample essays with EduGenius AI assistance</p>
         </div>
 
-        <!-- Sample Essay Section -->
-        <div class="card">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Generate Sample Essay</h2>
-            <button id="generateEssay" class="btn" disabled>Generate Sample Essay</button>
-            <div id="essayOutput" class="output-box"></div>
-            <button id="exportEssay" class="btn mt-4" disabled>Export Task & Essay to DOCX</button>
+        <!-- Status bar (shown after task is ready) -->
+        <div id="statusBar" class="status-bar hidden" role="status" aria-live="polite">
+            ✅ Task ready — scroll down to generate your sample essay
         </div>
-    </div>
 
-    <footer class="footer">
-        <p>Copyright © 2025 Hugo Wong. All rights reserved.</p>
+        <!-- Two-column grid (stacks on mobile/tablet) -->
+        <div class="content-grid">
+
+            <!-- ── Card 1: Task Generator ── -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon icon-indigo">📝</div>
+                    <div>
+                        <div class="card-title">Generate Writing Task</div>
+                        <div class="card-hint">Customise the settings and hit Generate</div>
+                    </div>
+                </div>
+
+                <form id="taskForm" novalidate>
+                    <div class="form-group">
+                        <label for="genre">Genre</label>
+                        <select id="genre" onchange="toggleCustomGenre()" aria-label="Select writing genre">
+                            <option value="argumentative essay">Argumentative Essay</option>
+                            <option value="narrative">Narrative</option>
+                            <option value="descriptive essay">Descriptive Essay</option>
+                            <option value="letter">Letter</option>
+                            <option value="article">Article</option>
+                            <option value="speech">Speech</option>
+                            <option value="report">Report</option>
+                            <option value="other">Other (specify below)</option>
+                        </select>
+                        <input type="text" id="customGenre" class="hidden input-mt"
+                               placeholder="Enter custom genre" aria-label="Custom genre">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="context">Context</label>
+                        <textarea id="context" rows="3"
+                                  placeholder="e.g., You are writing for a school magazine read by students and teachers in Hong Kong…"
+                                  aria-label="Writing context"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="topic">Topic or Theme</label>
+                        <input type="text" id="topic"
+                               placeholder="e.g., Balancing technology and mental well-being"
+                               aria-label="Topic or theme">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="wordLimit">Word Limit</label>
+                        <select id="wordLimit" aria-label="Select word limit">
+                            <option value="240-300">Part A: 240–300 words</option>
+                            <option value="400-500">Part B: 400–500 words</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="generateTaskBtn" class="btn btn-primary btn-full">
+                        ✨ Generate Task
+                    </button>
+                </form>
+
+                <div id="taskOutput" class="output-box" role="region" aria-label="Generated task output" aria-live="polite">
+                    <span class="output-empty">Your generated writing task will appear here…</span>
+                </div>
+
+                <div class="action-row">
+                    <button id="downloadTaskBtn" class="btn btn-secondary" disabled aria-label="Download task as text file">
+                        📄 Download Task
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── Card 2: Sample Essay Generator ── -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon icon-purple">📖</div>
+                    <div>
+                        <div class="card-title">Generate Sample Essay</div>
+                        <div class="card-hint">Generate a task first, then click below</div>
+                    </div>
+                </div>
+
+                <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem;">
+                    Once you have generated a writing task, click the button below to produce a
+                    Level&nbsp;7 model answer tailored to that task.
+                </p>
+
+                <button id="generateEssayBtn" class="btn btn-primary btn-full" disabled aria-label="Generate sample essay">
+                    🖊️ Generate Sample Essay
+                </button>
+
+                <div id="essayOutput" class="output-box" style="margin-top:1rem;"
+                     role="region" aria-label="Generated essay output" aria-live="polite">
+                    <span class="output-empty">Generate a task first — your sample essay will appear here…</span>
+                </div>
+
+                <div class="action-row">
+                    <button id="downloadEssayBtn" class="btn btn-secondary" disabled aria-label="Download task and essay as text file">
+                        📄 Download Task &amp; Essay
+                    </button>
+                </div>
+            </div>
+
+        </div><!-- /content-grid -->
+
+    </main>
+
+    <!-- ===== Footer ===== -->
+    <footer>
+        <p><strong>EduGenius</strong> AI 智學 &nbsp;·&nbsp; Copyright &copy; 2025 Hugo Wong. All rights reserved.</p>
     </footer>
 
     <script>
-        const POLLINATIONS_API_KEY = 'sk_dk6t4GEymji9dVR9jPau4bB9RJYJ0JbP';
+        // ============================================================
+        // EduGenius English Writing Practice – AI Logic
+        // No external library dependencies
+        // ============================================================
+
         const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
         const FALLBACK_MODELS = ['gemini-search', 'gemini-fast', 'glm', 'openai-fast', 'openai', 'deepseek'];
-        const { Document, Paragraph, TextRun, Packer } = docx;
+        const COPYRIGHT = 'Generated by EduGenius AI 智學\nCopyright © 2025 Hugo Wong. All rights reserved.';
 
-        // Toggle Custom Genre Input
+        // ---- Toggle custom genre input ----
         function toggleCustomGenre() {
-            const genreSelect = document.getElementById('genre');
-            const customGenreInput = document.getElementById('customGenre');
-            customGenreInput.classList.toggle('hidden', genreSelect.value !== 'other');
+            const sel = document.getElementById('genre');
+            const inp = document.getElementById('customGenre');
+            inp.classList.toggle('hidden', sel.value !== 'other');
         }
 
-        async function callGrokAPI(prompt) {
+        // ---- Call AI with model fallback ----
+        async function callAI(prompt) {
             const messages = [{ role: 'user', content: prompt }];
             for (const model of FALLBACK_MODELS) {
                 try {
-                    const response = await fetch(POLLINATIONS_API_URL, {
+                    const res = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${POLLINATIONS_API_KEY}`
-                        },
-                        body: JSON.stringify({ model: model, messages: messages })
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model, messages })
                     });
-                    if (!response.ok) {
-                        console.warn(`Model ${model} failed with status ${response.status}, trying next model...`);
-                        continue;
-                    }
-                    const data = await response.json();
+                    if (!res.ok) continue;
+                    const data = await res.json();
                     const content = data.choices?.[0]?.message?.content;
                     if (content) return content;
-                    console.warn(`Model ${model} returned no content, trying next model...`);
-                } catch (error) {
-                    console.warn(`Model ${model} failed with error: ${error.message}, trying next model...`);
+                } catch (e) {
+                    console.warn(`Model ${model} failed:`, e.message);
                 }
             }
-            return 'An error occurred while generating content.';
+            return '<p class="text-red-600">An error occurred while generating content. Please try again.</p>';
         }
 
-        // Format AI Response for Task
-        function formatTaskResponse(response) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(response, 'text/html');
-            const container = document.createElement('div');
-            container.className = 'prose max-w-none';
-            container.innerHTML = response;
-            container.querySelectorAll('p').forEach(p => {
+        // ---- Format task response (AI returns HTML snippets) ----
+        function formatTaskResponse(raw) {
+            const wrap = document.createElement('div');
+            wrap.className = 'prose max-w-none';
+            wrap.innerHTML = raw;
+            wrap.querySelectorAll('p').forEach(p => {
                 p.className = 'mb-2 text-gray-700';
             });
-            container.querySelectorAll('strong').forEach(strong => {
-                strong.className = 'font-semibold text-gray-800';
+            wrap.querySelectorAll('strong').forEach(s => {
+                s.className = 'font-semibold text-gray-800';
             });
-            container.querySelectorAll('ol').forEach(ol => {
+            wrap.querySelectorAll('ol').forEach(ol => {
                 ol.className = 'list-decimal pl-6 mb-4 text-gray-700';
             });
-            return container.outerHTML;
+            return wrap.outerHTML;
         }
 
-        // Format AI Response for Essay
-        function formatEssayResponse(response, genre) {
-            const genreStructures = {
+        // ---- Format essay response (markdown-like plain text) ----
+        function formatEssayResponse(raw, genre) {
+            const genreStarters = {
                 'letter': ['I am writing to express my view on', 'I am writing in response to'],
                 'speech': ['Good morning, ladies and gentlemen', 'It is an honor to address you today'],
                 'argumentative essay': ['It is often argued that', 'This essay will discuss'],
-                'article': ['In today’s fast-paced world', 'Recent developments in'],
+                'article': ["In today's fast-paced world", 'Recent developments in'],
                 'report': ['This report aims to', 'The purpose of this report is to'],
                 'narrative': ['It was a day I would never forget', 'As the sun set over'],
                 'descriptive essay': ['The scene was one of breathtaking beauty', 'Imagine a place where']
             };
             const usefulPhrases = [
-                { phrase: 'for the sake of', translation: '為了' },
-                { phrase: 'in light of', translation: '鑑於' },
-                { phrase: 'on the contrary', translation: '相反地' },
-                { phrase: 'by and large', translation: '總體而言' },
-                { phrase: 'in the long run', translation: '長遠來看' }
+                { phrase: 'for the sake of',  translation: '為了' },
+                { phrase: 'in light of',       translation: '鑑於' },
+                { phrase: 'on the contrary',   translation: '相反地' },
+                { phrase: 'by and large',      translation: '總體而言' },
+                { phrase: 'in the long run',   translation: '長遠來看' }
             ];
-            let formattedResponse = response;
-            // Apply bold to genre-specific structures
-            (genreStructures[genre.toLowerCase()] || []).forEach(structure => {
-                const regex = new RegExp(`(${structure})`, 'gi');
-                formattedResponse = formattedResponse.replace(regex, '**$1**');
+
+            let text = raw;
+            (genreStarters[genre.toLowerCase()] || []).forEach(s => {
+                text = text.replace(new RegExp(`(${s})`, 'gi'), '**$1**');
             });
-            // Apply italics and Chinese translations to useful phrases
             usefulPhrases.forEach(({ phrase, translation }) => {
-                const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
-                formattedResponse = formattedResponse.replace(regex, `_*${phrase}* (${translation})`);
+                text = text.replace(new RegExp(`\\b${phrase}\\b`, 'gi'), `_*${phrase}* (${translation})`);
             });
-            const paragraphs = formattedResponse.split('\n\n').filter(p => p.trim());
-            const container = document.createElement('div');
-            container.className = 'prose max-w-none';
-            paragraphs.forEach(para => {
+
+            const wrap = document.createElement('div');
+            wrap.className = 'prose max-w-none';
+            text.split('\n\n').filter(p => p.trim()).forEach(para => {
                 const p = document.createElement('p');
                 p.className = 'mb-4 text-gray-700 leading-relaxed';
-                p.innerHTML = para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
-                container.appendChild(p);
+                p.innerHTML = para
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                wrap.appendChild(p);
             });
-            return container.outerHTML;
+            return wrap.outerHTML;
         }
 
-        // Parse HTML to DOCX
-        function parseHtmlToDocx(html, isEssay = false, genre = '') {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const paragraphs = [];
-            if (!isEssay) {
-                // Task formatting
-                doc.body.childNodes.forEach(node => {
-                    if (node.nodeName === 'P') {
-                        const strong = node.querySelector('strong');
-                        const text = node.textContent;
-                        paragraphs.push(new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: strong ? strong.textContent : text.split(':').shift(),
-                                    bold: !!strong,
-                                    size: 22
-                                }),
-                                new TextRun({
-                                    text: strong ? `: ${text.replace(strong.textContent, '').trim()}` : text.replace(text.split(':').shift(), '').trim(),
-                                    size: 22
-                                })
-                            ],
-                            spacing: { after: 100 }
-                        }));
-                    } else if (node.nodeName === 'OL') {
-                        node.querySelectorAll('li').forEach(li => {
-                            paragraphs.push(new Paragraph({
-                                children: [new TextRun({ text: `• ${li.textContent}`, size: 22 })],
-                                spacing: { after: 100 }
-                            }));
-                        });
-                    }
-                });
-            } else {
-                // Essay formatting with bold and italics
-                html.split('\n\n').forEach(para => {
-                    const runs = [];
-                    let currentText = para;
-                    // Handle bold (**text**)
-                    currentText = currentText.replace(/\*\*(.*?)\*\*/g, (match, text) => {
-                        runs.push(new TextRun({ text, bold: true, size: 22 }));
-                        return '';
-                    });
-                    // Handle italics with translations (*text* (translation))
-                    currentText = currentText.replace(/\*(.*?)\* \((.*?)\)/g, (match, text, translation) => {
-                        runs.push(new TextRun({ text, italics: true, size: 22 }));
-                        runs.push(new TextRun({ text: ` (${translation})`, size: 22 }));
-                        return '';
-                    });
-                    // Add remaining text
-                    if (currentText.trim()) {
-                        runs.push(new TextRun({ text: currentText, size: 22 }));
-                    }
-                    paragraphs.push(new Paragraph({
-                        children: runs,
-                        spacing: { after: 200 }
-                    }));
-                });
-            }
-            return paragraphs;
+        // ---- Download as text file (no external library needed) ----
+        function downloadText(text, filename) {
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
-        // Task Generation
-        let currentTask = '';
-        let formattedTask = '';
+        // ---- Strip HTML tags to plain text for download ----
+        function htmlToPlain(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.innerText || tmp.textContent || '';
+        }
+
+        // ---- State ----
+        let currentTask  = '';
+        let currentEssay = '';
         let currentGenre = '';
-        const taskForm = document.getElementById('taskForm');
-        const taskOutput = document.getElementById('taskOutput');
-        const generateEssayButton = document.getElementById('generateEssay');
-        const exportTaskButton = document.getElementById('exportTask');
-        const exportEssayButton = document.getElementById('exportEssay');
+
+        // ---- DOM references ----
+        const taskForm        = document.getElementById('taskForm');
+        const taskOutput      = document.getElementById('taskOutput');
+        const generateEssayBtn = document.getElementById('generateEssayBtn');
+        const downloadTaskBtn  = document.getElementById('downloadTaskBtn');
+        const downloadEssayBtn = document.getElementById('downloadEssayBtn');
+        const generateTaskBtn  = document.getElementById('generateTaskBtn');
+        const statusBar        = document.getElementById('statusBar');
+
+        // ---- Task generation ----
         taskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const genreSelect = document.getElementById('genre');
-            const customGenreInput = document.getElementById('customGenre');
-            const genre = genreSelect.value === 'other' ? customGenreInput.value || 'custom genre' : genreSelect.value;
+
+            const genreEl = document.getElementById('genre');
+            const customGenreEl = document.getElementById('customGenre');
+            const genre = genreEl.value === 'other'
+                ? (customGenreEl.value.trim() || 'custom genre')
+                : genreEl.value;
             currentGenre = genre;
-            const context = document.getElementById('context').value || 'A general context relevant to Hong Kong students';
-            const topic = document.getElementById('topic').value || 'A relevant topic for Hong Kong youth';
+
+            const context   = document.getElementById('context').value.trim()
+                              || 'A general context relevant to Hong Kong students';
+            const topic     = document.getElementById('topic').value.trim()
+                              || 'A relevant topic for Hong Kong youth';
             const wordLimit = document.getElementById('wordLimit').value;
-            const part = wordLimit.includes('240-300') ? 'Part A' : 'Part B';
-            const prompt = `Generate a Hong Kong DSE English Writing task designed to elicit Level 7 performance in Content, Language, and Organization. The task should meet these criteria:
-            - Content: Fully address the task, be entirely relevant, show creativity, develop ideas thoroughly with support, and show high audience awareness with appropriate register, tone, and style.
-            - Language: Use a wide range of accurate sentence structures (including complex ones), precise vocabulary, and near-perfect grammar/spelling.
-            - Organization: Feature logical development, sophisticated cohesive ties, and a coherent, genre-appropriate structure.
-            Requirements:
-            - Genre: ${genre}
-            - Context: ${context}
-            - Topic: ${topic}
-            - Word Limit: ${wordLimit} words
-            - Part: ${part}
-            - Include 2–3 guiding points to help structure the response, ensuring opportunities for sophisticated organization and cohesion.
-            - The task should be engaging, relevant to Hong Kong secondary students, and allow diverse perspectives or creative interpretations.
-            Format the output as:
-            <p><strong>Part:</strong> ${part}</p>
-            <p><strong>Genre:</strong> ${genre}</p>
-            <p><strong>Context:</strong> [context]</p>
-            <p><strong>Question:</strong> [question]</p>
-            <p><strong>Guiding Points:</strong></p>
-            <ol class="list-decimal pl-5 mb-4">[guiding points]</ol>
-            <p><strong>Word Limit:</strong> ${wordLimit} words</p>`;
-            taskOutput.innerHTML = '<p class="text-gray-600">Generating task...</p>';
-            currentTask = await callGrokAPI(prompt);
-            formattedTask = formatTaskResponse(currentTask);
-            taskOutput.innerHTML = formattedTask;
-            generateEssayButton.disabled = false;
-            exportTaskButton.disabled = false;
-            exportEssayButton.disabled = true;
+            const part      = wordLimit.includes('240-300') ? 'Part A' : 'Part B';
+
+            const prompt =
+`Generate a Hong Kong DSE English Writing task designed to elicit Level 7 performance in Content, Language, and Organization. The task should meet these criteria:
+- Content: Fully address the task, be entirely relevant, show creativity, develop ideas thoroughly with support, and show high audience awareness with appropriate register, tone, and style.
+- Language: Use a wide range of accurate sentence structures (including complex ones), precise vocabulary, and near-perfect grammar/spelling.
+- Organization: Feature logical development, sophisticated cohesive ties, and a coherent, genre-appropriate structure.
+Requirements:
+- Genre: ${genre}
+- Context: ${context}
+- Topic: ${topic}
+- Word Limit: ${wordLimit} words
+- Part: ${part}
+- Include 2–3 guiding points to help structure the response, ensuring opportunities for sophisticated organization and cohesion.
+- The task should be engaging, relevant to Hong Kong secondary students, and allow diverse perspectives or creative interpretations.
+Format the output as:
+<p><strong>Part:</strong> ${part}</p>
+<p><strong>Genre:</strong> ${genre}</p>
+<p><strong>Context:</strong> [context]</p>
+<p><strong>Question:</strong> [question]</p>
+<p><strong>Guiding Points:</strong></p>
+<ol class="list-decimal pl-5 mb-4">[guiding points as <li> items]</ol>
+<p><strong>Word Limit:</strong> ${wordLimit} words</p>`;
+
+            // Update UI to loading state
+            generateTaskBtn.disabled = true;
+            generateTaskBtn.innerHTML = '<span class="spinner"></span> Generating…';
+            taskOutput.innerHTML = '<div class="loading-text"><span class="spinner"></span> Generating your writing task…</div>';
+            statusBar.classList.add('hidden');
+            generateEssayBtn.disabled = true;
+            downloadTaskBtn.disabled = true;
+            downloadEssayBtn.disabled = true;
+            currentEssay = '';
+
+            currentTask = await callAI(prompt);
+            taskOutput.innerHTML = formatTaskResponse(currentTask);
+
+            // Restore UI
+            generateTaskBtn.disabled = false;
+            generateTaskBtn.innerHTML = '✨ Generate Task';
+            generateEssayBtn.disabled = false;
+            downloadTaskBtn.disabled = false;
+            statusBar.classList.remove('hidden');
         });
 
-        // Sample Essay Generation
-        let currentEssay = '';
-        generateEssayButton.addEventListener('click', async () => {
+        // ---- Essay generation ----
+        generateEssayBtn.addEventListener('click', async () => {
             if (!currentTask) {
-                document.getElementById('essayOutput').innerHTML = '<p class="text-red-600">Please generate a task first.</p>';
+                document.getElementById('essayOutput').innerHTML =
+                    '<p class="text-red-600">Please generate a task first.</p>';
                 return;
             }
             const wordLimit = document.getElementById('wordLimit').value;
-            const essayPrompt = `Generate a sample essay for the following Hong Kong DSE English Writing task:\n${currentTask}\nThe essay should aim for Level 7 in Content (fully relevant, creative, well-supported ideas, high audience awareness), Language (wide range of accurate complex structures, precise vocabulary, near-perfect grammar), and Organization (logical development, sophisticated cohesive ties, genre-appropriate structure). Word count: ${wordLimit} words.`;
+            const prompt =
+`Generate a sample essay for the following Hong Kong DSE English Writing task:
+${currentTask}
+The essay should aim for Level 7 in Content (fully relevant, creative, well-supported ideas, high audience awareness), Language (wide range of accurate complex structures, precise vocabulary, near-perfect grammar), and Organization (logical development, sophisticated cohesive ties, genre-appropriate structure). Word count: ${wordLimit} words.`;
+
             const essayOutput = document.getElementById('essayOutput');
-            essayOutput.innerHTML = '<p class="text-gray-600">Generating essay...</p>';
-            currentEssay = await callGrokAPI(essayPrompt);
+            generateEssayBtn.disabled = true;
+            generateEssayBtn.innerHTML = '<span class="spinner"></span> Generating…';
+            essayOutput.innerHTML = '<div class="loading-text"><span class="spinner"></span> Generating your sample essay…</div>';
+
+            currentEssay = await callAI(prompt);
             essayOutput.innerHTML = formatEssayResponse(currentEssay, currentGenre);
-            exportEssayButton.disabled = false;
+
+            generateEssayBtn.disabled = false;
+            generateEssayBtn.innerHTML = '🖊️ Generate Sample Essay';
+            downloadEssayBtn.disabled = false;
         });
 
-        // Export Task to DOCX
-        exportTaskButton.addEventListener('click', () => {
+        // ---- Download task ----
+        downloadTaskBtn.addEventListener('click', () => {
             if (!currentTask) return;
-            const doc = new Document({
-                sections: [{
-                    properties: {},
-                    children: [
-                        new Paragraph({
-                            children: [new TextRun({ text: "Hong Kong DSE English Writing Task", bold: true, size: 28 })],
-                            spacing: { after: 200 }
-                        }),
-                        ...parseHtmlToDocx(currentTask),
-                        new Paragraph({
-                            children: [new TextRun({ text: "Copyright © 2025 Hugo Wong. All rights reserved.", size: 20, italics: true })],
-                            spacing: { before: 400 }
-                        })
-                    ]
-                }]
-            });
-            Packer.toBlob(doc).then(blob => {
-                saveAs(blob, "DSE_Writing_Task.docx");
-            });
+            const plain = htmlToPlain(currentTask);
+            downloadText(
+                `EduGenius – Hong Kong DSE English Writing Task\n${'='.repeat(50)}\n\n${plain}\n\n${'='.repeat(50)}\n${COPYRIGHT}`,
+                'DSE_Writing_Task.txt'
+            );
         });
 
-        // Export Task and Essay to DOCX
-        exportEssayButton.addEventListener('click', () => {
+        // ---- Download task + essay ----
+        downloadEssayBtn.addEventListener('click', () => {
             if (!currentTask || !currentEssay) return;
-            const doc = new Document({
-                sections: [{
-                    properties: {},
-                    children: [
-                        new Paragraph({
-                            children: [new TextRun({ text: "Hong Kong DSE English Writing Task and Sample Essay", bold: true, size: 28 })],
-                            spacing: { after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [new TextRun({ text: "Task", bold: true, size: 24 })],
-                            spacing: { after: 100 }
-                        }),
-                        ...parseHtmlToDocx(currentTask),
-                        new Paragraph({
-                            children: [new TextRun({ text: "Sample Essay", bold: true, size: 24 })],
-                            spacing: { before: 400, after: 100 }
-                        }),
-                        ...parseHtmlToDocx(currentEssay, true, currentGenre),
-                        new Paragraph({
-                            children: [new TextRun({ text: "Copyright © 2025 Hugo Wong. All rights reserved.", size: 20, italics: true })],
-                            spacing: { before: 400 }
-                        })
-                    ]
-                }]
-            });
-            Packer.toBlob(doc).then(blob => {
-                saveAs(blob, "DSE_Writing_Task_and_Essay.docx");
-            });
+            const plainTask  = htmlToPlain(currentTask);
+            const plainEssay = htmlToPlain(formatEssayResponse(currentEssay, currentGenre));
+            downloadText(
+                `EduGenius – Hong Kong DSE English Writing Task & Sample Essay\n${'='.repeat(60)}\n\n--- WRITING TASK ---\n\n${plainTask}\n\n--- SAMPLE ESSAY ---\n\n${plainEssay}\n\n${'='.repeat(60)}\n${COPYRIGHT}`,
+                'DSE_Writing_Task_and_Essay.txt'
+            );
         });
     </script>
+
 </body>
 </html>

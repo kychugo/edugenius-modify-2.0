@@ -1190,25 +1190,25 @@
                 tools.push(
                     {
                         name: 'English Writing Practice',
-                        icon: 'fas fa-pen-fancy', // UPDATED ICON
+                        icon: 'fas fa-pen-fancy',
                         description: 'Improve your English writing skills',
-                        action: () => window.open('https://hugo_wong.pyscriptapps.com/eng-writing-ai-v1/latest/', '_blank'),
+                        action: () => window.open('./eng-writing.html', '_blank'),
                         color: 'from-teal-400 to-teal-600',
-                        iconColorClass: 'text-teal-900 dark:text-white' // Color class for visibility
+                        iconColorClass: 'text-teal-900 dark:text-white'
                     },
                     {
                         name: 'Vocabulary Generator',
                         icon: 'fas fa-lightbulb',
                         description: 'Generate custom vocabulary lists',
-                        action: () => window.open('https://hugo_wong.pyscriptapps.com/eng-vocab-ai-v3/latest/', '_blank'),
+                        action: () => window.open('./vocab.html#generator', '_blank'),
                         color: 'from-yellow-400 to-yellow-500',
-                        iconColorClass: 'text-yellow-900 dark:text-white' // Color class for visibility
+                        iconColorClass: 'text-yellow-900 dark:text-white'
                     },
                     {
                         name: 'Vocabulary Quiz',
                         icon: 'fas fa-question-circle',
                         description: 'Test your vocabulary knowledge',
-                        action: () => window.open('https://hugo_wong.pyscriptapps.com/ai-vocab-quiz/latest/', '_blank'),
+                        action: () => window.open('./vocab.html#quiz', '_blank'),
                         color: 'from-red-400 to-red-600',
                         iconColorClass: 'text-white'
                     }
@@ -1276,9 +1276,9 @@
             } else if (toolName === 'Exam Paper Generator') {
                 window.open('./exam.html', '_blank');
             } else if (toolName === 'Vocabulary Generator') {
-                window.open('https://edugenius.pyscriptapps.com/vocab-gen/latest/', '_blank');
+                window.open('./vocab.html#generator', '_blank');
             } else if (toolName === 'Vocabulary Quiz') {
-                window.open('https://edugenius.pyscriptapps.com/vocab-quiz/latest/', '_blank');
+                window.open('./vocab.html#quiz', '_blank');
             }
         }
 
