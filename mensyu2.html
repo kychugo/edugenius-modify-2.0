@@ -952,15 +952,12 @@
     <script>
         // JavaScript code here
         // Constants
-const API_URL = "https://api.deepseek.com/v1/chat/completions";
-const API_KEYS = [
-    "sk-5209dcddbc7e404b85e875ae46a3df04"
-];
-const MODEL = "deepseek-chat";
+const POLLINATIONS_API_KEY = 'sk_dk6t4GEymji9dVR9jPau4bB9RJYJ0JbP';
+const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
+const FALLBACK_MODELS = ['gemini-search', 'gemini-fast', 'glm', 'openai-fast', 'openai', 'deepseek'];
 const ANCIENT_CHARACTERS = ['sushe', 'hanyu'];
 
 // Global variables
-let currentApiKeyIndex = 0;
 let posts = JSON.parse(localStorage.getItem('posts')) || [];
 let postHistory = JSON.parse(localStorage.getItem('postHistory')) || [];
 let commentHistory = JSON.parse(localStorage.getItem('commentHistory')) || [];
@@ -1020,33 +1017,35 @@ const authorsData = {
 };
 
 // Utility Functions
-function getApiKey() {
-    const key = API_KEYS[currentApiKeyIndex];
-    currentApiKeyIndex = (currentApiKeyIndex + 1) % API_KEYS.length;
-    return key;
-}
-
 async function makeApiRequest(messages) {
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getApiKey()}`
-            },
-            body: JSON.stringify({
-                model: MODEL,
-                messages: messages,
-                max_tokens: 5000
-            })
-        });
-        if (!response.ok) throw new Error('API request failed');
-        const data = await response.json();
-        return data.choices[0].message.content.trim();
-    } catch (error) {
-        console.error('API Error:', error);
-        return null;
+    for (const model of FALLBACK_MODELS) {
+        try {
+            const response = await fetch(POLLINATIONS_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${POLLINATIONS_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: messages,
+                    max_tokens: 5000
+                })
+            });
+            if (!response.ok) {
+                console.warn(`Model ${model} failed with status ${response.status}, trying next model...`);
+                continue;
+            }
+            const data = await response.json();
+            const content = data.choices?.[0]?.message?.content?.trim();
+            if (content) return content;
+            console.warn(`Model ${model} returned no content, trying next model...`);
+        } catch (error) {
+            console.warn(`Model ${model} failed with error: ${error.message}, trying next model...`);
+        }
     }
+    console.error('All models failed');
+    return null;
 }
 
 function savePosts() {
