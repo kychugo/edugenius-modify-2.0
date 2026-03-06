@@ -777,7 +777,7 @@ Requirements:
             storageBucket: "login-system-9c566.firebasestorage.app",
             messagingSenderId: "547074181663",
             appId: "1:547074181663:web:6e3afd6c7c1ec6ae43232a"
-        }, 'authGuard');
+        });
         const auth = getAuth(app);
         const overlay = document.getElementById('auth-guard-overlay');
         onAuthStateChanged(auth, (user) => {
