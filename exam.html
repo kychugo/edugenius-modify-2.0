@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKDSE Exam Paper Generator</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f5f7fa;
+            padding: 20px;
+            line-height: 1.6;
+            overflow-x: hidden;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto 80px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+ 
+        }
+        .header {
+            background: linear-gradient(135deg, #007BFF, #00c4b4);
+            color: white;
+            padding: 25px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            margin: -30px -30px 25px;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+        }
+        h1 {
+            font-size: 2.2em;
+            margin: 0;
+            font-weight: 700;
+        }
+        .subtitle {
+            font-size: 1em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        .form-group {
+            margin-bottom: 25px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
+            animation-delay: calc(0.2s * var(--i));
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007BFF;
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 1.05em;
+        }
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e3e7;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #fff;
+        }
+        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #007BFF;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+            outline: none;
+        }
+        select[multiple] {
+            height: 150px;
+            padding: 10px;
+        }
+        .question-type-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .question-type-group {
+            flex: 1;
+            background: #f1f8fe;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e3e7;
+        }
+        .question-type-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #007BFF;
+        }
+        .question-type-group input {
+            width: 70px;
+            padding: 8px 12px;
+            text-align: center;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        button {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #007BFF, #00a8ff);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+        .output {
+            margin-top: 30px;
+            padding: 25px;
+            border: 1px solid #e0e3e7;
+            border-radius: 8px;
+            background: #fff;
+            max-height: 600px;
+            overflow-y: auto;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease-in;
+        }
+        .output h1 { 
+            font-size: 1.8em; 
+            margin: 1em 0 0.5em; 
+            color: #2c3e50;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 5px;
+        }
+        .output h2 { 
+            font-size: 1.5em; 
+            margin: 0.8em 0 0.4em; 
+            color: #34495e;
+        }
+        .output h3 { 
+            font-size: 1.3em; 
+            margin: 0.6em 0 0.3em; 
+            color: #4a6278;
+        }
+        .output h4 { 
+            font-size: 1.1em; 
+            margin: 0.5em 0 0.2em; 
+            color: #5d6d7e;
+        }
+        .output strong { 
+            font-weight: 700; 
+            color: #2c3e50;
+        }
+        .output em { 
+            font-style: italic; 
+            color: #5d6d7e;
+        }
+        .output hr { 
+            margin: 1.5em 0; 
+            border: 0; 
+            border-top: 1px solid #e0e3e7; 
+        }
+        .output p {
+            margin-bottom: 1em;
+            line-height: 1.7;
+        }
+        .output ul, .output ol {
+            margin: 1em 0;
+            padding-left: 30px;
+        }
+        .output li {
+            margin-bottom: 0.5em;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: 500;
+            background: #fdecea;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border-left: 4px solid #e74c3c;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: 500;
+            background: #e8f8ef;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border-left: 4px solid #27ae60;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007BFF;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #2c3e50;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 14px;
+            color: #ecf0f1;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .copyright {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .topic-selection {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .topic-selector {
+            flex: 1;
+        }
+        .custom-topic {
+            flex: 1;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .badge-easy {
+            background: #d5f5e3;
+            color: #27ae60;
+        }
+        .badge-medium {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+        .badge-hard {
+            background: #fdedec;
+            color: #e74c3c;
+        }
+        .badge-mixed {
+            background: #eaf2f8;
+            color: #3498db;
+        }
+        .subtopics-container {
+            margin-top: 15px;
+            display: none;
+        }
+        .subtopic-checkbox {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        .subtopic-checkbox input {
+            margin-right: 8px;
+        }
+        .subtopic-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .math-display {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin-bottom: 100px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .subtitle {
+                font-size: 0.9em;
+            }
+            .form-group {
+                padding: 15px;
+            }
+            .question-type-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .question-type-group {
+                padding: 12px;
+            }
+            .topic-selection {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            button {
+                padding: 12px;
+            }
+            .output {
+                padding: 15px;
+                max-height: 400px;
+            }
+            select, input[type="text"], input[type="number"] {
+                padding: 10px 12px;
+                font-size: 15px;
+            }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            .header {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            label {
+                font-size: 1em;
+            }
+            .output h1 { font-size: 1.5em; }
+            .output h2 { font-size: 1.3em; }
+            .output h3 { font-size: 1.1em; }
+            .output h4 { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HKDSE Exam Paper Generator</h1>
+            <div class="subtitle">Create customized exam papers for Hong Kong Diploma of Secondary Education</div>
+        </div>
+        
+        <div class="form-group" style="--i: 1;">
+            <label for="subject"><i class="fas fa-book"></i> Subject:</label>
+            <select id="subject">
+                <option value="math">Mathematics</option>
+                <option value="physics">Physics</option>
+                <option value="biology">Biology</option>
+            </select>
+        </div>
+        
+        <div class="form-group" style="--i: 2;">
+            <label><i class="fas fa-question-circle"></i> Number of Questions:</label>
+            <div class="question-type-container">
+                <div class="question-type-group">
+                    <label for="mcCount">Multiple Choice:</label>
+                    <input type="number" id="mcCount" min="0" max="15" value="5" placeholder="0-15">
+                </div>
+                <div class="question-type-group">
+                    <label for="shortCount">Short Answer:</label>
+                    <input type="number" id="shortCount" min="0" max="15" value="5" placeholder="0-15">
+                </div>
+                <div class="question-type-group">
+                    <label for="longCount">Long Answer:</label>
+                    <input type="number" id="longCount" min="0" max="15" value="3" placeholder="0-15">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group" style="--i: 3;">
+            <label for="topics"><i class="fas fa-tags"></i> Topics:</label>
+            <div class="topic-selection">
+                <div class="topic-selector">
+                    <select id="topics" multiple>
+                        <!-- Options populated dynamically -->
+                    </select>
+                </div>
+                <div class="custom-topic">
+                    <input type="text" id="customTopics" placeholder="Enter custom topics separated by commas">
+                </div>
+            </div>
+            <div id="subtopicsContainer" class="subtopics-container">
+                <label><i class="fas fa-list-ul"></i> Sub-topics:</label>
+                <div id="subtopicsList"></div>
+            </div>
+        </div>
+        
+        <div class="form-group" style="--i: 4;">
+            <label for="difficulty"><i class="fas fa-chart-line"></i> Difficulty Level:</label>
+            <select id="difficulty">
+                <option value="easy"><span class="badge badge-easy">Easy</span></option>
+                <option value="medium"><span class="badge badge-medium">Medium</span></option>
+                <option value="hard"><span class="badge badge-hard">Hard</span></option>
+                <option value="mixed"><span class="badge badge-mixed">Mixed</span></option>
+            </select>
+        </div>
+        
+        <div class="button-group">
+            <button id="generate"><i class="fas fa-magic"></i> Generate Exam Paper</button>
+            <button id="export" disabled><i class="fas fa-file-word"></i> Export to Word</button>
+        </div>
+        
+        <div class="output" id="output"></div>
+    </div>
+    
+    <footer>
+        <div>HKDSE Exam Paper Generator</div>
+        <div class="copyright">Copyright © 2025 Hugo Wong. All rights reserved.</div>
+    </footer>
+
+    <script>
+        const API_KEY = 'xai-KocgvNpdZeddEkLPV3NZhi7DqOlHymLIfJLEi0sFhweWzh1Twlx5I9tMk4mrSuiepCcKoMg1Msw2BQ0g';
+        
+        const mathTopics = [
+            "Number systems",
+            "Quadratic Equations in One Unknown",
+            "Functions and Graphs",
+            "More about Graphs of Function",
+            "Equations of Straight Line",
+            "More about Polynomials",
+            "Variations",
+            "Exponential and Logarithmic Functions",
+            "More about Equations",
+            "Inequalities and Linear Programming",
+            "Arithmetic & Geometric Sequences & Series",
+            "Revision on Area and Volume",
+            "More about Trigonometry",
+            "Applications of Trigonometry in 2-dimensional Problems",
+            "Applications of Trigonometry in 3-dimensional Problems",
+            "Basic Properties of Circles",
+            "Tangents to Circles",
+            "Coordinate geometry in circles",
+            "Locus",
+            "Permutations and Combinations",
+            "More about Probability",
+            "Measure of Dispersion",
+            "Uses and Abuses of Statistics",
+            "Advanced Arithmetic & Geometric Sequences & Series",
+            "Advanced 3D Trigonometry",
+            "Advanced Geometry of Circles",
+            "Advanced Permutations and Combinations+Probability",
+            "Advanced Statistics"
+        ];
+        
+        const physicsTopics = {
+            "Heat and Gases": [
+                "Temperature, heat and internal energy",
+                "Transfer processes",
+                "Change of state",
+                "Gases"
+            ],
+            "Force and Motion": [
+                "Position and movement",
+                "Force and motion",
+                "Projectile motion",
+                "Work, energy and power",
+                "Momentum",
+                "Uniform circular motion",
+                "Gravitation"
+            ],
+            "Wave Motion": [
+                "Nature and properties of waves",
+                "Light",
+                "Sound"
+            ],
+            "Electricity and Magnetism": [
+                "Electrostatics",
+                "Circuits and domestic electricity",
+                "Electromagnetism"
+            ],
+            "Radioactivity and Nuclear Energy": [
+                "Radiation and radioactivity",
+                "Atomic model",
+                "Nuclear energy"
+            ]
+        };
+
+        const biologyTopics = {
+            "Book 1A": [
+                "Introducing biology",
+                "Movement of substances across cell membrane",
+                "Enzymes and metabolism",
+                "Food and humans",
+                "Nutrition in humans"
+            ],
+            "Book 1B": [
+                "Gas exchange in humans",
+                "Transport in humans",
+                "Nutrition and gas exchange in plants",
+                "Transpiration, transport and support in plants"
+            ],
+            "Book 2": [
+                "Cell cycle and division",
+                "Reproduction in flowering plants",
+                "Reproduction in humans",
+                "Growth and development",
+                "Detecting the environment",
+                "Coordination in humans",
+                "Movement in humans",
+                "Homeostasis"
+            ],
+            "Book 3": [
+                "Ecosystems",
+                "Photosynthesis",
+                "Respiration",
+                "Non-infectious diseases",
+                "Infectious diseases and disease prevention",
+                "Body defence mechanisms"
+            ],
+            "Book 4": [
+                "Basic genetics",
+                "Molecular genetics",
+                "Biotechnology",
+                "Biodiversity",
+                "Evolution I",
+                "Evolution II"
+            ]
+        };
+
+        const subjectSelect = document.getElementById('subject');
+        const topicsSelect = document.getElementById('topics');
+        const customTopicsInput = document.getElementById('customTopics');
+        const generateButton = document.getElementById('generate');
+        const exportButton = document.getElementById('export');
+        const outputDiv = document.getElementById('output');
+        const mcCountInput = document.getElementById('mcCount');
+        const shortCountInput = document.getElementById('shortCount');
+        const longCountInput = document.getElementById('longCount');
+        const subtopicsContainer = document.getElementById('subtopicsContainer');
+        const subtopicsList = document.getElementById('subtopicsList');
+
+        // Populate topics based on selected subject
+        function populateTopics() {
+            topicsSelect.innerHTML = '';
+            const subject = subjectSelect.value;
+            
+            if (subject === 'math') {
+                subtopicsContainer.style.display = 'none';
+                mathTopics.forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic;
+                    option.textContent = topic;
+                    topicsSelect.appendChild(option);
+                });
+            } else if (subject === 'physics') {
+                subtopicsContainer.style.display = 'block';
+                Object.keys(physicsTopics).forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic;
+                    option.textContent = topic;
+                    topicsSelect.appendChild(option);
+                });
+            } else if (subject === 'biology') {
+                subtopicsContainer.style.display = 'block';
+                Object.keys(biologyTopics).forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic;
+                    option.textContent = topic;
+                    topicsSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Populate subtopics when a physics or biology topic is selected
+        function populateSubtopics() {
+            subtopicsList.innerHTML = '';
+            const selectedOptions = Array.from(topicsSelect.selectedOptions);
+            const subject = subjectSelect.value;
+            const topics = subject === 'physics' ? physicsTopics : biologyTopics;
+            
+            selectedOptions.forEach(option => {
+                const topic = option.value;
+                if (topics[topic]) {
+                    const topicDiv = document.createElement('div');
+                    topicDiv.innerHTML = `<strong>${topic}</strong>`;
+                    subtopicsList.appendChild(topicDiv);
+                    
+                    topics[topic].forEach(subtopic => {
+                        const checkboxDiv = document.createElement('div');
+                        checkboxDiv.className = 'subtopic-checkbox';
+                        
+                        const checkboxId = `subtopic-${topic}-${subtopic}`.replace(/\s+/g, '-').toLowerCase();
+                        
+                        checkboxDiv.innerHTML = `
+                            <label class="subtopic-label">
+                                <input type="checkbox" id="${checkboxId}" value="${subtopic}" checked>
+                                ${subtopic}
+                            </label>
+                        `;
+                        subtopicsList.appendChild(checkboxDiv);
+                    });
+                }
+            });
+        }
+
+        subjectSelect.addEventListener('change', populateTopics);
+        topicsSelect.addEventListener('change', function() {
+            const subject = subjectSelect.value;
+            if (subject === 'physics' || subject === 'biology') {
+                populateSubtopics();
+            } else {
+                subtopicsContainer.style.display = 'none';
+            }
+        });
+        populateTopics();
+
+        // Format AI response with HTML tags (Corrected version)
+        function formatResponse(content) {
+            let processedContent = content
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/`(.+?)`/g, '<code>$1</code>')
+                .replace(/\\\((.*?)\\\)/g, '<span class="math-display">\\($1\\)</span>')
+                .replace(/\\\[(.*?)\\\]/g, '<div class="math-display">\\[$1\\]</div>');
+
+            const blocks = processedContent.split(/\n\s*\n/);
+
+            const htmlBlocks = blocks.map(block => {
+                const trimmedBlock = block.trim();
+                if (trimmedBlock.startsWith('#')) {
+                    if (trimmedBlock.startsWith('####')) return `<h4>${trimmedBlock.substring(4).trim()}</h4>`;
+                    if (trimmedBlock.startsWith('###')) return `<h3>${trimmedBlock.substring(3).trim()}</h3>`;
+                    if (trimmedBlock.startsWith('##')) return `<h2>${trimmedBlock.substring(2).trim()}</h2>`;
+                    if (trimmedBlock.startsWith('#')) return `<h1>${trimmedBlock.substring(1).trim()}</h1>`;
+                }
+                if (trimmedBlock === '---') {
+                    return '<hr>';
+                }
+                if (trimmedBlock.startsWith('- ')) {
+                    const listItems = trimmedBlock.split('\n').map(item => `<li>${item.replace(/^- /, '').trim()}</li>`).join('');
+                    return `<ul>${listItems}</ul>`;
+                }
+                if (trimmedBlock) {
+                    return `<p>${trimmedBlock.replace(/\n/g, '<br>')}</p>`;
+                }
+                return '';
+            });
+            return `<div>${htmlBlocks.join('')}</div>`;
+        }
+
+
+        // Get selected subtopics for physics or biology
+        function getSelectedSubtopics() {
+            const selectedSubtopics = [];
+            const checkboxes = subtopicsList.querySelectorAll('input[type="checkbox"]:checked');
+            
+            checkboxes.forEach(checkbox => {
+                selectedSubtopics.push(checkbox.value);
+            });
+            
+            return selectedSubtopics;
+        }
+
+        // Generate exam paper
+        generateButton.addEventListener('click', async () => {
+            const subject = subjectSelect.value;
+            const mcCount = parseInt(mcCountInput.value) || 0;
+            const shortCount = parseInt(shortCountInput.value) || 0;
+            const longCount = parseInt(longCountInput.value) || 0;
+            const selectedTopics = Array.from(topicsSelect.selectedOptions).map(option => option.value);
+            const customTopics = customTopicsInput.value.split(',').map(topic => topic.trim()).filter(topic => topic);
+            const topics = [...selectedTopics, ...customTopics];
+            const difficulty = document.getElementById('difficulty').value;
+            
+            const subtopics = (subject === 'physics' || subject === 'biology') ? getSelectedSubtopics() : [];
+
+            if (topics.length === 0) {
+                outputDiv.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i> Please select or enter at least one topic.</div>';
+                exportButton.disabled = true;
+                return;
+            }
+
+            if (mcCount + shortCount + longCount === 0) {
+                outputDiv.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i> Please specify at least one question to generate.</div>';
+                exportButton.disabled = true;
+                return;
+            }
+
+            const questionTypes = [];
+            if (mcCount > 0) questionTypes.push(`${mcCount} multiple choice`);
+            if (shortCount > 0) questionTypes.push(`${shortCount} short answer`);
+            if (longCount > 0) questionTypes.push(`${longCount} long answer`);
+
+            let prompt = `Generate an HKDSE ${subject} exam paper with the following specifications:
+- Question types: ${questionTypes.join(', ')}
+- Main topics: ${topics.join(', ')}`;
+            
+            if (subtopics.length > 0) {
+                prompt += `\n- Sub-topics: ${subtopics.join(', ')}`;
+            }
+            
+            prompt += `\n- Difficulty: ${difficulty}
+
+Requirements:
+1. Include questions, answers, and explanatory notes in English only
+2. Highlight key concepts using **bold** and *italics*
+3. Use bullet points (- ) for lists where appropriate
+4. Use MathJax for mathematical expressions (e.g., \\(x^2\\) for superscripts)
+5. Ensure all questions are original and suitable for HKDSE students
+6. Do not repeat similar questions
+7. Organize content with clear headings (use # for main title, ## for sections, ### for subsections)
+8. Include a title "HKDSE ${subject} Exam Paper" at the top
+9. Separate different sections with horizontal rules (---)
+10. Format mathematical expressions with \\(...\\) for inline and \\[...\\] for display math
+11. Clearly separate each question with a horizontal rule (---)`;
+
+            outputDiv.innerHTML = '<div class="loader"></div>';
+            generateButton.disabled = true;
+            exportButton.disabled = true;
+
+            try {
+                const response = await fetch('https://api.x.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'grok-2',
+                        messages: [{ role: 'user', content: prompt }],
+                        temperature: 0.7,
+                        max_tokens: 3000
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                outputDiv.innerHTML = formatResponse(content);
+                MathJax.typesetPromise();
+                exportButton.disabled = false;
+                
+                outputDiv.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error:', error);
+                outputDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-circle"></i> An error occurred while generating the exam paper: ${error.message}. Please try again.</div>`;
+                exportButton.disabled = true;
+            } finally {
+                generateButton.disabled = false;
+            }
+        });
+        
+        // [--- START OF FULLY DEBUGGED EXPORT FUNCTION ---]
+        // Export to Word with full content parsing
+        exportButton.addEventListener('click', () => {
+            try {
+                const { docx } = window;
+                if (!docx) {
+                    throw new Error("docx library not loaded properly");
+                }
+                
+                const subject = subjectSelect.value;
+                const content = outputDiv.innerHTML;
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = content;
+                
+                // The 'children' array will be populated by parsing the HTML content.
+                // No manual title or copyright will be added.
+                const children = [];
+                
+                let currentList = null;
+                
+                const processNode = (node, indentLevel = 0) => {
+                    if (node.nodeType !== Node.ELEMENT_NODE) {
+                        return;
+                    }
+                    
+                    const tagName = node.tagName.toLowerCase();
+                    
+                    if (tagName === 'h1') {
+                        children.push(new docx.Paragraph({ text: node.textContent, heading: docx.HeadingLevel.HEADING_1, spacing: { before: 400, after: 200 } }));
+                    } else if (tagName === 'h2') {
+                        children.push(new docx.Paragraph({ text: node.textContent, heading: docx.HeadingLevel.HEADING_2, spacing: { before: 300, after: 150 } }));
+                    } else if (tagName === 'h3') {
+                        children.push(new docx.Paragraph({ text: node.textContent, heading: docx.HeadingLevel.HEADING_3, spacing: { before: 200, after: 100 } }));
+                    } else if (tagName === 'h4') {
+                        children.push(new docx.Paragraph({ text: node.textContent, heading: docx.HeadingLevel.HEADING_4, spacing: { before: 150, after: 75 } }));
+                    } else if (tagName === 'hr') {
+                        // Just add a visual line separator
+                        children.push(new docx.Paragraph({ text: "", border: { bottom: { size: 6, color: "auto", style: "single" } }, spacing: { before: 200, after: 200 } }));
+                        if (currentList) currentList = null;
+                    } else if (tagName === 'p') {
+                        const paragraphChildren = [];
+                        
+                        const processChildNode = (childNode) => {
+                            if (childNode.nodeType === Node.TEXT_NODE) {
+                                paragraphChildren.push(new docx.TextRun({ text: childNode.textContent }));
+                            } else if (childNode.nodeType === Node.ELEMENT_NODE) {
+                                let textContent = childNode.textContent;
+                                let isBold = false;
+                                let isItalic = false;
+
+                                if (childNode.tagName.toLowerCase() === 'strong') isBold = true;
+                                if (childNode.tagName.toLowerCase() === 'em') isItalic = true;
+                                
+                                // Handle nested tags if necessary, but this simple way covers most cases
+                                if (childNode.childNodes.length === 1 && childNode.childNodes[0].nodeType === Node.TEXT_NODE) {
+                                     paragraphChildren.push(new docx.TextRun({ text: textContent, bold: isBold, italics: isItalic }));
+                                } else { // Fallback for more complex nested nodes
+                                     paragraphChildren.push(new docx.TextRun({ text: textContent }));
+                                }
+                            }
+                        };
+                        
+                        node.childNodes.forEach(processChildNode);
+                        
+                        children.push(new docx.Paragraph({ children: paragraphChildren, spacing: { after: 100 } }));
+                        if (currentList) currentList = null;
+                    } else if (tagName === 'ul' || tagName === 'ol') {
+                        Array.from(node.children).forEach(li => {
+                            if (li.tagName.toLowerCase() === 'li') {
+                                children.push(new docx.Paragraph({
+                                    text: li.textContent,
+                                    bullet: { level: indentLevel },
+                                    spacing: { after: 50 }
+                                }));
+                            }
+                        });
+                    } else if (tagName === 'div' && node.classList.contains('math-display')) {
+                        children.push(new docx.Paragraph({ text: node.textContent, spacing: { before: 100, after: 100 }, alignment: docx.AlignmentType.CENTER }));
+                        if (currentList) currentList = null;
+                    } else if (tagName === 'div') {
+                        // Recursively process children of a generic div
+                        Array.from(node.childNodes).forEach(child => processNode(child, indentLevel));
+                    }
+                };
+                
+                Array.from(tempDiv.childNodes).forEach(node => processNode(node));
+                
+                const doc = new docx.Document({
+                    sections: [{
+                        properties: {
+                            page: {
+                                margin: {
+                                    top: 1000,
+                                    right: 1000,
+                                    bottom: 1000,
+                                    left: 1000,
+                                }
+                            }
+                        },
+                        children: children
+                    }]
+                });
+
+                docx.Packer.toBlob(doc).then(blob => {
+                    saveAs(blob, `HKDSE_${subject}_Exam_Paper.docx`);
+                }).catch(error => {
+                    console.error('Error exporting to Word:', error);
+                    outputDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-circle"></i> Failed to export to Word: ${error.message}</div>`;
+                });
+                
+            } catch (error) {
+                console.error('Error in export:', error);
+                outputDiv.innerHTML = `<div class="error"><i class="fas fa-exclamation-circle"></i> Export failed: ${error.message}</div>`;
+            }
+        });
+        // [--- END OF FULLY DEBUGGED EXPORT FUNCTION ---]
+
+        // Input validation for question counts
+        [mcCountInput, shortCountInput, longCountInput].forEach(input => {
+            input.addEventListener('change', () => {
+                let value = parseInt(input.value);
+                if (isNaN(value)) value = 0;
+                if (value < 0) value = 0;
+                if (value > 15) value = 15;
+                input.value = value;
+            });
+        });
+    </script>
+</body>
+</html>
