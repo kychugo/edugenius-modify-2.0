@@ -373,9 +373,35 @@
             .output h3 { font-size: 1.1em; }
             .output h4 { font-size: 1em; }
         }
+        .back-btn-bar {
+            padding: 12px 20px 0;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            background: #007BFF;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: #0056b3;
+        }
     </style>
 </head>
 <body>
+    <!-- Back to EduGenius -->
+    <div class="back-btn-bar">
+        <a href="./index.html" class="back-btn" aria-label="Back to EduGenius">
+            <i class="fas fa-arrow-left"></i> Back to EduGenius
+        </a>
+    </div>
     <div class="container">
         <div class="header">
             <h1>HKDSE Exam Paper Generator</h1>

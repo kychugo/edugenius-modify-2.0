@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduGenius – Vocabulary Tools</title>
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        /* ============================================================
+           EduGenius Vocabulary Tools
+           Self-contained styles – no external dependencies
+           ============================================================ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --secondary: #7c3aed;
+            --secondary-light: #f5f3ff;
+            --yellow: #d97706;
+            --yellow-light: #fffbeb;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --green: #059669;
+            --green-light: #ecfdf5;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --text-secondary: #374151;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 14px;
+            --radius-sm: 8px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ---- Header ---- */
+        .site-header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            color: var(--text);
+            flex-shrink: 0;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.3);
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--yellow-light);
+            border: 1px solid #fde68a;
+            padding: 0.2rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+            flex-shrink: 0;
+        }
+
+        .back-btn:hover {
+            background: #e0e7ff;
+            transform: translateX(-2px);
+        }
+
+        /* ---- Container ---- */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 3rem;
+        }
+
+        /* ---- Hero ---- */
+        .hero {
+            text-align: center;
+            padding: 2.5rem 1rem 2rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 1rem;
+            background: var(--yellow-light);
+            color: var(--yellow);
+            border: 1px solid #fde68a;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--yellow), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        /* ---- Tabs ---- */
+        .tab-bar {
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+            border-radius: var(--radius);
+            padding: 0.4rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.625rem 1rem;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            background: transparent;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+        }
+
+        .tab-btn:not(.active):hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* ---- Tab panels ---- */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ---- Card ---- */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.75rem;
+            transition: box-shadow 0.25s;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .icon-yellow { background: var(--yellow-light); }
+        .icon-red { background: var(--red-light); }
+        .icon-green { background: var(--green-light); }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        /* ---- Form ---- */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .form-row-3 {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .form-group { }
+
+        label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.375rem;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            color: var(--text);
+            background: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.875rem center;
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+        }
+
+        /* ---- Buttons ---- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.675rem 1.25rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--primary-hover), #6d28d9);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-yellow {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+        }
+
+        .btn-yellow:hover:not(:disabled) {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
+        }
+
+        .btn-red {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+        }
+
+        .btn-red:hover:not(:disabled) {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1.5px solid #c7d2fe;
+        }
+
+        .btn-ghost:hover:not(:disabled) {
+            background: #e0e7ff;
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-full { width: 100%; }
+        .btn-mt { margin-top: 1rem; }
+
+        /* ---- Loading ---- */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            flex-shrink: 0;
+        }
+
+        .spinner-dark {
+            border-color: rgba(79, 70, 229, 0.2);
+            border-top-color: var(--primary);
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: 1rem 0;
+        }
+
+        /* ---- Vocab card grid ---- */
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        @media (min-width: 640px) {
+            .vocab-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (min-width: 900px) {
+            .vocab-grid { grid-template-columns: 1fr 1fr 1fr; }
+        }
+
+        .vocab-card {
+            background: linear-gradient(135deg, #f8faff, #f5f3ff);
+            border: 1.5px solid #c7d2fe;
+            border-radius: 10px;
+            padding: 1rem 1.125rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .vocab-card:hover {
+            box-shadow: 0 4px 12px rgba(79,70,229,0.12);
+            transform: translateY(-2px);
+        }
+
+        .vocab-word {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .vocab-pos {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .vocab-def {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            line-height: 1.5;
+        }
+
+        .vocab-example {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            font-style: italic;
+            border-left: 2px solid #c7d2fe;
+            padding-left: 0.5rem;
+            margin-bottom: 0.4rem;
+            line-height: 1.45;
+        }
+
+        .vocab-cn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--secondary);
+            background: var(--secondary-light);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        /* ---- Quiz section ---- */
+        .quiz-progress {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .progress-bar-wrap {
+            flex: 1;
+            height: 8px;
+            background: var(--border);
+            border-radius: 9999px;
+            margin: 0 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 9999px;
+            transition: width 0.4s ease;
+        }
+
+        .quiz-question-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-q-number {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .quiz-q-text {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.625rem;
+        }
+
+        @media (min-width: 640px) {
+            .quiz-options { grid-template-columns: 1fr 1fr; }
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.625rem;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.18s;
+            font-size: 0.9375rem;
+            color: var(--text);
+            text-align: left;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .quiz-option:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--green);
+            background: var(--green-light);
+            color: #065f46;
+        }
+
+        .quiz-option.wrong {
+            border-color: var(--red);
+            background: var(--red-light);
+            color: #991b1b;
+        }
+
+        .quiz-option:disabled {
+            cursor: default;
+        }
+
+        .option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border-radius: 50%;
+            background: var(--border);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            transition: all 0.18s;
+        }
+
+        .quiz-option:hover:not(:disabled) .option-letter {
+            background: var(--primary);
+            color: white;
+        }
+
+        .quiz-option.correct .option-letter {
+            background: var(--green);
+            color: white;
+        }
+
+        .quiz-option.wrong .option-letter {
+            background: var(--red);
+            color: white;
+        }
+
+        .quiz-explanation {
+            margin-top: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            color: #92400e;
+            display: none;
+        }
+
+        .quiz-explanation.show { display: block; }
+
+        /* ---- Score card ---- */
+        .score-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .score-great { background: var(--green-light); color: var(--green); }
+        .score-good  { background: var(--yellow-light); color: var(--yellow); }
+        .score-low   { background: var(--red-light); color: var(--red); }
+
+        .score-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .score-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* ---- Utility ---- */
+        .hidden { display: none !important; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-4 { margin-top: 1rem; }
+
+        /* ---- Action row ---- */
+        .action-row {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        /* ---- Empty state ---- */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+        /* ---- Footer ---- */
+        footer {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer strong {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 640px) {
+            .header-inner { padding: 0.75rem 1rem; }
+            .header-subtitle { display: none; }
+            .container { padding: 1.5rem 1rem 2rem; }
+            .hero { padding: 1.75rem 0.5rem 1.5rem; }
+            .card { padding: 1.25rem; }
+            .tab-bar { margin: 0 0 1.5rem; }
+            .action-row { flex-direction: column; }
+            .action-row .btn { width: 100%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== Header ===== -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="./index.html" class="brand" aria-label="EduGenius Home">
+                <div class="brand-icon">🧠</div>
+                <span class="brand-name">EduGenius</span>
+            </a>
+            <span class="header-subtitle">📚 Vocabulary Tools</span>
+            <a href="./index.html" class="back-btn" aria-label="Back to EduGenius">← Back</a>
+        </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="container">
+
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-badge">📚 Vocabulary Tools</div>
+            <h1>Build Your<br><span>Vocabulary</span></h1>
+            <p>Generate custom vocabulary lists and test your knowledge with AI-powered quizzes — all in one place</p>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="tab-bar" role="tablist" aria-label="Vocabulary tools">
+            <button class="tab-btn active" id="tab-generator" role="tab"
+                    aria-selected="true" aria-controls="panel-generator"
+                    onclick="switchTab('generator')">
+                💡 Generator
+            </button>
+            <button class="tab-btn" id="tab-quiz" role="tab"
+                    aria-selected="false" aria-controls="panel-quiz"
+                    onclick="switchTab('quiz')">
+                ✏️ Quiz
+            </button>
+        </div>
+
+        <!-- ============================================================
+             TAB 1: Vocabulary Generator
+             ============================================================ -->
+        <div class="tab-panel active" id="panel-generator" role="tabpanel" aria-labelledby="tab-generator">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon icon-yellow">💡</div>
+                    <div>
+                        <div class="card-title">Vocabulary Generator</div>
+                        <div class="card-hint">Pick a topic and level — AI builds your word list</div>
+                    </div>
+                </div>
+
+                <form id="genForm" novalidate>
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label for="genTopic">Topic</label>
+                            <input type="text" id="genTopic"
+                                   placeholder="e.g., Environment, Technology"
+                                   aria-label="Vocabulary topic">
+                        </div>
+                        <div class="form-group">
+                            <label for="genLevel">Level</label>
+                            <select id="genLevel" aria-label="Vocabulary level">
+                                <option value="DSE Foundation">DSE Foundation</option>
+                                <option value="DSE Core" selected>DSE Core</option>
+                                <option value="DSE Extended">DSE Extended</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="genCount">Number of Words</label>
+                            <select id="genCount" aria-label="Number of vocabulary words">
+                                <option value="6">6 words</option>
+                                <option value="9" selected>9 words</option>
+                                <option value="12">12 words</option>
+                                <option value="15">15 words</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="action-row" style="margin-top:0.75rem;">
+                        <button type="submit" id="genBtn" class="btn btn-yellow">
+                            💡 Generate Vocabulary
+                        </button>
+                        <button type="button" id="startQuizFromGenBtn" class="btn btn-ghost hidden"
+                                onclick="switchTab('quiz', true)">
+                            ✏️ Quiz These Words
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Output -->
+            <div id="genOutput">
+                <div class="empty-state">
+                    <div class="empty-icon">📖</div>
+                    <p>Fill in a topic and click <strong>Generate Vocabulary</strong> to get started</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             TAB 2: Vocabulary Quiz
+             ============================================================ -->
+        <div class="tab-panel hidden" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon icon-red">✏️</div>
+                    <div>
+                        <div class="card-title">Vocabulary Quiz</div>
+                        <div class="card-hint">Test your knowledge with AI-generated questions</div>
+                    </div>
+                </div>
+
+                <form id="quizForm" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="quizTopic">Topic</label>
+                            <input type="text" id="quizTopic"
+                                   placeholder="e.g., Environment, Technology"
+                                   aria-label="Quiz topic">
+                        </div>
+                        <div class="form-group">
+                            <label for="quizLevel">Level</label>
+                            <select id="quizLevel" aria-label="Quiz level">
+                                <option value="DSE Foundation">DSE Foundation</option>
+                                <option value="DSE Core" selected>DSE Core</option>
+                                <option value="DSE Extended">DSE Extended</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="action-row" style="margin-top:0.75rem;">
+                        <button type="submit" id="quizStartBtn" class="btn btn-red">
+                            🚀 Start Quiz
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Quiz output -->
+            <div id="quizOutput">
+                <div class="empty-state">
+                    <div class="empty-icon">🎯</div>
+                    <p>Fill in a topic and click <strong>Start Quiz</strong> to begin</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p><strong>EduGenius</strong> AI 智學 &nbsp;·&nbsp; Copyright &copy; 2025 Hugo Wong. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // ============================================================
+        // EduGenius Vocabulary Tools – AI Logic
+        // ============================================================
+
+        const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
+        const FALLBACK_MODELS = ['gemini-search', 'gemini-fast', 'glm', 'openai-fast', 'openai', 'deepseek'];
+
+        // ---- Helpers ----
+        async function callAI(prompt, useJson = false) {
+            const messages = [{ role: 'user', content: prompt }];
+            for (const model of FALLBACK_MODELS) {
+                try {
+                    const body = { model, messages };
+                    const res = await fetch(POLLINATIONS_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    const content = data.choices?.[0]?.message?.content;
+                    if (content) return content;
+                } catch (e) {
+                    console.warn(`Model ${model} failed:`, e.message);
+                }
+            }
+            return null;
+        }
+
+        function setLoading(btn, loading, label) {
+            if (loading) {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner"></span> ${label}`;
+            } else {
+                btn.disabled = false;
+            }
+        }
+
+        // ---- Tab switching ----
+        function switchTab(name, fromGen = false) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            document.getElementById('panel-' + name).classList.remove('hidden');
+            document.getElementById('panel-' + name).classList.add('active');
+            document.getElementById('tab-' + name).classList.add('active');
+            document.getElementById('tab-' + name).setAttribute('aria-selected', 'true');
+
+            // If switching to quiz from generator, pre-fill topic/level
+            if (name === 'quiz' && fromGen) {
+                const topic = document.getElementById('genTopic').value;
+                const level = document.getElementById('genLevel').value;
+                if (topic) document.getElementById('quizTopic').value = topic;
+                document.getElementById('quizLevel').value = level;
+            }
+        }
+
+        // Check URL hash on load
+        (function() {
+            if (window.location.hash === '#quiz') {
+                switchTab('quiz');
+            }
+        })();
+
+        // ====================================================
+        // VOCABULARY GENERATOR
+        // ====================================================
+
+        let generatedWords = []; // Store for quiz use
+
+        function parseVocabList(raw) {
+            // Try to parse structured sections: WORD / POS / DEFINITION / EXAMPLE / CHINESE
+            const words = [];
+            // Split by numbered entries like "1." or "Word:" headers
+            const blocks = raw.split(/\n(?=\d+\.)/).filter(b => b.trim());
+
+            for (const block of blocks) {
+                const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+                const entry = {};
+
+                for (const line of lines) {
+                    const lower = line.toLowerCase();
+                    if (!entry.word && /^\d+\.\s*\*?\*?(.+?)\*?\*?\s*(\(.*?\))?$/.test(line)) {
+                        const m = line.match(/^\d+\.\s*\*?\*?(.+?)\*?\*?\s*(?:\(([^)]+)\))?$/);
+                        if (m) {
+                            entry.word = m[1].replace(/\*+/g, '').trim();
+                            entry.pos  = m[2] ? m[2].trim() : '';
+                        }
+                    } else if (lower.startsWith('definition:') || lower.startsWith('def:') || lower.startsWith('meaning:')) {
+                        entry.def = line.replace(/^.+?:\s*/i, '').trim();
+                    } else if (lower.startsWith('example:') || lower.startsWith('sentence:') || lower.startsWith('usage:')) {
+                        entry.example = line.replace(/^.+?:\s*/i, '').trim();
+                    } else if (lower.startsWith('chinese') || lower.startsWith('中文') || lower.startsWith('translation')) {
+                        entry.cn = line.replace(/^.+?:\s*/i, '').trim();
+                    } else if (!entry.pos && /^\((noun|verb|adjective|adverb|phrase|idiom|n\.|v\.|adj\.|adv\.)/i.test(line)) {
+                        entry.pos = line.replace(/[()]/g, '').trim();
+                    }
+                }
+
+                if (entry.word) words.push(entry);
+            }
+            return words;
+        }
+
+        function renderVocabCards(words) {
+            if (!words.length) return `<div class="empty-state"><p>Could not parse vocabulary list. Please try again.</p></div>`;
+            return `<div class="vocab-grid">${words.map(w => `
+                <div class="vocab-card">
+                    <div class="vocab-word">${escapeHtml(w.word || '')}</div>
+                    ${w.pos ? `<div class="vocab-pos">(${escapeHtml(w.pos)})</div>` : ''}
+                    ${w.def ? `<div class="vocab-def">📌 ${escapeHtml(w.def)}</div>` : ''}
+                    ${w.example ? `<div class="vocab-example">"${escapeHtml(w.example)}"</div>` : ''}
+                    ${w.cn ? `<span class="vocab-cn">🇨🇳 ${escapeHtml(w.cn)}</span>` : ''}
+                </div>`).join('')}</div>`;
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        document.getElementById('genForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = document.getElementById('genTopic').value.trim() || 'General English';
+            const level = document.getElementById('genLevel').value;
+            const count = parseInt(document.getElementById('genCount').value, 10);
+            const genBtn = document.getElementById('genBtn');
+            const genOut = document.getElementById('genOutput');
+            const quizFromGenBtn = document.getElementById('startQuizFromGenBtn');
+
+            setLoading(genBtn, true, 'Generating…');
+            quizFromGenBtn.classList.add('hidden');
+            genOut.innerHTML = `<div class="loading-text"><span class="spinner spinner-dark"></span> Generating ${count} vocabulary words on "${topic}"…</div>`;
+
+            const prompt =
+`Generate a vocabulary list of exactly ${count} English words for Hong Kong DSE students at ${level} level on the topic of "${topic}".
+
+For EACH word, use this exact format:
+1. [WORD] ([part of speech])
+Definition: [Clear, concise English definition]
+Example: [A natural example sentence using the word]
+Chinese: [Traditional Chinese translation]
+
+2. [WORD] ...
+
+Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文) for the Chinese translation.`;
+
+            const raw = await callAI(prompt);
+            if (!raw) {
+                genOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Failed to generate vocabulary. Please try again.</p></div>`;
+                setLoading(genBtn, false);
+                genBtn.innerHTML = '💡 Generate Vocabulary';
+                return;
+            }
+
+            generatedWords = parseVocabList(raw);
+            genOut.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon icon-yellow">📚</div>
+                        <div>
+                            <div class="card-title">${count} Words: ${escapeHtml(topic)}</div>
+                            <div class="card-hint">${level} level</div>
+                        </div>
+                    </div>
+                    ${renderVocabCards(generatedWords)}
+                </div>`;
+
+            setLoading(genBtn, false);
+            genBtn.innerHTML = '💡 Generate Vocabulary';
+            quizFromGenBtn.classList.remove('hidden');
+        });
+
+        // ====================================================
+        // VOCABULARY QUIZ
+        // ====================================================
+
+        let quizQuestions = [];
+        let currentQ = 0;
+        let score = 0;
+
+        function extractJson(raw) {
+            // Try to find JSON in the response (model might add prose around it)
+            const match = raw.match(/\{[\s\S]*\}/);
+            if (match) {
+                try { return JSON.parse(match[0]); } catch {}
+            }
+            // Try code blocks
+            const codeMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (codeMatch) {
+                try { return JSON.parse(codeMatch[1]); } catch {}
+            }
+            return null;
+        }
+
+        function renderQuestion(idx) {
+            if (idx >= quizQuestions.length) {
+                renderScore();
+                return;
+            }
+            const q = quizQuestions[idx];
+            const letters = ['A', 'B', 'C', 'D'];
+            const progress = Math.round(((idx) / quizQuestions.length) * 100);
+
+            document.getElementById('quizOutput').innerHTML = `
+                <div class="quiz-progress">
+                    <span class="progress-label">Q${idx + 1} / ${quizQuestions.length}</span>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" style="width:${progress}%"></div>
+                    </div>
+                    <span class="progress-label">Score: ${score}</span>
+                </div>
+                <div class="quiz-question-card">
+                    <div class="quiz-q-number">Question ${idx + 1} of ${quizQuestions.length}</div>
+                    <div class="quiz-q-text">${escapeHtml(q.question)}</div>
+                    <div class="quiz-options" id="optionsWrap">
+                        ${q.options.map((opt, i) => `
+                            <button class="quiz-option" data-idx="${i}" onclick="checkAnswer(${i})"
+                                    aria-label="Option ${letters[i]}: ${escapeHtml(opt)}">
+                                <span class="option-letter">${letters[i]}</span>
+                                <span>${escapeHtml(opt)}</span>
+                            </button>`).join('')}
+                    </div>
+                    <div class="quiz-explanation" id="explanation">
+                        💡 ${escapeHtml(q.explanation || '')}
+                    </div>
+                </div>`;
+        }
+
+        function checkAnswer(selectedIdx) {
+            const q = quizQuestions[currentQ];
+            const correct = q.answer;
+            const options = document.querySelectorAll('.quiz-option');
+            const explanationEl = document.getElementById('explanation');
+
+            options.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === correct) btn.classList.add('correct');
+                else if (i === selectedIdx && i !== correct) btn.classList.add('wrong');
+            });
+
+            if (selectedIdx === correct) score++;
+            explanationEl.classList.add('show');
+
+            // Auto-advance after delay
+            setTimeout(() => {
+                currentQ++;
+                renderQuestion(currentQ);
+            }, 2200);
+        }
+
+        function renderScore() {
+            const total = quizQuestions.length;
+            const pct = Math.round((score / total) * 100);
+            let cls = 'score-low', emoji = '📖', msg = 'Keep practising!';
+            if (pct >= 80) { cls = 'score-great'; emoji = '🏆'; msg = 'Excellent work!'; }
+            else if (pct >= 60) { cls = 'score-good'; emoji = '👏'; msg = 'Good effort!'; }
+
+            document.getElementById('quizOutput').innerHTML = `
+                <div class="card score-card">
+                    <div class="score-circle ${cls}">${emoji}</div>
+                    <div class="score-title">${score} / ${total}</div>
+                    <div class="score-subtitle">${pct}% correct &nbsp;·&nbsp; ${msg}</div>
+                    <div class="action-row" style="justify-content:center;">
+                        <button class="btn btn-red" onclick="restartQuiz()">🔄 Try Again</button>
+                        <button class="btn btn-ghost" onclick="switchTab('generator')">💡 Generate Vocabulary</button>
+                    </div>
+                </div>`;
+        }
+
+        function restartQuiz() {
+            currentQ = 0;
+            score = 0;
+            renderQuestion(0);
+        }
+
+        document.getElementById('quizForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = document.getElementById('quizTopic').value.trim() || 'General English';
+            const level = document.getElementById('quizLevel').value;
+            const quizBtn = document.getElementById('quizStartBtn');
+            const quizOut = document.getElementById('quizOutput');
+
+            setLoading(quizBtn, true, 'Generating Quiz…');
+            quizOut.innerHTML = `<div class="loading-text"><span class="spinner spinner-dark"></span> Generating quiz questions on "${topic}"…</div>`;
+
+            const prompt =
+`Generate a vocabulary quiz for Hong Kong DSE English students at ${level} level on the topic of "${topic}".
+Create exactly 5 multiple-choice questions.
+
+Return ONLY valid JSON (no other text, no markdown code blocks) in this format:
+{
+  "questions": [
+    {
+      "question": "Question text here",
+      "options": ["Option A text", "Option B text", "Option C text", "Option D text"],
+      "answer": 0,
+      "explanation": "Brief explanation of the correct answer"
+    }
+  ]
+}
+
+Where "answer" is the 0-based index (0=A, 1=B, 2=C, 3=D) of the correct option.
+Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextual meaning.`;
+
+            const raw = await callAI(prompt);
+            if (!raw) {
+                quizOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Failed to generate quiz. Please try again.</p></div>`;
+                setLoading(quizBtn, false);
+                quizBtn.innerHTML = '🚀 Start Quiz';
+                return;
+            }
+
+            const parsed = extractJson(raw);
+            if (!parsed || !Array.isArray(parsed.questions) || !parsed.questions.length) {
+                quizOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Could not parse quiz. Please try again.</p></div>`;
+                setLoading(quizBtn, false);
+                quizBtn.innerHTML = '🚀 Start Quiz';
+                return;
+            }
+
+            quizQuestions = parsed.questions;
+            currentQ = 0;
+            score = 0;
+            setLoading(quizBtn, false);
+            quizBtn.innerHTML = '🚀 Start Quiz';
+            renderQuestion(0);
+        });
+    </script>
+
+</body>
+</html>
