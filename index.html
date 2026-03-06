@@ -4,705 +4,519 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Subject AI Learning Platform</title>
+    <title>EduGenius AI — Smart Learning Platform</title>
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" sizes="192x192" href="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png">
-    
-    
+
     <!-- External Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            font-family: 'Inter', 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --primary-dark: #5b21b6;
+            --secondary: #06b6d4;
+            --text-primary: #1e1b4b;
+            --text-secondary: #64748b;
+            --bg-main: #f0f2ff;
+            --glass-bg: rgba(255,255,255,0.80);
+            --glass-border: rgba(255,255,255,0.65);
+            --shadow-glow: 0 0 40px rgba(124,58,237,0.10);
+            --radius: 20px;
+            --radius-sm: 12px;
+        }
+        .dark {
+            --primary: #a78bfa;
+            --primary-light: #c4b5fd;
+            --primary-dark: #7c3aed;
+            --secondary: #22d3ee;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --bg-main: #0d0d1a;
+            --glass-bg: rgba(15,15,40,0.85);
+            --glass-border: rgba(255,255,255,0.08);
+            --shadow-glow: 0 0 60px rgba(124,58,237,0.18);
+        }
+        * { font-family: 'Plus Jakarta Sans','Inter','Segoe UI','Microsoft JhengHei',Arial,sans-serif; box-sizing: border-box; }
+
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        @keyframes pulseGlow { 0%,100%{opacity:.8} 50%{opacity:1} }
+        @keyframes dotPulse { 0%,60%,100%{transform:scale(1);opacity:.6} 30%{transform:scale(1.4);opacity:1} }
+
+        .animate-fadeInUp { animation: fadeInUp 0.6s cubic-bezier(.16,1,.3,1) both; }
+        .animate-slideInRight { animation: slideInRight 0.4s cubic-bezier(.16,1,.3,1) both; }
+        .delay-100{animation-delay:.1s} .delay-200{animation-delay:.2s} .delay-300{animation-delay:.3s}
+        .delay-400{animation-delay:.4s} .delay-500{animation-delay:.5s}
+
+        html { scroll-behavior: smooth; }
+        body {
+            min-height:100vh;
+            background-color: var(--bg-main);
+            position:relative; overflow-x:hidden;
+            transition: background-color .4s ease;
+            color: var(--text-primary);
+        }
+        body::before {
+            content:''; position:fixed; inset:0;
+            background:
+                radial-gradient(ellipse 80% 60% at 15% 5%,  rgba(124,58,237,.18) 0%,transparent 55%),
+                radial-gradient(ellipse 60% 50% at 85% 85%, rgba(6,182,212,.14) 0%,transparent 55%),
+                radial-gradient(ellipse 60% 50% at 5%  95%, rgba(236,72,153,.08) 0%,transparent 55%);
+            pointer-events:none; z-index:0;
+        }
+        .dark body::before {
+            background:
+                radial-gradient(ellipse 80% 60% at 15% 5%,  rgba(124,58,237,.32) 0%,transparent 55%),
+                radial-gradient(ellipse 60% 50% at 85% 85%, rgba(6,182,212,.22) 0%,transparent 55%),
+                radial-gradient(ellipse 60% 50% at 5%  95%, rgba(236,72,153,.14) 0%,transparent 55%);
         }
 
-        /* Custom animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px rgba(0,0,0,.08), var(--shadow-glow);
+            position:relative; overflow:hidden;
+        }
+        .glass-card::before {
+            content:''; position:absolute; top:0;left:0;right:0; height:1px;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+            pointer-events:none;
         }
 
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        .custom-scrollbar::-webkit-scrollbar { width:5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background:transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background:var(--primary-light); }
+
+        .gradient-text {
+            background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-        
-        .animate-fadeInUp {
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .animate-slideInRight {
-            animation: slideInRight 0.4s ease-out;
-        }
-
-        /* Custom scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-        
-        /* Message bubbles */
-        .message-bubble {
-            position: relative;
-            max-width: 80%;
-            word-wrap: break-word;
-            animation: slideInRight 0.3s ease-out;
-        }
-
-        .message-bubble::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-        }
-
-        .user-bubble::after {
-            bottom: 0;
-            right: -8px;
-            border-left: 8px solid #3b82f6;
-            border-bottom: 8px solid transparent;
-        }
-
-        .ai-bubble::after {
-            bottom: 0;
-            left: -8px;
-            border-right: 8px solid #f3f4f6;
-            border-bottom: 8px solid transparent;
-        }
-
-        /* Loading dots */
-        .loading-dots {
-            display: inline-flex;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .loading-dots span {
-            height: 4px;
-            width: 4px;
-            background-color: currentColor;
-            border-radius: 50%;
-            animation: pulse 1.4s ease-in-out infinite both;
-        }
-
-        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-        
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .message-bubble {
-                max-width: 90%;
-            }
-        }
-
-        /* Print styles */
-         {
-            .no-print {
-                display: none !important;
-            }
-        }
-
-        /* Custom button styles */
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
+            background:linear-gradient(135deg,#7c3aed 0%,#5b21b6 100%);
+            color:#fff!important; border:none;
+            border-radius:var(--radius-sm); font-weight:700;
+            transition:all .3s cubic-bezier(.4,0,.2,1);
+            position:relative; overflow:hidden;
+        }
+        .dark .btn-primary { background:linear-gradient(135deg,#a78bfa 0%,#7c3aed 100%); }
+        .btn-primary::after { content:'';position:absolute;inset:0; background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 60%); opacity:0;transition:opacity .3s;border-radius:inherit; }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(124,58,237,.42); }
+        .btn-primary:hover::after { opacity:1; }
+        .btn-primary:active { transform:translateY(0); }
+
+        .btn-secondary {
+            background:var(--glass-bg); color:var(--text-primary);
+            border:1px solid var(--glass-border);
+            border-radius:var(--radius-sm); font-weight:600;
+            transition:all .25s ease; backdrop-filter:blur(12px);
+        }
+        .btn-secondary:hover { border-color:rgba(124,58,237,.45);color:var(--primary);background:rgba(124,58,237,.06); }
+
+        .btn-danger {
+            background:rgba(239,68,68,.08); color:#ef4444;
+            border:1px solid rgba(239,68,68,.20);
+            border-radius:var(--radius-sm); font-weight:600;
+            transition:all .25s ease;
+        }
+        .btn-danger:hover { background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.50); }
+
+        .subject-card { transition:all .35s cubic-bezier(.4,0,.2,1); cursor:pointer; }
+        .subject-card:hover { transform:translateY(-10px) scale(1.02); box-shadow:0 28px 56px rgba(0,0,0,.13),var(--shadow-glow); }
+        .subject-card:active { transform:translateY(-4px) scale(1.01); }
+
+        .icon-ring { border-radius:18px;width:68px;height:68px;display:flex;align-items:center;justify-content:center;transition:transform .35s ease; }
+        .subject-card:hover .icon-ring { transform:scale(1.12) rotate(-4deg); }
+
+        .tool-card { transition:all .3s cubic-bezier(.4,0,.2,1); cursor:pointer; }
+        .tool-card:hover { transform:translateX(8px); box-shadow:0 16px 40px rgba(0,0,0,.10),var(--shadow-glow); }
+
+        .message-bubble { position:relative;max-width:80%;word-wrap:break-word;animation:fadeInUp .35s cubic-bezier(.16,1,.3,1) both; }
+
+        .user-bubble {
+            background:linear-gradient(135deg,#7c3aed 0%,#5b21b6 100%);
+            color:#fff; border-radius:20px 20px 4px 20px;
+            box-shadow:0 4px 20px rgba(124,58,237,.30);
+        }
+        .dark .user-bubble { background:linear-gradient(135deg,#a78bfa 0%,#7c3aed 100%); }
+
+        .ai-bubble {
+            background:var(--glass-bg); backdrop-filter:blur(16px);
+            border:1px solid var(--glass-border); color:var(--text-primary);
+            border-radius:20px 20px 20px 4px; box-shadow:0 4px 16px rgba(0,0,0,.08);
         }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .loading-dots { display:inline-flex;align-items:center;gap:5px; }
+        .loading-dots span { height:8px;width:8px;background:var(--primary);border-radius:50%;animation:dotPulse 1.2s ease-in-out infinite both; }
+        .loading-dots span:nth-child(1){animation-delay:0s}
+        .loading-dots span:nth-child(2){animation-delay:.2s}
+        .loading-dots span:nth-child(3){animation-delay:.4s}
+
+        .input-field {
+            background:var(--glass-bg); border:1.5px solid var(--glass-border);
+            border-radius:var(--radius-sm); color:var(--text-primary);
+            transition:all .25s ease; backdrop-filter:blur(12px);
+        }
+        .input-field:focus { outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.15); }
+        .input-field::placeholder { color:var(--text-secondary); }
+
+        .status-online { position:relative; }
+        .status-online::after {
+            content:''; position:absolute; bottom:3px; right:3px;
+            width:13px; height:13px; background:#10b981;
+            border-radius:50%; border:3px solid var(--bg-main);
         }
 
-        /* Subject card hover effects */
-        .subject-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .nav-bar {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:12px 20px; border-radius:16px;
+            background:var(--glass-bg); backdrop-filter:blur(20px);
+            -webkit-backdrop-filter:blur(20px);
+            border:1px solid var(--glass-border);
+            box-shadow:0 4px 16px rgba(0,0,0,.06); margin-bottom:24px;
         }
 
-        .subject-card:hover {
-            transform: translateY(-8px) scale(1.02);
+        .chat-container {
+            background:var(--glass-bg); backdrop-filter:blur(24px) saturate(150%);
+            -webkit-backdrop-filter:blur(24px) saturate(150%);
+            border:1px solid var(--glass-border); border-radius:var(--radius);
+            box-shadow:0 8px 32px rgba(0,0,0,.10);
+            display:flex; flex-direction:column; flex:1;
         }
+        .chat-input-area { border-top:1px solid var(--glass-border);padding:16px; border-radius:0 0 var(--radius) var(--radius); }
 
-        /* Status indicator */
-        .status-online {
-            position: relative;
+        .msg-action-btn {
+            font-size:.72rem;font-weight:600;padding:4px 10px;
+            border-radius:8px;border:1px solid var(--glass-border);
+            background:var(--glass-bg);color:var(--text-secondary);
+            transition:all .2s ease;cursor:pointer;
         }
+        .msg-action-btn:hover { background:var(--primary);color:#fff;border-color:var(--primary); }
 
-        .status-online::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            width: 12px;
-            height: 12px;
-            background: #10b981;
-            border-radius: 50%;
-            border: 2px solid white;
-        }
+        .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; } }
+        @media (max-width:768px) { .message-bubble{max-width:92%} :root{--radius:16px;--radius-sm:10px} }
+        @media print { .no-print { display:none!important; } }
 
-        /* Accessibility improvements */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-        
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* --- Custom Dark Mode Overrides for Black & White Theme --- */
-        .dark { color-scheme: dark; }
-
-        /* Backgrounds */
-        .dark body {
-            background-image: none !important;
-            background-color: #000000 !important;
-        }
-        .dark .bg-white, .dark .dark\:bg-gray-800 {
-            background-color: #111111 !important;
-            border-color: #333333 !important;
-        }
-        .dark .bg-gray-100, .dark .dark\:bg-gray-700 {
-            background-color: #1c1c1c !important;
-        }
-        .dark .hover\:bg-gray-200:hover, .dark .dark\:hover\:bg-gray-600:hover {
-            background-color: #2b2b2b !important;
-        }
-
-        /* Text */
-        .dark .text-gray-900, .dark .dark\:text-white { color: #ffffff !important; }
-        .dark .text-gray-600, .dark .dark\:text-gray-300 { color: #bbbbbb !important; }
-        .dark .text-gray-700 { color: #cccccc !important; }
-        .dark .text-gray-500, .dark .dark\:text-gray-400 { color: #999999 !important; }
-        .dark .text-gray-800, .dark .dark\:text-gray-200 { color: #eeeeee !important; }
-
-        /* Borders */
-        .dark .border-gray-200, .dark .dark\:border-gray-700 { border-color: #333333 !important; }
-        .dark .border-gray-300, .dark .dark\:border-gray-600 { border-color: #444444 !important; }
-        .dark .status-online::before { border-color: #111 !important; }
-
-        /* ----- Icon Backgrounds (Subjects, Tools, Chat) ----- */
-        .dark .bg-gradient-to-br[class*="from-"] {
-            background-image: none !important;
-            background-color: #282828 !important;
-        }
-        .dark .bg-gradient-to-br[class*="from-"] .text-white,
-        .dark .bg-gradient-to-br[class*="from-"] i {
-            color: #ffffff !important;
-        }
-        
-        /* ----- Buttons ----- */
-        /* Primary Action Buttons (Sign In, Send Chat Message) */
-        .dark .btn-primary,
-        .dark button.bg-gradient-to-br[class*="from-green"],
-        .dark button.bg-gradient-to-br[class*="from-purple"] {
-            background-image: none !important;
-            background-color: #ffffff !important;
-            color: #000000 !important;
-            box-shadow: none !important;
-        }
-        .dark .btn-primary:hover,
-        .dark button.bg-gradient-to-br[class*="from-green"]:hover,
-        .dark button.bg-gradient-to-br[class*="from-purple"]:hover {
-            background-color: #cccccc !important;
-        }
-        .dark .btn-primary .text-white, .dark button.bg-gradient-to-br .text-white,
-        .dark .btn-primary i, .dark button.bg-gradient-to-br i {
-            color: #000000 !important;
-        }
-        
-        /* Destructive Action Button (Sign Out) */
-        .dark button.bg-red-500 {
-            background: transparent !important;
-            border: 1px solid #777 !important;
-        }
-        .dark button.bg-red-500:hover, .dark button.hover\:bg-red-600:hover {
-            background: #2a2a2a !important;
-            border-color: #aaa !important;
-        }
-        .dark button.bg-red-500 .text-white, .dark button.bg-red-500 i {
-            color: #cccccc !important;
-        }
-        .dark button.bg-red-500:hover .text-white, .dark button.bg-red-500:hover i {
-            color: #ffffff !important;
-        }
-
-        /* Secondary Chat Buttons (Copy, Share) */
-        .dark button.bg-blue-500, .dark button.bg-green-500 {
-            background-color: #252525 !important;
-        }
-        .dark button.bg-blue-500:hover, .dark button.bg-green-500:hover {
-            background-color: #383838 !important;
-        }
-        .dark button.bg-blue-500 .text-white, .dark button.bg-green-500 .text-white,
-        .dark button.bg-blue-500 i, .dark button.bg-green-500 i {
-            color: #dddddd !important;
-        }
-        .dark button.bg-blue-500:hover .text-white, .dark button.bg-green-500:hover .text-white,
-        .dark button.bg-blue-500:hover i, .dark button.bg-green-500:hover i {
-            color: #ffffff !important;
-        }
-        
-        /* ----- Subject & Chat UI ----- */
-        .dark span[class*="-100"] { background-color: #2a2a2a !important; }
-        .dark span[class*="-800"] { color: #e0e0e0 !important; }
-        
-        /* User Chat Bubble */
-        .dark .user-bubble {
-            background: #e5e5e5 !important;
-            color: #000 !important;
-        }
-        .dark .user-bubble::after {
-            border-left-color: #e5e5e5 !important;
-        }
-        .dark .user-bubble .font-medium {
-             color: #000 !important;
-        }
-        .dark .user-bubble .bg-white.bg-opacity-20 { 
-            background-color: rgba(0,0,0,0.4) !important;
-        }
-        .dark .user-bubble .fa-user {
-             color: #fff !important;
-        }
-        
-        /* AI Chat Bubble */
-        .dark .ai-bubble {
-             background-color: #1c1c1c !important;
-        }
-        .dark .ai-bubble::after {
-            border-right-color: #1c1c1c !important;
-        }
-
-        /* Scrollbar */
-        .dark .custom-scrollbar::-webkit-scrollbar-track { background: #111; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #444; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #666; }
-
+        /* Class-based dark mode icon toggle for theme buttons */
+        .theme-moon { display:inline-block; }
+        .theme-sun  { display:none; }
+        .dark .theme-moon { display:none; }
+        .dark .theme-sun  { display:inline-block; }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 transition-all duration-300">
+<body class="transition-all duration-300">
     <!-- Authentication Screen -->
-    <div class="container mx-auto px-4 py-8" id="authScreen">
-        <div class="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 animate-fadeInUp">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8 relative z-10" id="authScreen">
+        <div class="w-full max-w-md animate-fadeInUp">
             <div class="text-center mb-8">
-                <div class="relative inline-block">
-                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" 
-                         alt="Platform Logo" 
-                         class="w-20 h-20 mx-auto rounded-2xl shadow-lg status-online">
-                    <span class="sr-only">AI Learning Platform Logo</span>
+                <div class="inline-block relative mb-5">
+                    <div class="absolute inset-0 rounded-3xl" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);filter:blur(16px);opacity:.3;transform:scale(1.15)"></div>
+                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png"
+                         alt="Platform Logo"
+                         class="relative w-24 h-24 mx-auto rounded-3xl shadow-2xl status-online">
+                    <span class="sr-only">EduGenius AI Logo</span>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mt-6 mb-2">
-                    <i class="fas fa-brain text-purple-600 mr-2"></i>
-                    EduGenius
+                <h1 class="text-4xl font-extrabold mb-2">
+                    <span class="gradient-text">EduGenius</span>
                 </h1>
-                <p class="text-gray-600 dark:text-gray-300">Your intelligent study companion</p>
+                <p class="text-sm font-medium" style="color:var(--text-secondary)">Your intelligent AI study companion 智學</p>
             </div>
-            
-            <form class="space-y-6" role="form" aria-label="Authentication form">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-envelope mr-2"></i>Email Address
-                    </label>
-                    <input type="email" 
-                           id="email" 
-                           placeholder="Enter your email" 
-                           required
-                           aria-required="true"
-                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
+
+            <div class="glass-card p-8">
+                <form class="space-y-5" role="form" aria-label="Authentication form">
+                    <div>
+                        <label for="email" class="block text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--text-secondary)">
+                            <i class="fas fa-envelope mr-1.5" style="color:var(--primary)"></i>Email Address
+                        </label>
+                        <input type="email" id="email" placeholder="you@example.com"
+                               required aria-required="true"
+                               class="input-field w-full px-4 py-3 text-sm outline-none">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--text-secondary)">
+                            <i class="fas fa-lock mr-1.5" style="color:var(--primary)"></i>Password
+                        </label>
+                        <input type="password" id="password" placeholder="Enter your password"
+                               required aria-required="true"
+                               class="input-field w-full px-4 py-3 text-sm outline-none">
+                    </div>
+                    <div class="space-y-3 pt-2">
+                        <button type="button" id="sign-in-button"
+                                class="w-full btn-primary py-3 px-6 rounded-xl text-sm focus:ring-4 focus:ring-purple-300 outline-none">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                        </button>
+                        <button type="button" id="register-button"
+                                class="w-full btn-secondary py-3 px-6 rounded-xl text-sm focus:ring-4 outline-none">
+                            <i class="fas fa-user-plus mr-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <div id="auth-error" class="mt-4 p-3 rounded-xl text-sm hidden"
+                     style="background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.25);color:#ef4444"
+                     role="alert" aria-live="polite"></div>
+
+                <div class="mt-6 pt-5 text-center text-xs" style="border-top:1px solid var(--glass-border);color:var(--text-secondary)">
+                    <p class="font-semibold">EduGenius AI 智學</p>
+                    <p class="mt-1">Copyright &copy; 2026 Hugo Wong. All rights reserved.</p>
                 </div>
-                
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-lock mr-2"></i>Password
-                    </label>
-                    <input type="password" 
-                           id="password" 
-                           placeholder="Enter your password" 
-                           required
-                           aria-required="true"
-                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
-                </div>
-                
-                <div class="space-y-3">
-                    <button type="button" 
-                            id="sign-in-button"
-                            class="w-full btn-primary text-white font-semibold py-3 px-6 rounded-xl focus:ring-4 focus:ring-purple-300 outline-none transition-all duration-200">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
-                    </button>
-                    <button type="button" 
-                            id="register-button"
-                            class="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-xl focus:ring-4 focus:ring-gray-300 outline-none transition-all duration-200">
-                        <i class="fas fa-user-plus mr-2"></i>Create Account
-                    </button>
-                </div>
-            </form>
-            
-            <div id="auth-error" 
-                 class="mt-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-xl text-red-700 dark:text-red-300 text-sm hidden"
-                 role="alert"
-                 aria-live="polite">
             </div>
-            
-            <footer class="text-center text-xs text-gray-500 dark:text-gray-400 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <p>EduGenius Al 智學</p>
-                <p>Copyright © 2026 Hugo Wong All rights reserved.</p>
-            </footer>
         </div>
     </div>
 
     <!-- Cover Page (Subject List) -->
-    <div class="container mx-auto px-4 py-8 hidden" id="coverScreen">
+    <div class="container mx-auto px-4 py-8 hidden relative z-10" id="coverScreen">
         <div class="max-w-6xl mx-auto">
-            <!-- Header with controls -->
-            <div class="flex justify-between items-center mb-8 no-print">
-                <button id="theme-toggle" 
-                        class="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-gray-600 dark:text-gray-300"
-                        aria-label="Toggle dark mode">
-                    <i class="fas fa-moon dark:hidden"></i>
-                    <i class="fas fa-sun hidden dark:block"></i>
-                </button>
-                <button id="sign-out-button" 
-                        class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 font-medium"
-                        aria-label="Sign out">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
-                </button>
-            </div>
-            
-            <!-- Main content -->
-            <div class="text-center mb-12 animate-fadeInUp">
-                <div class="relative inline-block mb-6">
-                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" 
-                         alt="Platform Logo" 
-                         class="w-24 h-24 mx-auto rounded-2xl shadow-xl status-online">
+            <!-- Nav bar -->
+            <div class="nav-bar no-print animate-fadeInUp">
+                <div class="flex items-center gap-3">
+                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="Logo" class="w-9 h-9 rounded-xl">
+                    <span class="font-bold text-sm gradient-text">EduGenius AI</span>
                 </div>
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                    Choose Your Subject
+                <div class="flex items-center gap-2">
+                    <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
+                        <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
+                    </button>
+                    <button id="sign-out-button" class="btn-danger px-4 py-2 text-sm" aria-label="Sign out">
+                        <i class="fas fa-sign-out-alt mr-1.5"></i>Sign Out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hero heading -->
+            <div class="text-center mb-12 animate-fadeInUp">
+                <div class="inline-block mb-4">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest"
+                         style="background:rgba(124,58,237,.10);color:var(--primary);border:1px solid rgba(124,58,237,.20)">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                        AI-Powered Learning
+                    </div>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-extrabold mb-4" style="color:var(--text-primary)">
+                    Choose Your <span class="gradient-text">Subject</span>
                 </h1>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                    Explore our AI-powered learning tools designed specifically for Hong Kong DSE students
+                <p class="text-lg max-w-2xl mx-auto" style="color:var(--text-secondary)">
+                    Explore AI-powered learning tools designed for Hong Kong DSE students
                 </p>
             </div>
-            
+
             <!-- Subject Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                <!-- Chinese Subject - First position -->
-                <div class="subject-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl cursor-pointer group" 
-                     onclick="showAIList('中文')"
-                     role="button"
-                     tabindex="0"
-                     aria-label="中文 subject">
+                <!-- Chinese -->
+                <div class="glass-card subject-card p-6 animate-fadeInUp"
+                     onclick="showAIList('中文')" role="button" tabindex="0" aria-label="中文 subject">
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <div class="icon-ring mx-auto mb-4" style="background:linear-gradient(135deg,#ef4444,#dc2626)">
                             <i class="fas fa-dragon text-2xl text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">中文</h2>
-                        <p class="text-gray-600 dark:text-gray-300">古典文學與現代語文</p>
-                        <div class="mt-4 flex justify-center">
-                            <span class="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm">
-                                4 AI Tools
-                            </span>
-                        </div>
+                        <h2 class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">中文</h2>
+                        <p class="text-sm mb-4" style="color:var(--text-secondary)">古典文學與現代語文</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                              style="background:rgba(239,68,68,.12);color:#ef4444">4 AI Tools</span>
                     </div>
                 </div>
-                
-                <div class="subject-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl cursor-pointer group" 
-                     onclick="showAIList('English')"
-                     role="button"
-                     tabindex="0"
-                     aria-label="English subject">
+
+                <!-- English -->
+                <div class="glass-card subject-card p-6 animate-fadeInUp delay-100"
+                     onclick="showAIList('English')" role="button" tabindex="0" aria-label="English subject">
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <div class="icon-ring mx-auto mb-4" style="background:linear-gradient(135deg,#3b82f6,#2563eb)">
                             <i class="fas fa-book-open text-2xl text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">English</h2>
-                        <p class="text-gray-600 dark:text-gray-300">Language arts, literature, and composition</p>
-                        <div class="mt-4 flex justify-center">
-                            <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
-                                6 AI Tools
-                            </span>
-                        </div>
+                        <h2 class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">English</h2>
+                        <p class="text-sm mb-4" style="color:var(--text-secondary)">Language arts, literature &amp; composition</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                              style="background:rgba(59,130,246,.12);color:#3b82f6">6 AI Tools</span>
                     </div>
                 </div>
-                
-                <div class="subject-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl cursor-pointer group" 
-                     onclick="showAIList('Math')"
-                     role="button"
-                     tabindex="0"
-                     aria-label="Mathematics subject">
+
+                <!-- Math -->
+                <div class="glass-card subject-card p-6 animate-fadeInUp delay-200"
+                     onclick="showAIList('Math')" role="button" tabindex="0" aria-label="Mathematics subject">
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <div class="icon-ring mx-auto mb-4" style="background:linear-gradient(135deg,#10b981,#059669)">
                             <i class="fas fa-calculator text-2xl text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Math</h2>
-                        <p class="text-gray-600 dark:text-gray-300">Algebra, geometry, calculus, and statistics</p>
-                        <div class="mt-4 flex justify-center">
-                            <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
-                                4 AI Tools
-                            </span>
-                        </div>
+                        <h2 class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">Math</h2>
+                        <p class="text-sm mb-4" style="color:var(--text-secondary)">Algebra, geometry, calculus &amp; statistics</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                              style="background:rgba(16,185,129,.12);color:#10b981">4 AI Tools</span>
                     </div>
                 </div>
-                
-                <div class="subject-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl cursor-pointer group" 
-                     onclick="showAIList('Physics')"
-                     role="button"
-                     tabindex="0"
-                     aria-label="Physics subject">
+
+                <!-- Physics -->
+                <div class="glass-card subject-card p-6 animate-fadeInUp delay-300"
+                     onclick="showAIList('Physics')" role="button" tabindex="0" aria-label="Physics subject">
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <div class="icon-ring mx-auto mb-4" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">
                             <i class="fas fa-atom text-2xl text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Physics</h2>
-                        <p class="text-gray-600 dark:text-gray-300">Mechanics, electricity, waves, and modern physics</p>
-                        <div class="mt-4 flex justify-center">
-                            <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">
-                                4 AI Tools
-                            </span>
-                        </div>
+                        <h2 class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">Physics</h2>
+                        <p class="text-sm mb-4" style="color:var(--text-secondary)">Mechanics, electricity, waves &amp; modern physics</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                              style="background:rgba(139,92,246,.12);color:#8b5cf6">4 AI Tools</span>
                     </div>
                 </div>
-                
-                <div class="subject-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl cursor-pointer group" 
-                     onclick="showAIList('Biology')"
-                     role="button"
-                     tabindex="0"
-                     aria-label="Biology subject">
+
+                <!-- Biology -->
+                <div class="glass-card subject-card p-6 animate-fadeInUp delay-400"
+                     onclick="showAIList('Biology')" role="button" tabindex="0" aria-label="Biology subject">
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <div class="icon-ring mx-auto mb-4" style="background:linear-gradient(135deg,#22c55e,#16a34a)">
                             <i class="fas fa-dna text-2xl text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Biology</h2>
-                        <p class="text-gray-600 dark:text-gray-300">Cell biology, genetics, ecology, and physiology</p>
-                        <div class="mt-4 flex justify-center">
-                            <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 rounded-full text-sm">
-                                4 AI Tools
-                            </span>
-                        </div>
+                        <h2 class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">Biology</h2>
+                        <p class="text-sm mb-4" style="color:var(--text-secondary)">Cell biology, genetics, ecology &amp; physiology</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                              style="background:rgba(34,197,94,.12);color:#22c55e">4 AI Tools</span>
                     </div>
                 </div>
-                
-                <div class="subject-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl cursor-pointer group" 
-                     onclick="showAIList('ICT')"
-                     role="button"
-                     tabindex="0"
-                     aria-label="ICT subject">
+
+                <!-- ICT -->
+                <div class="glass-card subject-card p-6 animate-fadeInUp delay-500"
+                     onclick="showAIList('ICT')" role="button" tabindex="0" aria-label="ICT subject">
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <div class="icon-ring mx-auto mb-4" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
                             <i class="fas fa-laptop-code text-2xl text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">ICT</h2>
-                        <p class="text-gray-600 dark:text-gray-300">Programming, networking, databases, and cybersecurity</p>
-                        <div class="mt-4 flex justify-center">
-                            <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm">
-                                4 AI Tools
-                            </span>
-                        </div>
+                        <h2 class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">ICT</h2>
+                        <p class="text-sm mb-4" style="color:var(--text-secondary)">Programming, networking, databases &amp; cybersecurity</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                              style="background:rgba(99,102,241,.12);color:#6366f1">4 AI Tools</span>
                     </div>
                 </div>
             </div>
-            
-            <footer class="text-center text-sm text-gray-500 dark:text-gray-400 mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-                <p>EduGenius Al 智學</p>
-                <p>Copyright © 2026 Hugo Wong All rights reserved.</p>
+
+            <footer class="text-center text-xs pt-6" style="border-top:1px solid var(--glass-border);color:var(--text-secondary)">
+                <p class="font-semibold">EduGenius AI 智學</p>
+                <p class="mt-1">Copyright &copy; 2026 Hugo Wong. All rights reserved.</p>
             </footer>
         </div>
     </div>
 
     <!-- Subject AI List Page -->
-    <div class="container mx-auto px-4 py-8 hidden" id="aiListScreen">
-        <div class="max-w-4xl mx-auto">
-            <!-- Header with navigation -->
-            <div class="flex justify-between items-center mb-8 no-print">
-                <button onclick="showCover()" 
-                        class="flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200"
-                        aria-label="Back to subjects">
-                    <i class="fas fa-arrow-left mr-2"></i>Back to Subjects
+    <div class="container mx-auto px-4 py-8 hidden relative z-10" id="aiListScreen">
+        <div class="max-w-3xl mx-auto">
+            <!-- Nav -->
+            <div class="nav-bar no-print animate-fadeInUp">
+                <button onclick="showCover()"
+                        class="btn-secondary flex items-center gap-2 px-4 py-2 text-sm" aria-label="Back to subjects">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Subjects</span>
                 </button>
-                <div class="flex space-x-3">
-                    <button id="theme-toggle-ai-list" 
-                            class="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-gray-600 dark:text-gray-300"
-                            aria-label="Toggle dark mode">
-                        <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:block"></i>
+                <div class="flex items-center gap-2">
+                    <button id="theme-toggle-ai-list" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
+                        <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button-ai-list" 
-                            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 font-medium"
-                            aria-label="Sign out">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+                    <button id="sign-out-button-ai-list" class="btn-danger px-4 py-2 text-sm" aria-label="Sign out">
+                        <i class="fas fa-sign-out-alt mr-1.5"></i>Sign Out
                     </button>
                 </div>
             </div>
-            
-            <!-- Main content -->
-            <div class="text-center mb-12 animate-fadeInUp">
-                <div class="relative inline-block mb-6">
-                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" 
-                         alt="Platform Logo" 
-                         class="w-20 h-20 mx-auto rounded-2xl shadow-xl">
-                </div>
-                <h1 id="aiListHeader" class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+
+            <!-- Header -->
+            <div class="text-center mb-10 animate-fadeInUp">
+                <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="Platform Logo"
+                     class="w-16 h-16 mx-auto rounded-2xl shadow-xl mb-4">
+                <h1 id="aiListHeader" class="text-3xl font-extrabold mb-2" style="color:var(--text-primary)">
                     Subject AI Tools
                 </h1>
-                <p class="text-xl text-gray-600 dark:text-gray-300">
-                    Choose the perfect AI tool for your learning needs
-                </p>
+                <p class="text-sm" style="color:var(--text-secondary)">Choose the perfect AI tool for your learning needs</p>
             </div>
-            
+
             <!-- AI Options -->
-            <div class="max-w-2xl mx-auto space-y-4 mb-12" id="aiOptions">
-                <!-- AI options will be populated by JavaScript -->
+            <div class="space-y-4 mb-12" id="aiOptions">
+                <!-- Populated by JavaScript -->
             </div>
-            
-            <footer class="text-center text-sm text-gray-500 dark:text-gray-400 mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-                <p>EduGenius Al 智學</p>
-                <p>Copyright © 2026 Hugo Wong All rights reserved.</p>
+
+            <footer class="text-center text-xs pt-6" style="border-top:1px solid var(--glass-border);color:var(--text-secondary)">
+                <p class="font-semibold">EduGenius AI 智學</p>
+                <p class="mt-1">Copyright &copy; 2026 Hugo Wong. All rights reserved.</p>
             </footer>
         </div>
     </div>
 
-    <!-- Ask AI Interface -->
-    <div class="container mx-auto px-4 py-8 hidden" id="askAIInterface">
-        <div class="max-w-4xl mx-auto h-screen flex flex-col">
-            <!-- Header -->
-            <div class="flex justify-between items-center mb-6 no-print">
-                <button onclick="showAIList(currentSubject)" 
-                        class="flex items-center px-3 md:px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200"
-                        aria-label="Back to AI tools">
-                    <i class="fas fa-arrow-left md:mr-2"></i>
+    <!-- Ask Interface -->
+    <div class="container mx-auto px-4 py-8 hidden relative z-10" id="askAIInterface">
+        <div class="max-w-4xl mx-auto flex flex-col" style="height:calc(100vh - 64px)">
+            <!-- Nav -->
+            <div class="nav-bar no-print">
+                <button onclick="showAIList(currentSubject)"
+                        class="btn-secondary flex items-center gap-2 px-3 md:px-4 py-2 text-sm" aria-label="Back to AI tools">
+                    <i class="fas fa-arrow-left"></i>
                     <span class="hidden md:inline">Back to Tools</span>
                 </button>
-                <div class="flex space-x-2 md:space-x-3">
-                    <button id="theme-toggle-ask-ai" 
-                            class="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-gray-600 dark:text-gray-300"
-                            aria-label="Toggle dark mode">
-                        <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:block"></i>
+                <div class="flex items-center gap-2">
+                    <button id="theme-toggle-askai" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
+                        <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button-ask-ai" 
-                            class="flex items-center px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 font-medium"
-                            aria-label="Sign out">
-                        <i class="fas fa-sign-out-alt md:mr-2"></i>
+                    <button id="sign-out-button-askai" class="btn-danger flex items-center gap-1.5 px-3 md:px-4 py-2 text-sm" aria-label="Sign out">
+                        <i class="fas fa-sign-out-alt"></i>
                         <span class="hidden md:inline">Sign Out</span>
                     </button>
                 </div>
             </div>
-            
+
             <!-- Chat header -->
-            <div class="text-center mb-6">
-                <h1 id="askAIHeader" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    <i class="fas fa-robot mr-2 text-blue-500"></i>Ask AI
+            <div class="text-center mb-5">
+                <h1 id="askAIHeader" class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">
+                    <i class="fas fa-robot mr-2" style="color:#7c3aed"></i>AI Tool
                 </h1>
-                <p class="text-gray-600 dark:text-gray-300">Ask me anything about your subject!</p>
+                <p class="text-sm" style="color:var(--text-secondary)">Ask your question here...</p>
             </div>
-            
+
             <!-- Chat container -->
-            <div class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-xl flex flex-col">
-                <!-- Chat messages -->
-                <div id="askAIChatBox" 
-                     class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-4"
-                     role="log"
-                     aria-label="Chat messages"
-                     aria-live="polite">
-                    <!-- Initial AI Message -->
+            <div class="chat-container">
+                <div id="askAIChatBox"
+                     class="flex-1 p-5 overflow-y-auto custom-scrollbar space-y-4"
+                     role="log" aria-label="Chat messages" aria-live="polite">
                 </div>
-                
+
                 <!-- Input area -->
-                <div class="p-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="space-y-3">
+                <div class="chat-input-area">
+                    <div class="space-y-2">
                         <!-- Image preview -->
-                        <div id="askAIImagePreviewContainer" class="hidden relative w-32">
-                            <img id="askAIImagePreview" 
-                                 class="w-32 h-32 object-cover rounded-xl shadow-lg" 
-                                 alt="Image preview">
-                            <button onclick="clearImagePreview('askAI')" 
-                                    class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm transition-colors duration-200 flex items-center justify-center shadow-lg">
+                        <div id="askAIImagePreviewContainer" class="hidden relative w-32 mb-2">
+                            <img id="askAIImagePreview"
+                                 class="w-32 h-32 object-cover rounded-xl shadow-lg" alt="Image preview">
+                            <button onclick="clearImagePreview('askAI')"
+                                    class="absolute -top-2 -right-2 w-7 h-7 text-white rounded-full text-sm flex items-center justify-center shadow-lg"
+                                    style="background:#ef4444">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
-                        
-                        <!-- Main input bar -->
-                        <div class="flex items-end space-x-2">
-                            <textarea id="askAIInput" 
-                                      placeholder="Type your question here..." 
-                                      class="flex-1 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                                      rows="1"
-                                      oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
-                                      aria-label="Type your question"></textarea>
-
-                            <div class="flex items-center space-x-2">
+                        <div class="flex items-end gap-2">
+                            <textarea id="askAIInput"
+                                      placeholder="Type your question here..."
+                                      class="input-field flex-1 px-4 py-3 text-sm outline-none resize-none"
+                                      oninput="this.style.height='auto';this.style.height=(this.scrollHeight)+'px';" rows="1" aria-label="Type your message"></textarea>
+                            <div class="flex items-center gap-2">
                                 <label for="askAIPhotoInput" title="Upload Image"
-                                       class="w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200 cursor-pointer">
-                                    <i class="fas fa-image text-lg"></i>
+                                       class="w-11 h-11 flex items-center justify-center rounded-xl btn-secondary cursor-pointer">
+                                    <i class="fas fa-image" style="color:var(--primary)"></i>
                                 </label>
                                 <input type="file" id="askAIPhotoInput" accept="image/*" onchange="previewImage('askAI')" class="hidden">
-                                
                                 <button onclick="pasteImage('askAI')" title="Paste Image"
-                                        class="w-12 h-12 hidden md:flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200"
+                                        class="w-11 h-11 hidden md:flex items-center justify-center rounded-xl btn-secondary"
                                         aria-label="Paste image from clipboard">
-                                    <i class="fas fa-paste text-lg"></i>
+                                    <i class="fas fa-paste" style="color:var(--primary)"></i>
                                 </button>
                             </div>
-                            
                             <button id="askAISendBtn" onclick="sendMessage('askAI')" title="Send"
-                                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center btn-primary rounded-xl font-medium transition-all duration-200 focus:ring-4 focus:ring-blue-300 outline-none"
+                                    class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl text-white font-bold focus:ring-4 focus:ring-purple-300 outline-none transition-all duration-200"
+                                    style="background:linear-gradient(135deg,var(--primary),var(--secondary))"
                                     aria-label="Send message">
-                                <!-- White Icon for Light Mode -->
-                                <svg class="w-6 h-6 inline dark:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-                                </svg>
-                                <!-- Black Icon for Dark Mode -->
-                                <svg class="w-6 h-6 hidden dark:inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-                                </svg>
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                             </button>
                         </div>
                     </div>
@@ -711,174 +525,136 @@
         </div>
     </div>
 
-    <!-- Dictionary AI Interface -->
-    <div class="container mx-auto px-4 py-8 hidden" id="dictionaryAIInterface">
-        <div class="max-w-4xl mx-auto h-screen flex flex-col">
-            <!-- Header -->
-            <div class="flex justify-between items-center mb-6 no-print">
-                <button onclick="showAIList(currentSubject)" 
-                        class="flex items-center px-3 md:px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200"
-                        aria-label="Back to AI tools">
-                    <i class="fas fa-arrow-left md:mr-2"></i>
+    <!-- Dictionary Interface -->
+    <div class="container mx-auto px-4 py-8 hidden relative z-10" id="dictionaryAIInterface">
+        <div class="max-w-4xl mx-auto flex flex-col" style="height:calc(100vh - 64px)">
+            <!-- Nav -->
+            <div class="nav-bar no-print">
+                <button onclick="showAIList(currentSubject)"
+                        class="btn-secondary flex items-center gap-2 px-3 md:px-4 py-2 text-sm" aria-label="Back to AI tools">
+                    <i class="fas fa-arrow-left"></i>
                     <span class="hidden md:inline">Back to Tools</span>
                 </button>
-                <div class="flex space-x-2 md:space-x-3">
-                    <button id="theme-toggle-dictionary-ai" 
-                            class="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-gray-600 dark:text-gray-300"
-                            aria-label="Toggle dark mode">
-                        <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:block"></i>
+                <div class="flex items-center gap-2">
+                    <button id="theme-toggle-dictionaryai" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
+                        <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button-dictionary-ai" 
-                            class="flex items-center px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 font-medium"
-                            aria-label="Sign out">
-                        <i class="fas fa-sign-out-alt md:mr-2"></i>
+                    <button id="sign-out-button-dictionaryai" class="btn-danger flex items-center gap-1.5 px-3 md:px-4 py-2 text-sm" aria-label="Sign out">
+                        <i class="fas fa-sign-out-alt"></i>
                         <span class="hidden md:inline">Sign Out</span>
                     </button>
                 </div>
             </div>
-            
+
             <!-- Chat header -->
-            <div class="text-center mb-6">
-                <h1 id="dictionaryAIHeader" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    <i class="fas fa-book mr-2 text-green-500"></i>Dictionary AI
+            <div class="text-center mb-5">
+                <h1 id="dictionaryAIHeader" class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">
+                    <i class="fas fa-book mr-2" style="color:#10b981"></i>AI Tool
                 </h1>
-                <p class="text-gray-600 dark:text-gray-300">Enter a term to get a detailed explanation</p>
+                <p class="text-sm" style="color:var(--text-secondary)">Ask a word or concept...</p>
             </div>
-            
+
             <!-- Chat container -->
-            <div class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-xl flex flex-col">
-                <!-- Chat messages -->
-                <div id="dictionaryAIChatBox" 
-                     class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-4"
-                     role="log"
-                     aria-label="Chat messages"
-                     aria-live="polite">
-                     <!-- Initial AI Message -->
+            <div class="chat-container">
+                <div id="dictionaryAIChatBox"
+                     class="flex-1 p-5 overflow-y-auto custom-scrollbar space-y-4"
+                     role="log" aria-label="Chat messages" aria-live="polite">
                 </div>
-                
+
                 <!-- Input area -->
-                <div class="p-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-end space-x-2">
-                        <textarea id="dictionaryAIInput" 
-                                  placeholder="Enter word or phrase..." 
-                                  class="flex-1 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                                  rows="1"
-                                  oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
-                                  aria-label="Enter term to define"></textarea>
-                        
-                        <button id="dictionaryAISendBtn" onclick="sendMessage('dictionaryAI')" title="Define"
-                                class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 rounded-xl font-medium transition-all duration-200 focus:ring-4 focus:ring-green-300 outline-none"
-                                aria-label="Look up term">
-                            <!-- White Search Icon -->
-                            <svg class="w-6 h-6 inline dark:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
-                            </svg>
-                            <!-- Black Search Icon for Dark Mode -->
-                            <svg class="w-6 h-6 hidden dark:inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
-                                 <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
-                            </svg>
-                        </button>
+                <div class="chat-input-area">
+                    <div class="space-y-2">
+                        <div class="flex items-end gap-2">
+                            <textarea id="dictionaryAIInput"
+                                      placeholder="Enter a word or concept..."
+                                      class="input-field flex-1 px-4 py-3 text-sm outline-none resize-none"
+                                      oninput="this.style.height='auto';this.style.height=(this.scrollHeight)+'px';" rows="1" aria-label="Type your message"></textarea>
+                            <div class="flex items-center gap-2">
+                            </div>
+                            <button id="dictionaryAISendBtn" onclick="sendMessage('dictionaryAI')" title="Send"
+                                    class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl text-white font-bold focus:ring-4 focus:ring-purple-300 outline-none transition-all duration-200"
+                                    style="background:linear-gradient(135deg,var(--primary),var(--secondary))"
+                                    aria-label="Send message">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Guide Learning Interface -->
-    <div class="container mx-auto px-4 py-8 hidden" id="guideLearningInterface">
-        <div class="max-w-4xl mx-auto h-screen flex flex-col">
-            <!-- Header -->
-            <div class="flex justify-between items-center mb-6 no-print">
-                <button onclick="showAIList(currentSubject)" 
-                        class="flex items-center px-3 md:px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200"
-                        aria-label="Back to AI tools">
-                    <i class="fas fa-arrow-left md:mr-2"></i>
+    <!-- Guidelearning Interface -->
+    <div class="container mx-auto px-4 py-8 hidden relative z-10" id="guideLearningInterface">
+        <div class="max-w-4xl mx-auto flex flex-col" style="height:calc(100vh - 64px)">
+            <!-- Nav -->
+            <div class="nav-bar no-print">
+                <button onclick="showAIList(currentSubject)"
+                        class="btn-secondary flex items-center gap-2 px-3 md:px-4 py-2 text-sm" aria-label="Back to AI tools">
+                    <i class="fas fa-arrow-left"></i>
                     <span class="hidden md:inline">Back to Tools</span>
                 </button>
-                <div class="flex space-x-2 md:space-x-3">
-                    <button id="theme-toggle-guide-learning" 
-                            class="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-gray-600 dark:text-gray-300"
-                            aria-label="Toggle dark mode">
-                        <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:block"></i>
+                <div class="flex items-center gap-2">
+                    <button id="theme-toggle-guidelearning" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
+                        <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button-guide-learning" 
-                            class="flex items-center px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 font-medium"
-                            aria-label="Sign out">
-                        <i class="fas fa-sign-out-alt md:mr-2"></i>
+                    <button id="sign-out-button-guidelearning" class="btn-danger flex items-center gap-1.5 px-3 md:px-4 py-2 text-sm" aria-label="Sign out">
+                        <i class="fas fa-sign-out-alt"></i>
                         <span class="hidden md:inline">Sign Out</span>
                     </button>
                 </div>
             </div>
-            
+
             <!-- Chat header -->
-            <div class="text-center mb-6">
-                <h1 id="guideLearningHeader" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    <i class="fas fa-compass mr-2 text-purple-500"></i>Guide Learning
+            <div class="text-center mb-5">
+                <h1 id="guideLearningHeader" class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">
+                    <i class="fas fa-compass mr-2" style="color:#8b5cf6"></i>AI Tool
                 </h1>
-                <p class="text-gray-600 dark:text-gray-300">Ask a question, and I'll guide you to the answer!</p>
+                <p class="text-sm" style="color:var(--text-secondary)">Ask your question here...</p>
             </div>
-            
+
             <!-- Chat container -->
-            <div class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-xl flex flex-col">
-                <!-- Chat messages -->
-                <div id="guideLearningChatBox" 
-                     class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-4"
-                     role="log"
-                     aria-label="Chat messages"
-                     aria-live="polite">
-                    <!-- Initial AI Message -->
+            <div class="chat-container">
+                <div id="guideLearningChatBox"
+                     class="flex-1 p-5 overflow-y-auto custom-scrollbar space-y-4"
+                     role="log" aria-label="Chat messages" aria-live="polite">
                 </div>
-                
+
                 <!-- Input area -->
-                 <div class="p-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="space-y-3">
+                <div class="chat-input-area">
+                    <div class="space-y-2">
                         <!-- Image preview -->
-                        <div id="guideLearningImagePreviewContainer" class="hidden relative w-32">
-                            <img id="guideLearningImagePreview" 
-                                 class="w-32 h-32 object-cover rounded-xl shadow-lg" 
-                                 alt="Image preview">
-                            <button onclick="clearImagePreview('guideLearning')" 
-                                    class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm transition-colors duration-200 flex items-center justify-center shadow-lg">
+                        <div id="guideLearningImagePreviewContainer" class="hidden relative w-32 mb-2">
+                            <img id="guideLearningImagePreview"
+                                 class="w-32 h-32 object-cover rounded-xl shadow-lg" alt="Image preview">
+                            <button onclick="clearImagePreview('guideLearning')"
+                                    class="absolute -top-2 -right-2 w-7 h-7 text-white rounded-full text-sm flex items-center justify-center shadow-lg"
+                                    style="background:#ef4444">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
-                        
-                        <!-- Main input bar -->
-                        <div class="flex items-end space-x-2">
-                            <textarea id="guideLearningInput" 
-                                      placeholder="Type your question here..." 
-                                      class="flex-1 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                                      rows="1"
-                                      oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
-                                      aria-label="Type your question"></textarea>
-
-                            <div class="flex items-center space-x-2">
+                        <div class="flex items-end gap-2">
+                            <textarea id="guideLearningInput"
+                                      placeholder="Type your question here..."
+                                      class="input-field flex-1 px-4 py-3 text-sm outline-none resize-none"
+                                      oninput="this.style.height='auto';this.style.height=(this.scrollHeight)+'px';" rows="1" aria-label="Type your message"></textarea>
+                            <div class="flex items-center gap-2">
                                 <label for="guideLearningPhotoInput" title="Upload Image"
-                                       class="w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200 cursor-pointer">
-                                    <i class="fas fa-image text-lg"></i>
+                                       class="w-11 h-11 flex items-center justify-center rounded-xl btn-secondary cursor-pointer">
+                                    <i class="fas fa-image" style="color:var(--primary)"></i>
                                 </label>
                                 <input type="file" id="guideLearningPhotoInput" accept="image/*" onchange="previewImage('guideLearning')" class="hidden">
-                                
                                 <button onclick="pasteImage('guideLearning')" title="Paste Image"
-                                        class="w-12 h-12 hidden md:flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200"
+                                        class="w-11 h-11 hidden md:flex items-center justify-center rounded-xl btn-secondary"
                                         aria-label="Paste image from clipboard">
-                                    <i class="fas fa-paste text-lg"></i>
+                                    <i class="fas fa-paste" style="color:var(--primary)"></i>
                                 </button>
                             </div>
-                            
                             <button id="guideLearningSendBtn" onclick="sendMessage('guideLearning')" title="Send"
-                                    class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 rounded-xl font-medium transition-all duration-200 focus:ring-4 focus:ring-purple-300 outline-none"
+                                    class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl text-white font-bold focus:ring-4 focus:ring-purple-300 outline-none transition-all duration-200"
+                                    style="background:linear-gradient(135deg,var(--primary),var(--secondary))"
                                     aria-label="Send message">
-                                <!-- White Icon for Light Mode -->
-                                <svg class="w-6 h-6 inline dark:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-                                </svg>
-                                <!-- Black Icon for Dark Mode -->
-                                <svg class="w-6 h-6 hidden dark:inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-                                </svg>
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                             </button>
                         </div>
                     </div>
@@ -1237,23 +1013,20 @@
                 });
             }
 
-            aiOptions.innerHTML = tools.map(tool => `
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer group animate-fadeInUp"
+            aiOptions.innerHTML = tools.map((tool, idx) => `
+                <div class="glass-card tool-card p-5 animate-fadeInUp"
+                     style="animation-delay:${idx * 0.08}s"
                      onclick="handleToolClick('${tool.name}', '${subject}')"
-                     role="button"
-                     tabindex="0"
-                     aria-label="${tool.name} for ${subject}">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 bg-gradient-to-br ${tool.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                            <i class="${tool.icon} text-2xl ${tool.iconColorClass}"></i>
+                     role="button" tabindex="0" aria-label="${tool.name} for ${subject}">
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br ${tool.color} shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <i class="${tool.icon} text-xl text-white"></i>
                         </div>
-                        <div class="flex-1">
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">${tool.name}</h3>
-                            <p class="text-gray-600 dark:text-gray-300">${tool.description}</p>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base font-bold mb-0.5" style="color:var(--text-primary)">${tool.name}</h3>
+                            <p class="text-sm truncate" style="color:var(--text-secondary)">${tool.description}</p>
                         </div>
-                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <i class="fas fa-arrow-right text-gray-400"></i>
-                        </div>
+                        <i class="fas fa-chevron-right flex-shrink-0 text-sm" style="color:var(--primary)"></i>
                     </div>
                 </div>
             `).join('');
@@ -1361,14 +1134,15 @@
 
             chatBox.innerHTML = `
                 <div class="flex justify-start">
-                    <div class="message-bubble ai-bubble bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-2xl rounded-bl-sm">
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 bg-gradient-to-br from-${getToolColor(type)}-400 to-${getToolColor(type)}-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div class="message-bubble ai-bubble p-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                                 style="background:linear-gradient(135deg,var(--primary),var(--secondary))">
                                 <i class="fas fa-${getToolIcon(type)} text-white text-sm"></i>
                             </div>
                             <div>
-                                <p class="font-medium mb-1">${toolNames[type]}</p>
-                                <p>${welcomeMessages[type]}</p>
+                                <p class="font-bold text-sm mb-1" style="color:var(--text-primary)">${toolNames[type]}</p>
+                                <p class="text-sm" style="color:var(--text-primary)">${welcomeMessages[type]}</p>
                             </div>
                         </div>
                     </div>
@@ -1611,15 +1385,16 @@
             }
 
             messageDiv.innerHTML = `
-                <div class="message-bubble user-bubble bg-blue-500 text-white p-4 rounded-2xl rounded-br-sm max-w-xs md:max-w-md lg:max-w-lg">
-                    <div class="flex items-start space-x-3">
-                        <div class="flex-1">
-                            <p class="font-medium mb-1">You</p>
-                            <p>${content.replace(/\n/g, '<br>')}</p>
+                <div class="message-bubble user-bubble p-4 max-w-xs md:max-w-md lg:max-w-lg">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-sm mb-1 text-white opacity-80">You</p>
+                            <p class="text-sm text-white">${content.replace(/\n/g, '<br>')}</p>
                             ${imageHTML}
                         </div>
-                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-user text-white text-sm"></i>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                             style="background:rgba(255,255,255,.20)">
+                            <i class="fas fa-user text-white text-xs"></i>
                         </div>
                     </div>
                 </div>
@@ -1637,18 +1412,15 @@
             messageDiv.className = 'flex justify-start';
             
             messageDiv.innerHTML = `
-                <div class="message-bubble ai-bubble bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-2xl rounded-bl-sm">
-                    <div class="flex items-start space-x-3">
-                        <div class="w-8 h-8 bg-gradient-to-br from-${getToolColor(type)}-400 to-${getToolColor(type)}-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div class="message-bubble ai-bubble p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                             style="background:linear-gradient(135deg,var(--primary),var(--secondary))">
                             <i class="fas fa-${getToolIcon(type)} text-white text-sm"></i>
                         </div>
                         <div>
-                            <p class="font-medium mb-1">AI Assistant</p>
-                            <div class="loading-dots">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
+                            <p class="font-bold text-sm mb-2" style="color:var(--text-primary)">AI Assistant</p>
+                            <div class="loading-dots"><span></span><span></span><span></span></div>
                         </div>
                     </div>
                 </div>
@@ -1674,25 +1446,24 @@
             const bgColor = isError ? 'bg-red-100 dark:bg-red-900' : 'bg-gray-100 dark:bg-gray-700';
             const textColor = isError ? 'text-red-900 dark:text-red-100' : 'text-gray-900 dark:text-white';
             
+            const errorStyle = isError ? 'background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.20);' : '';
+            const errorColor = isError ? '#ef4444' : 'var(--text-primary)';
             messageDiv.innerHTML = `
-                <div class="message-bubble ai-bubble ${bgColor} ${textColor} p-4 rounded-2xl rounded-bl-sm max-w-xs md:max-w-md lg:max-w-lg">
-                    <div class="flex items-start space-x-3">
-                        <div class="w-8 h-8 bg-gradient-to-br from-${getToolColor(type)}-400 to-${getToolColor(type)}-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div class="message-bubble ai-bubble p-4 max-w-xs md:max-w-md lg:max-w-2xl" style="${errorStyle}">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                             style="background:linear-gradient(135deg,var(--primary),var(--secondary))">
                             <i class="fas fa-${getToolIcon(type)} text-white text-sm"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="font-medium mb-1">AI Assistant</p>
-                            <div class="prose prose-sm dark:prose-invert max-w-none">${formatMarkdown(content)}</div>
+                            <p class="font-bold text-sm mb-2" style="color:${errorColor}">AI Assistant</p>
+                            <div class="prose prose-sm max-w-none text-sm" style="color:var(--text-primary)">${formatMarkdown(content)}</div>
                             ${!isError ? `
-                                <div class="mt-3 flex space-x-2">
-                                    <button onclick="copyMessage(this)" 
-                                            class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs transition-colors duration-200"
-                                            aria-label="Copy message">
+                                <div class="mt-3 flex gap-2">
+                                    <button onclick="copyMessage(this)" class="msg-action-btn" aria-label="Copy message">
                                         <i class="fas fa-copy mr-1"></i>Copy
                                     </button>
-                                    <button onclick="shareMessage(this)" 
-                                            class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs transition-colors duration-200"
-                                            aria-label="Share message">
+                                    <button onclick="shareMessage(this)" class="msg-action-btn" aria-label="Share message">
                                         <i class="fas fa-share mr-1"></i>Share
                                     </button>
                                 </div>
@@ -1717,15 +1488,9 @@
                     </div>`;
             } else {
                 if (button.id.includes('dictionary')) {
-                    iconContainer.innerHTML = `
-                        <svg class="w-6 h-6 inline dark:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
-                        <svg class="w-6 h-6 hidden dark:inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
-                    `;
+                    iconContainer.innerHTML = `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
                 } else {
-                    iconContainer.innerHTML = `
-                        <svg class="w-6 h-6 inline dark:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-                        <svg class="w-6 h-6 hidden dark:inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-                    `;
+                    iconContainer.innerHTML = `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
                 }
             }
         }
@@ -1826,23 +1591,21 @@
             const notification = document.createElement('div');
             notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-xl shadow-lg transition-all duration-300 transform translate-x-full`;
             
-            const colors = {
-                success: 'bg-green-500 text-white',
-                error: 'bg-red-500 text-white',
-                warning: 'bg-yellow-500 text-black',
-                info: 'bg-blue-500 text-white'
+            const notifColors = {
+                success: 'background:linear-gradient(135deg,#10b981,#059669)',
+                error:   'background:linear-gradient(135deg,#ef4444,#dc2626)',
+                warning: 'background:linear-gradient(135deg,#f59e0b,#d97706)',
+                info:    'background:linear-gradient(135deg,#3b82f6,#2563eb)'
             };
-            
             const icons = {
                 success: 'fas fa-check-circle',
                 error: 'fas fa-exclamation-circle',
                 warning: 'fas fa-exclamation-triangle',
                 info: 'fas fa-info-circle'
             };
-            
-            notification.classList.add(colors[type]);
+            notification.setAttribute('style', notifColors[type] + ';color:#fff;border-radius:14px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,.2)');
             notification.innerHTML = `
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center gap-2 text-sm font-semibold">
                     <i class="${icons[type]}"></i>
                     <span>${message}</span>
                 </div>
