@@ -372,7 +372,7 @@ ${codeContent}
                     const response = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${POLLINATIONS_API_KEY}` },
-                        body: JSON.stringify({ model: model, messages: messages })
+                        body: JSON.stringify({ model: model, messages: messages, temperature: 0.7, seed: Math.floor(Math.random() * 2147483647) })
                     });
                     if (!response.ok) {
                         console.warn(`Model ${model} failed with status ${response.status}, trying next model...`);

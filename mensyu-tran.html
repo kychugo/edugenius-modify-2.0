@@ -1260,6 +1260,7 @@ body: JSON.stringify({
 model: model,
 messages: messages,
 temperature: 0.3,
+seed: Math.floor(Math.random() * 2147483647),
 max_tokens: 4000
 })
 });

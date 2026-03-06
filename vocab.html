@@ -920,12 +920,35 @@
         const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
         const FALLBACK_MODELS = ['gemini-search', 'gemini-fast', 'glm', 'openai-fast', 'openai', 'deepseek'];
 
+        // ---- Random variation helpers ----
+        function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        const VOCAB_STYLE_HINTS = [
+            'Prioritise less commonly tested but high-impact words.',
+            'Favour formal academic vocabulary suitable for written registers.',
+            'Mix abstract nouns and concrete action verbs for variety.',
+            'Emphasise words with multiple meanings or strong collocations.',
+            'Include some vivid descriptive or figurative vocabulary.',
+            'Focus on words that appear frequently in newspaper editorials.',
+            'Highlight words that native speakers use in professional contexts.',
+            'Choose words that are commonly confused or misused by learners.',
+        ];
+        const QUIZ_FOCUS_HINTS = [
+            'Use tricky distractors that are plausible near-synonyms.',
+            'Vary question sentence length and register across questions.',
+            'Use authentic-sounding sentences drawn from news or literature.',
+            'Ensure distractor options are similar in form but different in meaning.',
+            'Mix academic and everyday contexts in example sentences.',
+            'Include at least one question that tests collocational knowledge.',
+            'Design distractors based on common learner errors.',
+        ];
+
         // ---- Helpers ----
         async function callAI(prompt, useJson = false) {
             const messages = [{ role: 'user', content: prompt }];
             for (const model of FALLBACK_MODELS) {
                 try {
-                    const body = { model, messages };
+                    const body = { model, messages, temperature: 0.9, seed: Math.floor(Math.random() * 2147483647) };
                     const res = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${POLLINATIONS_API_KEY}` },
@@ -1052,6 +1075,8 @@
             quizFromGenBtn.classList.add('hidden');
             genOut.innerHTML = `<div class="loading-text"><span class="spinner spinner-dark"></span> Generating ${count} vocabulary words on "${topic}"…</div>`;
 
+            const vocabStyleHint = pickRandom(VOCAB_STYLE_HINTS);
+
             const prompt =
 `Generate a vocabulary list of exactly ${count} English words for Hong Kong DSE students at ${level} level on the topic of "${topic}".
 
@@ -1063,7 +1088,8 @@ Chinese: [Traditional Chinese translation]
 
 2. [WORD] ...
 
-Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文) for the Chinese translation.`;
+Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文) for the Chinese translation.
+Note: ${vocabStyleHint}`;
 
             const raw = await callAI(prompt);
             if (!raw) {
@@ -1204,6 +1230,8 @@ Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文)
             setLoading(quizBtn, true, 'Generating Quiz…');
             quizOut.innerHTML = `<div class="loading-text"><span class="spinner spinner-dark"></span> Generating quiz questions on "${topic}"…</div>`;
 
+            const quizFocusHint = pickRandom(QUIZ_FOCUS_HINTS);
+
             const prompt =
 `Generate a vocabulary quiz for Hong Kong DSE English students at ${level} level on the topic of "${topic}".
 Create exactly 5 multiple-choice questions.
@@ -1221,7 +1249,8 @@ Return ONLY valid JSON (no other text, no markdown code blocks) in this format:
 }
 
 Where "answer" is the 0-based index (0=A, 1=B, 2=C, 3=D) of the correct option.
-Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextual meaning.`;
+Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextual meaning.
+Note: ${quizFocusHint}`;
 
             const raw = await callAI(prompt);
             if (!raw) {

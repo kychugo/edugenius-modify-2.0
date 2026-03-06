@@ -285,6 +285,17 @@
         const POLLINATIONS_API_KEY = 'sk_dk6t4GEymji9dVR9jPau4bB9RJYJ0JbP';
         const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
         const FALLBACK_MODELS = ['gemini-search', 'gemini-fast', 'glm', 'openai-fast', 'openai', 'deepseek'];
+
+        const EXAM_VARIATION_HINTS = [
+            'Ensure questions are wholly original and have not appeared in recent HKDSE papers.',
+            'Design questions that test higher-order thinking: analysis, evaluation, and synthesis.',
+            'Include at least one data-based or scenario-based question.',
+            'Focus on conceptual understanding rather than rote recall or formulaic answers.',
+            'Create questions that reward students who can apply knowledge in unfamiliar contexts.',
+            'Vary the cognitive demand: include both straightforward recall and open-ended inference.',
+            'Use novel problem setups that feel fresh and engaging to exam-experienced students.',
+        ];
+        function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
         
         const mathTopics = [
             "Number systems",
@@ -577,7 +588,8 @@ Requirements:
 8. Include a title "HKDSE ${subject} Exam Paper" at the top
 9. Separate different sections with horizontal rules (---)
 10. Format mathematical expressions with \\(...\\) for inline and \\[...\\] for display math
-11. Clearly separate each question with a horizontal rule (---)`;
+11. Clearly separate each question with a horizontal rule (---)
+12. ${pickRandom(EXAM_VARIATION_HINTS)}`;
 
             outputDiv.innerHTML = '<div class="loader"></div>';
             generateButton.disabled = true;
@@ -597,6 +609,7 @@ Requirements:
                                 model: model,
                                 messages: [{ role: 'user', content: prompt }],
                                 temperature: 0.7,
+                                seed: Math.floor(Math.random() * 2147483647),
                                 max_tokens: 3000
                             })
                         });
