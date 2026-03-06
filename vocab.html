@@ -897,7 +897,7 @@
     </main>
 
     <footer>
-        <p><strong>EduGenius</strong> AI 智學 &nbsp;·&nbsp; Copyright &copy; 2025 Hugo Wong. All rights reserved.</p>
+        <p><strong>EduGenius</strong> AI 智學 &nbsp;·&nbsp; Copyright &copy; 2026 Hugo Wong. All rights reserved.</p>
     </footer>
 
     <script>
@@ -905,6 +905,7 @@
         // EduGenius Vocabulary Tools – AI Logic
         // ============================================================
 
+        const POLLINATIONS_API_KEY = 'sk_dk6t4GEymji9dVR9jPau4bB9RJYJ0JbP';
         const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
         const FALLBACK_MODELS = ['gemini-search', 'gemini-fast', 'glm', 'openai-fast', 'openai', 'deepseek'];
 
@@ -916,7 +917,7 @@
                     const body = { model, messages };
                     const res = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${POLLINATIONS_API_KEY}` },
                         body: JSON.stringify(body)
                     });
                     if (!res.ok) continue;
