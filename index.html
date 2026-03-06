@@ -202,6 +202,15 @@
         }
         .msg-action-btn:hover { background:var(--primary);color:#fff;border-color:var(--primary); }
 
+        /* Markdown table styles */
+        .md-table-wrap { overflow-x:auto; margin:.75rem 0; }
+        .md-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+        .md-th { background:rgba(124,58,237,.12); color:var(--text-primary); font-weight:700;
+                 padding:.5rem .75rem; border:1px solid rgba(124,58,237,.20); text-align:left; }
+        .md-td { padding:.45rem .75rem; border:1px solid var(--glass-border); color:var(--text-primary); vertical-align:top; }
+        .md-table tbody tr:nth-child(even) .md-td { background:rgba(124,58,237,.04); }
+        .md-table tbody tr:hover .md-td { background:rgba(124,58,237,.08); }
+
         .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
         @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; } }
         @media (max-width:768px) { .message-bubble{max-width:92%} :root{--radius:16px;--radius-sm:10px} }
@@ -765,7 +774,7 @@
                     hideError();
                 })
                 .catch((error) => {
-                    showError(`Error: ${error.message}`);
+                    showError(getAuthErrorMessage(error.code));
                 })
                 .finally(() => {
                     setLoadingState(signInButton, false);
@@ -790,7 +799,7 @@
                     hideError();
                 })
                 .catch((error) => {
-                    showError(`Error: ${error.message}`);
+                    showError(getAuthErrorMessage(error.code));
                 })
                 .finally(() => {
                     setLoadingState(registerButton, false);
@@ -799,9 +808,27 @@
 
         signOutButtons.forEach(btn => btn.addEventListener('click', () => {
             signOut(auth).then(() => console.log('Signed out')).catch((error) => {
-                showError(`Error: ${error.message}`);
+                showError(getAuthErrorMessage(error.code));
             });
         }));
+
+        function getAuthErrorMessage(code) {
+            const messages = {
+                'auth/invalid-email':            'The email address is not valid. Please enter a correct email.',
+                'auth/user-not-found':           'No account found with this email. Please check or create a new account.',
+                'auth/wrong-password':           'Incorrect password. Please try again.',
+                'auth/invalid-credential':       'Incorrect email or password. Please try again.',
+                'auth/email-already-in-use':     'This email is already registered. Please sign in instead.',
+                'auth/weak-password':            'Password is too weak. Please use at least 6 characters.',
+                'auth/too-many-requests':        'Too many failed attempts. Please wait a moment and try again.',
+                'auth/network-request-failed':   'Network error. Please check your internet connection and try again.',
+                'auth/user-disabled':            'This account has been disabled. Please contact support.',
+                'auth/operation-not-allowed':    'This sign-in method is not enabled. Please contact support.',
+                'auth/popup-closed-by-user':     'Sign-in popup was closed before completing. Please try again.',
+                'auth/requires-recent-login':    'Please sign out and sign in again to perform this action.',
+            };
+            return messages[code] || 'Something went wrong. Please try again.';
+        }
 
         function showError(message) {
             authError.textContent = message;
@@ -1555,6 +1582,7 @@
             const lines = html.split('\n');
             const output = [];
             let listItems = [];
+            let tableLines = [];
 
             const flushList = () => {
                 if (listItems.length > 0) {
@@ -1563,12 +1591,47 @@
                 }
             };
 
+            const flushTable = () => {
+                // A valid Markdown table needs at least a header row + separator row (|---|---|)
+                if (tableLines.length < 2) {
+                    // Not enough lines for a valid table, emit as paragraphs
+                    tableLines.forEach(l => output.push(`<p class="my-1">${applyInline(l)}</p>`));
+                    tableLines = [];
+                    return;
+                }
+                // Row 0 = headers, Row 1 = separator (---|---), Row 2+ = body rows
+                // Strip leading/trailing pipes then split on inner pipes
+                const parseRow = (row) => row.replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+                const headers = parseRow(tableLines[0]);
+                const bodyRows = tableLines.slice(2);
+                const thead = `<thead><tr>${headers.map(h => `<th class="md-th">${applyInline(h)}</th>`).join('')}</tr></thead>`;
+                const tbody = bodyRows.length
+                    ? `<tbody>${bodyRows.map(r => `<tr>${parseRow(r).map(c => `<td class="md-td">${applyInline(c)}</td>`).join('')}</tr>`).join('')}</tbody>`
+                    : '';
+                output.push(`<div class="md-table-wrap"><table class="md-table">${thead}${tbody}</table></div>`);
+                tableLines = [];
+            };
+
+            const isTableRow = (s) => s.startsWith('|') && s.endsWith('|');
+            // Matches Markdown table separator rows like |---|---| or |:---|:---:|
+            const isSeparatorRow = (s) => /^\|[\s\-|:]+\|$/.test(s);
+
             for (const line of lines) {
                 const trimmed = line.trim();
                 if (!trimmed) {
                     flushList();
+                    if (tableLines.length > 0) flushTable();
                     continue;
                 }
+                // Table detection
+                if (isTableRow(trimmed)) {
+                    flushList();
+                    tableLines.push(trimmed);
+                    continue;
+                } else if (tableLines.length > 0) {
+                    flushTable();
+                }
+
                 if (trimmed.startsWith('#### ')) {
                     flushList();
                     output.push(`<h4 class="text-base font-semibold mt-3 mb-1">${applyInline(trimmed.slice(5))}</h4>`);
@@ -1593,6 +1656,7 @@
                 }
             }
             flushList();
+            if (tableLines.length > 0) flushTable();
 
             return output.join('\n');
 
