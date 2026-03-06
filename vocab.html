@@ -763,21 +763,7 @@
     <header class="site-header">
         <div class="header-inner">
             <a href="./index.html" class="brand" aria-label="EduGenius Home">
-                <!-- Vocabulary logo: open book with Aa letters representing word learning -->
-                <div class="brand-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Left page of open book -->
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="white" stroke-width="1.8" stroke-linejoin="round" fill="rgba(255,255,255,0.18)"/>
-                    <!-- Right page of open book -->
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="white" stroke-width="1.8" stroke-linejoin="round" fill="rgba(255,255,255,0.1)"/>
-                    <!-- "A" shape on left page (capital letter = vocabulary) -->
-                    <path d="M6 14 L7.5 10 L9 14" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
-                    <path d="M6.5 12.5h2" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
-                    <!-- Small "a" dot on right page (lowercase = learning words) -->
-                    <circle cx="16" cy="13" r="1.6" stroke="rgba(255,220,100,0.95)" stroke-width="1.3" fill="none"/>
-                    <path d="M17.6 11.2V14" stroke="rgba(255,220,100,0.95)" stroke-width="1.3" stroke-linecap="round"/>
-                  </svg>
-                </div>
+                <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius AI Logo" class="brand-icon" style="object-fit:cover">
                 <span class="brand-name">EduGenius</span>
             </a>
             <span class="header-subtitle">📚 Vocabulary Tools</span>
@@ -939,7 +925,7 @@
             const messages = [{ role: 'user', content: prompt }];
             for (const model of FALLBACK_MODELS) {
                 try {
-                    const body = { model, messages };
+                    const body = { model, messages, temperature: 0.9, seed: Math.floor(Math.random() * 2147483647) };
                     const res = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${POLLINATIONS_API_KEY}` },

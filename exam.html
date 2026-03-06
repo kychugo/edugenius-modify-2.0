@@ -204,17 +204,7 @@
         <!-- Page header card -->
         <div class="glass-card page-header">
             <div class="icon-wrap">
-                <!-- Exam logo: clipboard with checklist representing exam paper generation -->
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <!-- Clipboard board -->
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,255,255,0.12)"/>
-                  <!-- Clipboard top clip -->
-                  <path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" stroke="white" stroke-width="1.8" fill="rgba(255,255,255,0.25)"/>
-                  <!-- First checkmark (question answered) -->
-                  <path d="m9 12 2 2 4-4" stroke="rgba(255,220,100,0.95)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  <!-- Second checkmark -->
-                  <path d="m9 17 2 2 4-4" stroke="rgba(255,220,100,0.95)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius AI Logo" style="width:100%;height:100%;object-fit:cover;border-radius:20px">
             </div>
             <h1><span class="gradient-text">HKDSE Exam Paper Generator</span></h1>
             <p class="subtitle">Create customized exam papers for Hong Kong Diploma of Secondary Education</p>
@@ -607,6 +597,7 @@ Requirements:
                                 model: model,
                                 messages: [{ role: 'user', content: prompt }],
                                 temperature: 0.7,
+                                seed: Math.floor(Math.random() * 2147483647),
                                 max_tokens: 3000
                             })
                         });

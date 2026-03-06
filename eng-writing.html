@@ -528,18 +528,7 @@
     <header class="site-header">
         <div class="header-inner">
             <a href="./index.html" class="brand" aria-label="EduGenius Home">
-                <!-- Writing logo: pencil editing text lines representing English writing practice -->
-                <div class="brand-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Pencil body -->
-                    <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 3 21l.5-4.5L17 3z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,220,100,0.35)"/>
-                    <!-- Writing baseline -->
-                    <path d="M3 21h18" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
-                    <!-- Text lines suggesting written content -->
-                    <path d="M5 14 L11 8" stroke="rgba(255,255,255,0.55)" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M8 17 L14 11" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round"/>
-                  </svg>
-                </div>
+                <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius AI Logo" class="brand-icon" style="object-fit:cover">
                 <span class="brand-name">EduGenius</span>
             </a>
             <span class="header-subtitle">✍️ English Writing Practice</span>
@@ -698,7 +687,7 @@
                     const res = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${POLLINATIONS_API_KEY}` },
-                        body: JSON.stringify({ model, messages })
+                        body: JSON.stringify({ model, messages, temperature: 0.9, seed: Math.floor(Math.random() * 2147483647) })
                     });
                     if (!res.ok) continue;
                     const data = await res.json();

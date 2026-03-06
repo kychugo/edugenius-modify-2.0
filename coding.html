@@ -116,15 +116,8 @@
         <!-- Page header -->
         <div class="glass-card p-8 mb-8 text-center animate-fadeInUp">
             <div class="flex items-center justify-center gap-4 mb-3">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-                <!-- Coding logo: code brackets with AI sparkle representing AI code review -->
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <!-- Code brackets </> -->
-                  <path d="m18 16 4-4-4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="m6 8-4 4 4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <!-- Forward slash between brackets -->
-                  <path d="m14.5 4-5 16" stroke="rgba(255,220,100,0.95)" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden">
+                <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius AI Logo" style="width:100%;height:100%;object-fit:cover">
                 </div>
                 <h1 class="text-3xl font-extrabold"><span class="gradient-text">AI Code Review</span></h1>
             </div>
@@ -379,7 +372,7 @@ ${codeContent}
                     const response = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${POLLINATIONS_API_KEY}` },
-                        body: JSON.stringify({ model: model, messages: messages })
+                        body: JSON.stringify({ model: model, messages: messages, temperature: 0.7, seed: Math.floor(Math.random() * 2147483647) })
                     });
                     if (!response.ok) {
                         console.warn(`Model ${model} failed with status ${response.status}, trying next model...`);
