@@ -421,7 +421,7 @@ ${codeContent}
                     elements.push(new Paragraph({ text: line.replace('### ', ''), heading: HeadingLevel.HEADING_3, spacing: { after: 100 } }));
                 } else if (line.match(/^(\s*[-*+])\s/)) {
                     const match = line.match(/^(\s*[-*+])\s(.*)/);
-                    const text = match;
+                    const text = match[2];
                     elements.push(new Paragraph({ children: [new TextRun({ text: '•\t' + text, size: 24 })], spacing: { after: 100 } }));
                 } else if (line.trim()) {
                     elements.push(new Paragraph({ children: [new TextRun({ text: line, size: 24 })], spacing: { after: 200 } }));
@@ -529,7 +529,7 @@ ${codeContent}
             const files = dt.files;
             
             if (files.length > 0) {
-                const file = files;
+                const file = files[0];
                 if (file.name.endsWith('.py') || file.name.endsWith('.ipynb')) {
                     document.getElementById('file-upload').files = files; // Keep file input in sync
                     
