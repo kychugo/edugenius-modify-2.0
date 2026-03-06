@@ -840,11 +840,37 @@ border-radius: 5px;
 ::-webkit-scrollbar-thumb:hover {
 background: var(--secondary-color);
 }
+
+.back-btn {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+position: absolute;
+top: 18px;
+left: 18px;
+padding: 6px 14px;
+background: rgba(255, 255, 255, 0.25);
+color: #fff;
+border-radius: 8px;
+font-size: 0.875rem;
+font-weight: 600;
+text-decoration: none;
+backdrop-filter: blur(4px);
+border: 1px solid rgba(255, 255, 255, 0.4);
+transition: background 0.2s;
+}
+
+.back-btn:hover {
+background: rgba(255, 255, 255, 0.4);
+}
 </style>
 </head>
 <body>
 <div class="container">
 <header>
+<a href="./index.html" class="back-btn" aria-label="返回 EduGenius">
+    <i class="fas fa-arrow-left"></i> EduGenius
+</a>
 <h1>文樞</h1>
 </header>
 

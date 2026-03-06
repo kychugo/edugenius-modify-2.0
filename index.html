@@ -1180,7 +1180,7 @@
                     name: '文樞--古典文學互動學習平台',
                     icon: 'fas fa-scroll',
                     description: '古典文學互動學習',
-                    action: () => window.open('https://script.google.com/macros/s/AKfycbzH4DeseUMTFaSD4FV-odwDiDMGjhmoN1iEPVcK4XpCfdw3cWBZ85Zwmc0EBjXdupMBrg/exec', '_blank'),
+                    action: () => window.open('./mensyu2.html', '_blank'),
                     color: 'from-red-400 to-red-600',
                     iconColorClass: 'text-white'
                 });
@@ -1218,22 +1218,22 @@
             if (['Physics', 'Math', 'Biology'].includes(subject)) {
                 tools.push({
                     name: 'Exam Paper Generator',
-                    icon: 'fas fa-file-signature', // UPDATED ICON
+                    icon: 'fas fa-file-signature',
                     description: 'Generate practice exam papers',
-                    action: () => window.open('https://hugo_wong.pyscriptapps.com/exam-paper-generator-v3-public/latest/', '_blank'),
+                    action: () => window.open('./exam.html', '_blank'),
                     color: 'from-orange-400 to-orange-500',
-                    iconColorClass: 'text-orange-900 dark:text-white' // Color class for visibility
+                    iconColorClass: 'text-orange-900 dark:text-white'
                 });
             }
 
             if (subject === 'ICT') {
                 tools.push({
                     name: 'ICT Coding Review Platform',
-                    icon: 'fas fa-terminal', // UPDATED ICON
+                    icon: 'fas fa-terminal',
                     description: 'Review and improve your code',
-                    action: () => window.open('https://hugo_wong.pyscriptapps.com/s4-ict-ai-code-review-platform/latest/', '_blank'),
+                    action: () => window.open('./coding.html', '_blank'),
                     color: 'from-cyan-400 to-cyan-500',
-                    iconColorClass: 'text-cyan-900 dark:text-white' // Color class for visibility
+                    iconColorClass: 'text-cyan-900 dark:text-white'
                 });
             }
 
