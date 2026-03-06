@@ -679,20 +679,6 @@
             inp.classList.toggle('hidden', sel.value !== 'other');
         }
 
-        // ---- Random variation helpers ----
-        function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-        const TASK_CREATIVE_DIRECTIONS = [
-            'Present the scenario from an unexpected angle or perspective.',
-            'Include a subtle element of irony or contrast in the situation.',
-            'Frame the context around a recent local social trend in Hong Kong.',
-            'Make the scenario particularly relatable to urban Hong Kong youth.',
-            'Incorporate a cross-cultural or intergenerational tension element.',
-            'Use a scenario set in a school, community, or workplace specific to HK.',
-            'Include a moral dilemma as the central tension of the task.',
-            'Ground the scenario in a technology or media-related context.',
-        ];
-
         // ---- Call AI with model fallback ----
         async function callAI(prompt) {
             const messages = [{ role: 'user', content: prompt }];
@@ -823,8 +809,6 @@
             const wordLimit = document.getElementById('wordLimit').value;
             const part      = wordLimit.includes('240-300') ? 'Part A' : 'Part B';
 
-            const creativeDir = pickRandom(TASK_CREATIVE_DIRECTIONS);
-
             const prompt =
 `Generate a Hong Kong DSE English Writing task designed to elicit Level 7 performance in Content, Language, and Organization. The task should meet these criteria:
 - Content: Fully address the task, be entirely relevant, show creativity, develop ideas thoroughly with support, and show high audience awareness with appropriate register, tone, and style.
@@ -838,7 +822,6 @@ Requirements:
 - Part: ${part}
 - Include 2–3 guiding points to help structure the response, ensuring opportunities for sophisticated organization and cohesion.
 - The task should be engaging, relevant to Hong Kong secondary students, and allow diverse perspectives or creative interpretations.
-- Creative direction: ${creativeDir}
 Format the output as:
 <p><strong>Part:</strong> ${part}</p>
 <p><strong>Genre:</strong> ${genre}</p>
