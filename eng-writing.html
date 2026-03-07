@@ -509,8 +509,64 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* ---- Scoring panel ---- */
+        .score-panel { background: #f8faff; border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 1.25rem; margin-top: 1rem; }
+        .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+        .score-item { text-align: center; padding: 0.75rem; background: white; border-radius: 10px; border: 1px solid #e0e7ff; }
+        .score-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.35rem; }
+        .score-bar-wrap { height: 8px; background: #e5e7eb; border-radius: 9999px; margin: 0.35rem 0; overflow: hidden; }
+        .score-bar-fill { height: 100%; border-radius: 9999px; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.6s ease; }
+        .score-num { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+        .score-max { font-size: 0.75rem; color: var(--text-muted); }
+        .score-feedback { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.35rem; line-height: 1.4; }
+        .upgrade-list { list-style: none; padding: 0; margin-top: 0.5rem; }
+        .upgrade-item { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.4rem 0.5rem; border-radius: 6px; font-size: 0.82rem; margin-bottom: 0.3rem; background: #fff; border: 1px solid #e5e7eb; }
+        .upgrade-old { color: #b91c1c; text-decoration: line-through; font-weight: 600; }
+        .upgrade-arrow { color: var(--text-muted); }
+        .upgrade-new { color: #065f46; font-weight: 700; }
+        .upgrade-reason { color: var(--text-muted); font-size: 0.75rem; }
+        /* ---- Templates panel ---- */
+        .templates-section { margin-bottom: 1.5rem; }
+        .templates-toggle { display: flex; align-items: center; gap: 0.5rem; width: 100%; background: white; border: 1.5px solid #c7d2fe; border-radius: 10px; padding: 0.75rem 1rem; font-family: inherit; font-size: 0.9rem; font-weight: 700; color: var(--primary); cursor: pointer; transition: all 0.2s; }
+        .templates-toggle:hover { background: var(--primary-light); }
+        .templates-body { display: none; margin-top: 0.5rem; }
+        .templates-body.open { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+        @media (min-width: 640px) { .templates-body.open { grid-template-columns: 1fr 1fr; } }
+        .template-card { background: white; border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 1rem; cursor: pointer; transition: all 0.2s; }
+        .template-card:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(79,70,229,.1); }
+        .template-name { font-weight: 700; font-size: 0.9rem; color: var(--text); margin-bottom: 0.5rem; }
+        .template-structure { font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; white-space: pre-line; }
+        .template-starter { font-size: 0.78rem; color: var(--primary); font-style: italic; margin-top: 0.4rem; border-top: 1px solid #e5e7eb; padding-top: 0.4rem; }
+        .use-template-btn { font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 6px; border: none; background: var(--primary-light); color: var(--primary); font-family: inherit; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+        .use-template-btn:hover { background: #e0e7ff; }
+/* ---- Dark mode ---- */
+.dark body { background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0d1a2e 100%); color: #e2e8f0; }
+.dark .card { background: rgba(15,15,40,0.85); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; }
+.dark .site-header { background: rgba(15,15,40,0.95); }
+.dark .template-card { background: rgba(15,15,40,0.85); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+.dark .template-name { color: #e2e8f0; }
+.dark input[type="text"], .dark select, .dark textarea { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+.dark footer { color: #94a3b8; border-top-color: rgba(255,255,255,.08); }
+.dark .back-btn { background: rgba(124,58,237,.2); color: #a78bfa; }
+.dark .hero h1 { color: #e2e8f0; }
+.dark .card-title { color: #e2e8f0; }
+.dark .brand { color: #e2e8f0; }
+.dark label { color: #e2e8f0; }
+.dark .templates-toggle { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+.dark .templates-body { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.08); }
+.dark .status-bar { background: rgba(15,15,40,.8); color: #e2e8f0; }
+/* Micro-interactions */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+/* Focus ring */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(124,58,237,.5);
+    outline-offset: 2px;
+}
     </style>
-</head>
 <body>
     <!-- Auth guard overlay -->
     <div id="auth-guard-overlay" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,40,.96);backdrop-filter:blur(8px);">
@@ -532,9 +588,15 @@
                 <span class="brand-name">EduGenius</span>
             </a>
             <span class="header-subtitle">✍️ English Writing Practice</span>
-            <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">
-                <span class="back-arrow">←</span> Back
-            </a>
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode"
+                        style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(79,70,229,.1);color:var(--primary);font-size:1rem;transition:all .2s;flex-shrink:0">
+                    <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
+                </button>
+                <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">
+                    <span class="back-arrow">←</span> Back
+                </a>
+            </div>
         </div>
     </header>
 
@@ -551,6 +613,15 @@
         <!-- Status bar (shown after task is ready) -->
         <div id="statusBar" class="status-bar hidden" role="status" aria-live="polite">
             ✅ Task ready — scroll down to generate your sample essay
+        </div>
+
+        <!-- Writing Templates -->
+        <div class="templates-section">
+            <button class="templates-toggle" onclick="toggleTemplates()" aria-expanded="false" aria-controls="templates-body">
+                📋 Writing Templates
+                <span id="templates-arrow" style="margin-left:auto;font-size:.75rem;transition:transform .3s">▼</span>
+            </button>
+            <div class="templates-body" id="templates-body" role="region"></div>
         </div>
 
         <!-- Two-column grid (stacks on mobile/tablet) -->
@@ -640,6 +711,10 @@
                     🖊️ Generate Sample Essay
                 </button>
 
+                <button id="score-btn" class="btn btn-secondary btn-full" style="margin-top:0.75rem" onclick="scoreWriting()" aria-label="Score my writing using DSE rubric">
+                    📊 Score My Writing
+                </button>
+
                 <div id="essayOutput" class="output-box" style="margin-top:1rem;"
                      role="region" aria-label="Generated essay output" aria-live="polite">
                     <span class="output-empty">Generate a task first — your sample essay will appear here…</span>
@@ -650,6 +725,8 @@
                         📄 Download Task &amp; Essay
                     </button>
                 </div>
+
+                <div id="score-panel"></div>
             </div>
 
         </div><!-- /content-grid -->
@@ -906,6 +983,163 @@ The essay should aim for Level 7 in Content (fully relevant, creative, well-supp
                 'DSE_Writing_Task_and_Essay.txt'
             );
         });
+
+        // ============================================================
+        // Writing Templates
+        // ============================================================
+        const WRITING_TEMPLATES = [
+            {
+                name: '📝 Argumentative Essay',
+                structure: `Introduction\n  • Hook sentence\n  • Background context\n  • Thesis statement\n\nBody Paragraph 1 – Point 1\n  • Topic sentence\n  • Evidence / example\n  • Explanation (link to thesis)\n\nBody Paragraph 2 – Point 2\n  • (same structure)\n\nCounter-argument Paragraph\n  • Acknowledge opposing view\n  • Refute with evidence\n\nConclusion\n  • Restate thesis (differently)\n  • Call to action / final thought`,
+                starter: 'Opening: "In today\'s rapidly changing world, the issue of [topic] has become increasingly significant…"'
+            },
+            {
+                name: '📧 Email / Formal Letter',
+                structure: `Salutation: Dear [Name/Sir/Madam],\n\nPurpose Paragraph\n  • State reason for writing\n\nMain Body (1-2 paragraphs)\n  • Provide details / requests\n  • Use formal linking words\n\nClosing Paragraph\n  • Summarise / call to action\n\nComplimentary close:\nYours sincerely / faithfully,\n[Your name]`,
+                starter: 'Opening: "I am writing with regard to [topic/issue] and would like to bring your attention to…"'
+            },
+            {
+                name: '📋 Report',
+                structure: `Title: Report on [Topic]\nPrepared by: [Name]  Date: [Date]\n\n1. Introduction / Aim\n   • Purpose of report\n\n2. Findings\n   2.1 [Sub-heading]\n   2.2 [Sub-heading]\n\n3. Conclusions\n\n4. Recommendations`,
+                starter: 'Opening: "The aim of this report is to examine [topic] and to make recommendations based on the findings."'
+            },
+            {
+                name: '🎤 Speech',
+                structure: `Greeting: Good morning / afternoon, [audience].\n\nIntroduction\n  • Hook the audience\n  • State your topic and stance\n\nMain Points (2-3)\n  • Each point with evidence\n  • Use rhetorical devices\n  • Connect with audience\n\nConclusion\n  • Memorable closing line\n  • Call to action\n\nThank you.`,
+                starter: 'Opening: "Have you ever wondered why [topic]? Today, I stand before you to shed light on this pressing issue…"'
+            },
+            {
+                name: '📖 Short Story',
+                structure: `Exposition\n  • Introduce character & setting\n\nRising Action\n  • Introduce conflict / problem\n\nClimax\n  • Turning point (most intense)\n\nFalling Action\n  • Events after the climax\n\nResolution\n  • How conflict is resolved\n  • Character's reflection / lesson`,
+                starter: 'Opening: "It was the kind of [morning/evening] that made [character name] feel as if anything could happen…"'
+            }
+        ];
+
+        function toggleTemplates() {
+            const body = document.getElementById('templates-body');
+            const arrow = document.getElementById('templates-arrow');
+            const isOpen = body.classList.toggle('open');
+            const btn = body.previousElementSibling;
+            if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            if (arrow) arrow.style.transform = isOpen ? 'rotate(180deg)' : '';
+        }
+
+        function renderTemplates() {
+            const container = document.getElementById('templates-body');
+            if (!container) return;
+            container.innerHTML = WRITING_TEMPLATES.map((t, i) => `
+                <div class="template-card">
+                    <div class="template-name">${t.name}</div>
+                    <div class="template-structure">${t.structure}</div>
+                    <div class="template-starter">${t.starter}</div>
+                    <button class="use-template-btn" onclick="useTemplate(${i})" aria-label="Use ${t.name} template">✏️ Use This Template</button>
+                </div>`).join('');
+        }
+
+        function useTemplate(idx) {
+            const t = WRITING_TEMPLATES[idx];
+            const essayOutput = document.getElementById('essayOutput');
+            if (essayOutput) {
+                essayOutput.innerHTML = `<pre style="white-space:pre-wrap;font-family:inherit;font-size:0.9rem;color:var(--text)">[${t.name} – Fill in your content]\n\n${t.structure}\n\n---\nOpening suggestion:\n${t.starter}</pre>`;
+                essayOutput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            const body = document.getElementById('templates-body');
+            if (body && body.classList.contains('open')) toggleTemplates();
+        }
+
+        // ============================================================
+        // DSE Writing Scorer
+        // ============================================================
+        async function scoreWriting() {
+            const essayOutput = document.getElementById('essayOutput');
+            const essayText = essayOutput ? (essayOutput.innerText || essayOutput.textContent || '').trim() : '';
+            if (!essayText || essayText.length < 50 || essayText.includes('Generate a task first')) {
+                alert('Please generate a sample essay first (or write one), then click Score My Writing.');
+                return;
+            }
+
+            const scoreBtn = document.getElementById('score-btn');
+            const scorePanel = document.getElementById('score-panel');
+            if (scoreBtn) { scoreBtn.disabled = true; scoreBtn.textContent = '⏳ Scoring…'; }
+            if (scorePanel) scorePanel.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280"><span class="spinner" style="margin:auto;display:block;width:24px;height:24px;border-width:3px"></span><p style="margin-top:.75rem;font-size:.875rem">Analysing your writing…</p></div>';
+
+            const prompt = `You are a DSE English Writing examiner. Evaluate this student essay using the Hong Kong DSE English Paper 2 marking criteria.
+
+Essay:
+"""
+${essayText.substring(0, 2000)}
+"""
+
+Return ONLY valid JSON (absolutely no other text):
+{
+  "content": { "score": 5, "max": 7, "feedback": "Brief feedback on ideas and task achievement" },
+  "language": { "score": 4, "max": 7, "feedback": "Brief feedback on grammar, vocabulary, sentence structure" },
+  "organisation": { "score": 5, "max": 7, "feedback": "Brief feedback on structure, coherence, paragraphing" },
+  "overall": "One-sentence overall comment and single most important improvement tip.",
+  "wordUpgrades": [
+    { "original": "good", "upgraded": "exceptional", "reason": "More precise for academic writing" },
+    { "original": "bad", "upgraded": "detrimental", "reason": "Stronger academic vocabulary" }
+  ]
+}`;
+
+            try {
+                const raw = await callAI(prompt);
+                if (scoreBtn) { scoreBtn.disabled = false; scoreBtn.textContent = '📊 Score My Writing'; }
+
+                let parsed = null;
+                try {
+                    const m = raw.match(/\{[\s\S]*\}/);
+                    if (m) parsed = JSON.parse(m[0]);
+                } catch (_) {}
+
+                if (!parsed || !parsed.content) {
+                    if (scorePanel) scorePanel.innerHTML = '<p style="color:#dc2626;text-align:center;padding:1rem">Could not parse scoring result. Please try again.</p>';
+                    return;
+                }
+
+                const c = parsed.content, l = parsed.language, o = parsed.organisation;
+                const total = (c.score || 0) + (l.score || 0) + (o.score || 0);
+                const pct = Math.round((total / 21) * 100);
+
+                const upgradeHtml = (parsed.wordUpgrades || []).length
+                    ? `<div style="margin-top:0.75rem">
+                        <p style="font-size:.8rem;font-weight:700;color:var(--text-secondary);margin-bottom:.4rem">💡 Word Upgrade Suggestions</p>
+                        <ul class="upgrade-list">
+                            ${(parsed.wordUpgrades || []).map(u => `<li class="upgrade-item">
+                                <span class="upgrade-old">${u.original || ''}</span>
+                                <span class="upgrade-arrow">→</span>
+                                <span class="upgrade-new">${u.upgraded || ''}</span>
+                                <span class="upgrade-reason">– ${u.reason || ''}</span>
+                            </li>`).join('')}
+                        </ul>
+                       </div>` : '';
+
+                if (scorePanel) scorePanel.innerHTML = `
+                    <div class="score-panel">
+                        <p style="font-size:.85rem;font-weight:700;color:var(--text-secondary);margin-bottom:.75rem">📊 DSE Writing Score</p>
+                        <div class="score-grid">
+                            ${[
+                                { label: 'Content / Ideas', data: c },
+                                { label: 'Language', data: l },
+                                { label: 'Organisation', data: o }
+                            ].map(item => `<div class="score-item">
+                                <div class="score-label">${item.label}</div>
+                                <div class="score-num">${item.data.score}<span class="score-max">/${item.data.max}</span></div>
+                                <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${Math.round((item.data.score / item.data.max) * 100)}%"></div></div>
+                                <div class="score-feedback">${item.data.feedback || ''}</div>
+                            </div>`).join('')}
+                        </div>
+                        <p style="text-align:center;font-size:.9rem;font-weight:700;color:var(--primary);margin-bottom:.5rem">Total: ${total}/21 (${pct}%)</p>
+                        <p style="font-size:.85rem;color:var(--text-secondary);text-align:center;margin-bottom:.5rem">${parsed.overall || ''}</p>
+                        ${upgradeHtml}
+                    </div>`;
+            } catch (err) {
+                if (scoreBtn) { scoreBtn.disabled = false; scoreBtn.textContent = '📊 Score My Writing'; }
+                if (scorePanel) scorePanel.innerHTML = `<p style="color:#dc2626;text-align:center;padding:1rem">Error: ${err.message}</p>`;
+            }
+        }
+
+        renderTemplates();
     </script>
     <!-- Firebase auth guard -->
     <script type="module">
@@ -977,6 +1211,24 @@ The essay should aim for Level 7 in Content (fully relevant, creative, well-supp
         const link = document.getElementById('back-btn-link');
         if (link) {
             link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
+<script>
+    // Theme toggle
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.querySelectorAll('.theme-moon').forEach(el => el.style.display = isDark ? 'none' : '');
+        document.querySelectorAll('.theme-sun').forEach(el => el.style.display = isDark ? '' : 'none');
+    }
+    (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.querySelectorAll('.theme-moon').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.theme-sun').forEach(el => el.style.display = '');
         }
     })();
 </script>

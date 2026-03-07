@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered Python code review tool – submit your code and get instant feedback from EduGenius AI.">
     <title>AI Code Review - EduGenius</title>
 
     <!-- External Libraries -->
@@ -90,6 +91,56 @@
         .section-label { font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:8px; display:block; }
         .animate-fadeInUp { animation: fadeInUp .6s cubic-bezier(.16,1,.3,1) both; }
         .feedback-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:280px; color:var(--text-secondary); text-align:center; padding:2rem; }
+
+        /* ---- Code Annotation ---- */
+        .annotation-line { display:flex; gap:0.75rem; padding:0.35rem 0; border-bottom:1px solid rgba(124,58,237,.08); font-size:0.82rem; font-family:'Monaco','Menlo','Ubuntu Mono',monospace; }
+        .annotation-code { flex:0 0 50%; color:#e2e8f0; background:#1a1a2e; padding:0.2rem 0.5rem; border-radius:4px; white-space:pre; overflow-x:auto; }
+        .annotation-comment { flex:1; color:var(--text-secondary); font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:0.8rem; line-height:1.5; padding:0.1rem 0; }
+        .annotation-wrap { background:#1a1a2e; border-radius:12px; padding:0.75rem; max-height:400px; overflow-y:auto; }
+        /* ---- Code Completion ---- */
+        .completion-code { background:#1a1a2e; color:#e2e8f0; padding:1rem; border-radius:10px; font-family:'Monaco','Menlo','Ubuntu Mono',monospace; font-size:0.85rem; white-space:pre; overflow-x:auto; line-height:1.7; margin-bottom:0.75rem; }
+        .completion-blank { background:rgba(124,58,237,.25); border-bottom:2px solid var(--primary); padding:0.1rem 0.4rem; border-radius:4px; color:#a78bfa; font-weight:700; }
+        .completion-input { width:100%; min-height:120px; font-family:'Monaco','Menlo','Ubuntu Mono',monospace; font-size:0.85rem; padding:0.75rem; border-radius:10px; border:1.5px solid rgba(124,58,237,.3); background:#1a1a2e; color:#e2e8f0; resize:vertical; }
+        .completion-input:focus { outline:none; border-color:var(--primary); }
+
+.dark {
+    --primary: #a78bfa;
+    --primary-dark: #7c3aed;
+    --secondary: #22d3ee;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --bg-main: #0d0d1a;
+    --glass-bg: rgba(15,15,40,0.85);
+    --glass-border: rgba(255,255,255,0.08);
+    --shadow-glow: 0 0 60px rgba(124,58,237,0.18);
+}
+.dark body { background-color: var(--bg-main); color: var(--text-primary); }
+.dark body::before {
+    background:
+        radial-gradient(ellipse 80% 60% at 15% 5%, rgba(124,58,237,.32) 0%,transparent 55%),
+        radial-gradient(ellipse 60% 50% at 85% 85%, rgba(6,182,212,.22) 0%,transparent 55%);
+}
+.dark .glass-card { background: var(--glass-bg); border-color: var(--glass-border); }
+.dark .input-field { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+.dark .input-field::placeholder { color: #64748b; }
+.dark .btn-back { background: rgba(15,15,40,.8); color: var(--primary); }
+.dark .section-label { color: #94a3b8; }
+.dark .feedback-placeholder { color: #94a3b8; }
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .CodeMirror { height: 200px; }
+    .advanced-tools-grid { grid-template-columns: 1fr !important; }
+}
+/* Micro-interactions */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+/* Focus ring */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(124,58,237,.5);
+    outline-offset: 2px;
+}
     </style>
 </head>
 <body class="transition-all duration-300">
@@ -111,6 +162,9 @@
             <a id="back-btn-link" href="./index.html" class="btn-back px-4 py-2 text-sm" aria-label="Back">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
+            <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.1);color:var(--primary);font-size:1rem;transition:all .2s">
+                <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
+            </button>
         </div>
 
         <!-- Page header -->
@@ -164,6 +218,9 @@
                             class="w-full btn-primary py-3 px-6 text-sm rounded-xl">
                         <i class="fas fa-paper-plane mr-2"></i>Submit for AI Review
                     </button>
+                    <button onclick="annotateCode()" id="annotate-btn-2" class="w-full btn-success py-3 px-6 text-sm rounded-xl mt-3">
+                        <i class="fas fa-align-left mr-2"></i>📝 Line-by-Line Annotation
+                    </button>
                 </div>
             </div>
 
@@ -192,6 +249,39 @@
                         <p class="text-base font-semibold mb-1">AI feedback will appear here</p>
                         <p class="text-sm">Submit your question and code to get started</p>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced ICT Tools Section -->
+        <div class="glass-card p-6 mt-8 animate-fadeInUp">
+            <h3 class="text-lg font-extrabold mb-4" style="color:var(--text-primary)">
+                <i class="fas fa-tools mr-2" style="color:var(--primary)"></i>Advanced ICT Tools
+            </h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Line-by-line Annotation -->
+                <div class="rounded-2xl p-4" style="background:rgba(124,58,237,.04);border:1.5px solid rgba(124,58,237,.15)">
+                    <h4 class="font-bold text-sm mb-2" style="color:var(--text-primary)">
+                        <i class="fas fa-align-left mr-1" style="color:var(--primary)"></i>📝 Line-by-Line Code Annotation
+                    </h4>
+                    <p class="text-xs mb-3" style="color:var(--text-secondary)">Get a Cantonese explanation for every line of code in the editor above.</p>
+                    <button id="annotate-btn" onclick="annotateCode()" class="btn-primary py-2 px-4 text-xs rounded-xl">
+                        <i class="fas fa-align-left mr-2"></i>📝 Annotate Code
+                    </button>
+                </div>
+                <!-- Code Completion Exercise -->
+                <div class="rounded-2xl p-4" style="background:rgba(16,185,129,.04);border:1.5px solid rgba(16,185,129,.15)">
+                    <h4 class="font-bold text-sm mb-2" style="color:var(--text-primary)">
+                        <i class="fas fa-puzzle-piece mr-1" style="color:#10b981"></i>✏️ Code Completion Exercise
+                    </h4>
+                    <p class="text-xs mb-3" style="color:var(--text-secondary)">AI generates a code exercise with blanks for you to fill in.</p>
+                    <div class="flex gap-2 mb-3 flex-wrap">
+                        <input type="text" id="completion-topic" class="input-field text-xs px-3 py-2 rounded-xl flex-1" style="min-width:140px" placeholder="Topic (e.g. linear search, file handling)…">
+                        <button id="gen-completion-btn" onclick="generateCompletion()" class="btn-success py-2 px-3 text-xs rounded-xl">
+                            <i class="fas fa-puzzle-piece mr-1"></i>Generate Exercise
+                        </button>
+                    </div>
+                    <div id="completion-area" class="text-xs" style="color:var(--text-secondary)">Enter a topic and click Generate Exercise to begin.</div>
                 </div>
             </div>
         </div>
@@ -577,6 +667,175 @@ ${codeContent}
                 }
             }
         }
+
+        // ============================================================
+        // 2.5.2 – Line-by-Line Code Annotation
+        // ============================================================
+        async function annotateCode() {
+            const code = codeEditor.getValue().trim();
+            if (!code || code === '# Paste your Python code here...\ndef example_function():\n    return \'Hello, World!\'') {
+                displayFeedback('Please paste or write some Python code first.', 'error');
+                return;
+            }
+            const annotateBtn = document.getElementById('annotate-btn');
+            const annotateBtn2 = document.getElementById('annotate-btn-2');
+            const loadingHtml = '<i class="fas fa-spinner fa-spin mr-2"></i>Annotating…';
+            if (annotateBtn) { annotateBtn.disabled = true; annotateBtn.innerHTML = loadingHtml; }
+            if (annotateBtn2) { annotateBtn2.disabled = true; annotateBtn2.innerHTML = loadingHtml; }
+
+            const prompt = `You are a Python programming tutor for Hong Kong DSE ICT students.
+Annotate the following Python code line by line. For each non-empty line, provide a brief explanation in Traditional Chinese (繁體中文) that a beginner can understand.
+
+Return ONLY valid JSON (no prose):
+{
+  "lines": [
+    { "code": "def greet(name):", "comment": "定義一個名為 greet 的函式，接受 name 作為參數" },
+    { "code": "    print(f'Hello, {name}')", "comment": "使用 f-string 格式輸出問候語" }
+  ]
+}
+
+Code to annotate:
+\`\`\`python
+${code.substring(0, 2000)}
+\`\`\``;
+
+            try {
+                const raw = await callGrokAPI(prompt);
+                let parsed = null;
+                try {
+                    const m = raw.match(/\{[\s\S]*\}/);
+                    if (m) parsed = JSON.parse(m[0]);
+                } catch (_) {}
+
+                if (!parsed?.lines?.length) {
+                    displayFeedback('Could not generate annotation. Please try again.', 'error');
+                    return;
+                }
+
+                const html = `<div class="markdown-content">
+                    <h2 style="font-size:1rem;font-weight:700;margin-bottom:0.75rem;color:var(--text-primary)">📝 Line-by-Line Annotation</h2>
+                    <div class="annotation-wrap">
+                        ${parsed.lines.map(l => `<div class="annotation-line">
+                            <div class="annotation-code">${escapeAnnotation(l.code || '')}</div>
+                            <div class="annotation-comment">${escapeAnnotation(l.comment || '')}</div>
+                        </div>`).join('')}
+                    </div>
+                </div>`;
+                document.getElementById('feedback').innerHTML = html;
+                document.getElementById('feedback').className = 'min-h-96 p-4 bg-green-50 rounded-lg border-2 border-green-200 markdown-content';
+            } catch (err) {
+                displayFeedback(`Error: ${err.message}`, 'error');
+            } finally {
+                const defaultAnnotateHtml = '<i class="fas fa-align-left mr-2"></i>📝 Annotate Code';
+                if (annotateBtn) { annotateBtn.disabled = false; annotateBtn.innerHTML = defaultAnnotateHtml; }
+                if (annotateBtn2) { annotateBtn2.disabled = false; annotateBtn2.innerHTML = '<i class="fas fa-align-left mr-2"></i>📝 Line-by-Line Annotation'; }
+            }
+        }
+
+        function escapeAnnotation(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // ============================================================
+        // 2.5.3 – Interactive Code Completion Exercise
+        // ============================================================
+        let completionExercise = null;
+
+        async function generateCompletion() {
+            const topic = document.getElementById('completion-topic').value.trim() || 'list operations';
+            const genBtn = document.getElementById('gen-completion-btn');
+            if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating…'; }
+            document.getElementById('completion-area').innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem"></i><p style="margin-top:.5rem;font-size:.875rem">Generating exercise…</p></div>';
+
+            const prompt = `Create a Python code completion exercise for Hong Kong DSE ICT students about "${topic}".
+
+Return ONLY valid JSON:
+{
+  "title": "Exercise: List Searching",
+  "description": "Complete the Python code to perform linear search on a list.",
+  "codeWithBlanks": "def linear_search(lst, target):\\n    for i in ___:\\n        if lst[i] == ___:\\n            return i\\n    return ___",
+  "blanks": [
+    { "position": 1, "answer": "range(len(lst))", "hint": "What should we iterate over?" },
+    { "position": 2, "answer": "target", "hint": "What are we looking for?" },
+    { "position": 3, "answer": "-1", "hint": "What do we return if not found?" }
+  ],
+  "explanation": "This implements a linear search algorithm that returns the index of the target, or -1 if not found."
+}`;
+
+            try {
+                const raw = await callGrokAPI(prompt);
+                if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = '<i class="fas fa-puzzle-piece mr-2"></i>Generate Exercise'; }
+
+                let parsed = null;
+                try {
+                    const m = raw.match(/\{[\s\S]*\}/);
+                    if (m) parsed = JSON.parse(m[0]);
+                } catch (_) {}
+
+                if (!parsed?.codeWithBlanks) {
+                    document.getElementById('completion-area').innerHTML = '<p style="color:#dc2626;padding:1rem">Could not generate exercise. Please try again.</p>';
+                    return;
+                }
+
+                completionExercise = parsed;
+                renderCompletionExercise(parsed);
+            } catch (err) {
+                if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = '<i class="fas fa-puzzle-piece mr-2"></i>Generate Exercise'; }
+                document.getElementById('completion-area').innerHTML = `<p style="color:#dc2626;padding:1rem">Error: ${err.message}</p>`;
+            }
+        }
+
+        function renderCompletionExercise(ex) {
+            const blanksHtml = ex.blanks.map((b, i) => `
+                <div style="margin-bottom:0.5rem">
+                    <label style="font-size:.78rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:.2rem">Blank ${b.position} – Hint: ${escapeAnnotation(b.hint || '')}</label>
+                    <input type="text" id="blank-${i}" class="input-field" style="padding:.4rem .75rem;font-family:'Monaco','Menlo','Ubuntu Mono',monospace;font-size:.875rem;width:100%"
+                           placeholder="Fill in blank ${b.position}…" aria-label="Blank ${b.position}">
+                </div>`).join('');
+
+            document.getElementById('completion-area').innerHTML = `
+                <div>
+                    <h3 style="font-size:.95rem;font-weight:700;color:var(--text-primary);margin-bottom:.4rem">${escapeAnnotation(ex.title || 'Code Completion')}</h3>
+                    <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:.75rem">${escapeAnnotation(ex.description || '')}</p>
+                    <div class="completion-code">${escapeAnnotation(ex.codeWithBlanks || '').replace(/___/g, '<span class="completion-blank">___</span>')}</div>
+                    <div style="margin-bottom:.75rem">${blanksHtml}</div>
+                    <button onclick="checkCompletion()" class="btn-success py-2 px-4 text-sm rounded-xl" style="display:inline-flex;align-items:center;gap:.4rem">
+                        <i class="fas fa-check mr-1"></i>Check Answers
+                    </button>
+                    <div id="completion-result" style="margin-top:.75rem"></div>
+                    <div style="margin-top:.5rem;padding:.625rem;background:rgba(124,58,237,.06);border-radius:8px;font-size:.8rem;color:var(--text-secondary)">
+                        <strong>Explanation:</strong> ${escapeAnnotation(ex.explanation || '')}
+                    </div>
+                </div>`;
+        }
+
+        function checkCompletion() {
+            if (!completionExercise) return;
+            const results = completionExercise.blanks.map((b, i) => {
+                const input = document.getElementById(`blank-${i}`);
+                const userAnswer = (input ? input.value.trim() : '').toLowerCase().replace(/\s+/g, ' ');
+                const correct = (b.answer || '').toLowerCase().replace(/\s+/g, ' ');
+                const isCorrect = userAnswer === correct;
+                if (input) {
+                    input.style.borderColor = isCorrect ? '#10b981' : '#ef4444';
+                    input.style.background = isCorrect ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)';
+                }
+                return { isCorrect, correct: b.answer, position: b.position };
+            });
+            const passed = results.filter(r => r.isCorrect).length;
+            const total = results.length;
+            const resultDiv = document.getElementById('completion-result');
+            if (resultDiv) {
+                const allCorrect = passed === total;
+                const wrongDetails = results
+                    .filter(r => !r.isCorrect)
+                    .map(r => `Blank ${r.position}: answer is <code>${escapeAnnotation(r.correct)}</code>`)
+                    .join(' | ');
+                resultDiv.innerHTML = `<div style="padding:.625rem;border-radius:8px;font-size:.875rem;font-weight:600;background:${allCorrect ? '#d1fae5' : '#fef3c7'};color:${allCorrect ? '#065f46' : '#92400e'}">
+                    ${allCorrect ? '🎉 Perfect! All blanks correct!' : `${passed}/${total} correct. ${wrongDetails}`}
+                </div>`;
+            }
+        }
     </script>
     <!-- Firebase auth guard -->
     <script type="module">
@@ -630,6 +889,24 @@ ${codeContent}
         const link = document.getElementById('back-btn-link');
         if (link) {
             link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
+<script>
+    // Theme toggle
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.querySelectorAll('.theme-moon').forEach(el => el.style.display = isDark ? 'none' : '');
+        document.querySelectorAll('.theme-sun').forEach(el => el.style.display = isDark ? '' : 'none');
+    }
+    (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.querySelectorAll('.theme-moon').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.theme-sun').forEach(el => el.style.display = '');
         }
     })();
 </script>

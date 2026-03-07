@@ -744,8 +744,83 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* ---- SRS ---- */
+        .srs-card { border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 1.25rem; background: linear-gradient(135deg,#f8faff,#f5f3ff); margin-bottom: 1rem; }
+        .srs-word { font-size: 1.5rem; font-weight: 800; color: var(--primary); text-align:center; margin-bottom:0.5rem; }
+        .srs-mask { min-height: 3rem; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; }
+        .srs-blur { filter: blur(8px); transition: filter 0.3s; }
+        .srs-revealed { filter: none; }
+        .srs-def { font-size:0.95rem; color:var(--text-secondary); text-align:center; line-height:1.5; }
+        .srs-rating { display:flex; gap:0.5rem; justify-content:center; margin-top:0.75rem; flex-wrap:wrap; }
+        .srs-btn { padding:0.5rem 1rem; border-radius:8px; border:none; font-family:inherit; font-weight:700; font-size:0.875rem; cursor:pointer; transition:all 0.18s; }
+        .srs-btn-fail { background:#fee2e2; color:#b91c1c; } .srs-btn-fail:hover { background:#fca5a5; }
+        .srs-btn-hard { background:#fef3c7; color:#92400e; } .srs-btn-hard:hover { background:#fde68a; }
+        .srs-btn-ok   { background:#d1fae5; color:#065f46; } .srs-btn-ok:hover { background:#6ee7b7; }
+        .srs-btn-easy { background:#dbeafe; color:#1d4ed8; } .srs-btn-easy:hover { background:#93c5fd; }
+        .srs-progress { text-align:center; font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem; }
+        .srs-stats { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.25rem; }
+        .srs-stat { text-align:center; }
+        .srs-stat-num { font-size:1.5rem; font-weight:800; color:var(--primary); }
+        .srs-stat-label { font-size:0.75rem; color:var(--text-muted); }
+        .add-srs-btn { display:block; font-size:0.72rem; padding:0.2rem 0.55rem; border-radius:6px; border:1px solid #c7d2fe; background:var(--primary-light); color:var(--primary); cursor:pointer; font-family:inherit; font-weight:600; margin-top:0.5rem; transition:all 0.18s; }
+        .add-srs-btn:hover { background:#e0e7ff; }
+        .add-srs-btn.added { background:var(--green-light); color:var(--green); border-color:var(--green); }
+        /* ---- Quiz type selector ---- */
+        .quiz-type-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+        .quiz-type-btn { padding:0.4rem 0.9rem; border-radius:8px; border:1.5px solid var(--border); background:#fafafa; color:var(--text-muted); font-family:inherit; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.18s; }
+        .quiz-type-btn.active { border-color:var(--primary); background:var(--primary-light); color:var(--primary); }
+        /* Sentence completion */
+        .sc-input { width:100%; padding:0.625rem 0.875rem; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:1rem; margin-top:0.75rem; transition:border-color 0.2s; }
+        .sc-input:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,.12); }
+        .sc-submit { margin-top:0.625rem; }
+        /* Matching */
+        .match-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.75rem; }
+        .match-col { display:flex; flex-direction:column; gap:0.5rem; }
+        .match-item { padding:0.625rem 0.875rem; border-radius:8px; border:1.5px solid var(--border); background:#fafafa; cursor:pointer; font-family:inherit; font-size:0.875rem; transition:all 0.18s; text-align:left; word-break:break-word; }
+        .match-item:hover:not(:disabled) { border-color:var(--primary); background:var(--primary-light); }
+        .match-item.selected { border-color:var(--primary); background:var(--primary-light); color:var(--primary); font-weight:700; }
+        .match-item.matched-correct { border-color:var(--green); background:var(--green-light); color:#065f46; }
+        .match-item.matched-wrong { border-color:var(--red); background:var(--red-light); color:#991b1b; }
+/* ---- Dark mode ---- */
+.dark body { background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0d1a2e 100%); color: #e2e8f0; }
+.dark .card { background: rgba(15,15,40,0.85); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; }
+.dark .site-header { background: rgba(15,15,40,0.95); }
+.dark .tab-bar { background: rgba(15,15,40,0.9); }
+.dark .tab-btn { color: #94a3b8; }
+.dark .tab-btn.active { background: linear-gradient(135deg, #7c3aed, #06b6d4); color: white; }
+.dark .vocab-card { background: rgba(30,20,60,.8); border-color: rgba(124,58,237,.3); }
+.dark .vocab-word { color: #a78bfa; }
+.dark .quiz-question-card { background: rgba(15,15,40,0.9); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+.dark .quiz-q-text { color: #e2e8f0; }
+.dark .quiz-option { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+.dark .quiz-option:hover:not(:disabled) { background: rgba(124,58,237,.2); border-color: #7c3aed; color: #a78bfa; }
+.dark .score-panel { background: rgba(15,15,40,.8); border-color: rgba(124,58,237,.3); }
+.dark .score-item { background: rgba(30,20,60,.8); border-color: rgba(124,58,237,.2); }
+.dark input[type="text"], .dark select { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+.dark footer { color: #94a3b8; border-top-color: rgba(255,255,255,.08); }
+.dark .back-btn { background: rgba(124,58,237,.2); color: #a78bfa; }
+.dark .hero h1 { color: #e2e8f0; }
+.dark .card-title { color: #e2e8f0; }
+.dark .brand { color: #e2e8f0; }
+.dark label { color: #e2e8f0; }
+.dark .srs-card { background: rgba(30,20,60,.8); border-color: rgba(124,58,237,.3); }
+.dark .srs-word { color: #a78bfa; }
+.dark .quiz-type-btn { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #94a3b8; }
+.dark .quiz-type-btn.active { border-color: #7c3aed; background: rgba(124,58,237,.2); color: #a78bfa; }
+.dark .match-item { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+.dark .sc-input { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+/* Micro-interactions */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+/* Focus ring */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(124,58,237,.5);
+    outline-offset: 2px;
+}
     </style>
-</head>
 <body>
     <!-- Auth guard overlay -->
     <div id="auth-guard-overlay" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,40,.96);backdrop-filter:blur(8px);">
@@ -767,7 +842,13 @@
                 <span class="brand-name">EduGenius</span>
             </a>
             <span class="header-subtitle">📚 Vocabulary Tools</span>
-            <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">← Back</a>
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode"
+                        style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(79,70,229,.1);color:var(--primary);font-size:1rem;transition:all .2s;flex-shrink:0">
+                    <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
+                </button>
+                <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">← Back</a>
+            </div>
         </div>
     </header>
 
@@ -792,6 +873,11 @@
                     aria-selected="false" aria-controls="panel-quiz"
                     onclick="switchTab('quiz')">
                 ✏️ Quiz
+            </button>
+            <button class="tab-btn" id="tab-srs" role="tab"
+                    aria-selected="false" aria-controls="panel-srs"
+                    onclick="switchTab('srs')">
+                🧠 SRS Review
             </button>
         </div>
 
@@ -888,6 +974,14 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group" style="margin-top:0.75rem;">
+                        <label>Quiz Type</label>
+                        <div class="quiz-type-row" id="quizTypeRow" role="group" aria-label="Quiz type">
+                            <button type="button" class="quiz-type-btn active" data-type="mcq" onclick="setQuizType('mcq',this)">🔤 Multiple Choice</button>
+                            <button type="button" class="quiz-type-btn" data-type="sc" onclick="setQuizType('sc',this)">✍️ Sentence Completion</button>
+                            <button type="button" class="quiz-type-btn" data-type="match" onclick="setQuizType('match',this)">🔗 Matching</button>
+                        </div>
+                    </div>
                     <div class="action-row" style="margin-top:0.75rem;">
                         <button type="submit" id="quizStartBtn" class="btn btn-red">
                             🚀 Start Quiz
@@ -903,6 +997,13 @@
                     <p>Fill in a topic and click <strong>Start Quiz</strong> to begin</p>
                 </div>
             </div>
+        </div>
+
+        <!-- ============================================================
+             TAB 3: SRS Review
+             ============================================================ -->
+        <div class="tab-panel hidden" id="panel-srs" role="tabpanel" aria-labelledby="tab-srs">
+            <div class="empty-state"><div class="empty-icon">🧠</div><p>Loading SRS data…</p></div>
         </div>
 
     </main>
@@ -953,22 +1054,24 @@
 
         // ---- Tab switching ----
         function switchTab(name, fromGen = false) {
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.tab-panel').forEach(p => { p.classList.remove('active'); p.classList.add('hidden'); });
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.remove('active');
                 b.setAttribute('aria-selected', 'false');
             });
-            document.getElementById('panel-' + name).classList.remove('hidden');
-            document.getElementById('panel-' + name).classList.add('active');
-            document.getElementById('tab-' + name).classList.add('active');
-            document.getElementById('tab-' + name).setAttribute('aria-selected', 'true');
+            const panel = document.getElementById('panel-' + name);
+            const tab = document.getElementById('tab-' + name);
+            if (panel) { panel.classList.remove('hidden'); panel.classList.add('active'); }
+            if (tab) { tab.classList.add('active'); tab.setAttribute('aria-selected', 'true'); }
 
-            // If switching to quiz from generator, pre-fill topic/level
             if (name === 'quiz' && fromGen) {
                 const topic = document.getElementById('genTopic').value;
                 const level = document.getElementById('genLevel').value;
                 if (topic) document.getElementById('quizTopic').value = topic;
                 document.getElementById('quizLevel').value = level;
+            }
+            if (name === 'srs') {
+                renderSRSPanel();
             }
         }
 
@@ -1021,13 +1124,14 @@
 
         function renderVocabCards(words) {
             if (!words.length) return `<div class="empty-state"><p>Could not parse vocabulary list. Please try again.</p></div>`;
-            return `<div class="vocab-grid">${words.map(w => `
+            return `<div class="vocab-grid">${words.map((w,i) => `
                 <div class="vocab-card">
                     <div class="vocab-word">${escapeHtml(w.word || '')}</div>
                     ${w.pos ? `<div class="vocab-pos">(${escapeHtml(w.pos)})</div>` : ''}
                     ${w.def ? `<div class="vocab-def">📌 ${escapeHtml(w.def)}</div>` : ''}
                     ${w.example ? `<div class="vocab-example">"${escapeHtml(w.example)}"</div>` : ''}
                     ${w.cn ? `<span class="vocab-cn">🇨🇳 ${escapeHtml(w.cn)}</span>` : ''}
+                    <button class="add-srs-btn" id="srs-add-${i}" onclick="handleAddSRS(${i})" aria-label="Add ${escapeHtml(w.word||'')} to SRS review">📌 Add to SRS</button>
                 </div>`).join('')}</div>`;
         }
 
@@ -1199,6 +1303,362 @@ Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文)
             renderQuestion(0);
         }
 
+        // ====================================================
+        // SPACED REPETITION SYSTEM (SM-2 algorithm)
+        // ====================================================
+        const SRS_KEY = 'edugenius_srs_v1';
+        const SRS_DEFAULT_INTERVAL = 1;
+        const SRS_DEFAULT_REPETITIONS = 0;
+        const SRS_DEFAULT_EASE_FACTOR = 2.5;
+
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function srsLoad() {
+            try { return JSON.parse(localStorage.getItem(SRS_KEY) || '{}'); } catch { return {}; }
+        }
+        function srsSave(db) { localStorage.setItem(SRS_KEY, JSON.stringify(db)); }
+
+        function srsAddWord(word, def, cn) {
+            const db = srsLoad();
+            if (db[word]) return false;
+            db[word] = { word, def, cn: cn || '', interval: SRS_DEFAULT_INTERVAL, repetitions: SRS_DEFAULT_REPETITIONS, easeFactor: SRS_DEFAULT_EASE_FACTOR, nextReview: new Date().toISOString().slice(0, 10) };
+            srsSave(db);
+            return true;
+        }
+
+        function srsUpdate(word, quality) {
+            const db = srsLoad();
+            const card = db[word];
+            if (!card) return;
+            let { interval, repetitions, easeFactor } = card;
+            if (quality >= 3) {
+                if (repetitions === 0) interval = 1;
+                else if (repetitions === 1) interval = 6;
+                else interval = Math.round(interval * easeFactor);
+                repetitions++;
+            } else {
+                repetitions = 0;
+                interval = 1;
+            }
+            easeFactor = Math.max(1.3, easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+            const next = new Date();
+            next.setDate(next.getDate() + interval);
+            card.interval = interval;
+            card.repetitions = repetitions;
+            card.easeFactor = easeFactor;
+            card.nextReview = next.toISOString().slice(0, 10);
+            db[word] = card;
+            srsSave(db);
+        }
+
+        function srsDueCards() {
+            const db = srsLoad();
+            const today = new Date().toISOString().slice(0, 10);
+            return Object.values(db).filter(c => c.nextReview <= today);
+        }
+
+        function srsAllCards() {
+            return Object.values(srsLoad());
+        }
+
+        // ---- SRS Review UI ----
+        let srsQueue = [];
+        let srsIdx = 0;
+
+        function renderSRSPanel() {
+            const panel = document.getElementById('panel-srs');
+            const due = srsDueCards();
+            const all = srsAllCards();
+
+            if (!all.length) {
+                panel.innerHTML = `
+                    <div class="card">
+                        <div class="card-header"><div class="card-icon icon-yellow">🧠</div>
+                        <div><div class="card-title">Spaced Repetition Review</div>
+                        <div class="card-hint">No words yet – generate vocabulary and add words with 📌 Add to SRS</div></div></div>
+                        <div class="empty-state"><div class="empty-icon">📭</div>
+                        <p>Add vocabulary words from the <strong>Generator</strong> tab to start reviewing.</p></div>
+                    </div>`;
+                return;
+            }
+
+            const stats = `
+                <div class="srs-stats">
+                    <div class="srs-stat"><div class="srs-stat-num">${all.length}</div><div class="srs-stat-label">Total Words</div></div>
+                    <div class="srs-stat"><div class="srs-stat-num" style="color:#ef4444">${due.length}</div><div class="srs-stat-label">Due Today</div></div>
+                    <div class="srs-stat"><div class="srs-stat-num" style="color:#10b981">${all.length - due.length}</div><div class="srs-stat-label">Reviewed</div></div>
+                </div>`;
+
+            if (!due.length) {
+                panel.innerHTML = `
+                    <div class="card">
+                        <div class="card-header"><div class="card-icon icon-green">✅</div>
+                        <div><div class="card-title">All Caught Up!</div>
+                        <div class="card-hint">Great job! Come back tomorrow for more reviews.</div></div></div>
+                        ${stats}
+                        <div class="empty-state"><div class="empty-icon">🎉</div><p>No words due for review today.</p></div>
+                    </div>`;
+                return;
+            }
+
+            srsQueue = shuffle(due);
+            srsIdx = 0;
+            panel.innerHTML = `<div class="card">
+                <div class="card-header"><div class="card-icon icon-yellow">🧠</div>
+                <div><div class="card-title">SRS Review Session</div>
+                <div class="card-hint">Rate how well you recalled each word</div></div></div>
+                ${stats}
+                <div id="srs-review-area"></div>
+            </div>`;
+            renderSRSCard();
+        }
+
+        function renderSRSCard() {
+            const area = document.getElementById('srs-review-area');
+            if (!area) return;
+            if (srsIdx >= srsQueue.length) {
+                area.innerHTML = `<div class="empty-state"><div class="empty-icon">🎉</div>
+                    <p style="font-weight:700;font-size:1rem;color:var(--text)">Session complete!</p>
+                    <p>Reviewed ${srsQueue.length} word${srsQueue.length !== 1 ? 's' : ''}.</p>
+                    <div class="action-row" style="justify-content:center;margin-top:1rem">
+                        <button class="btn btn-primary" onclick="renderSRSPanel()">🔄 New Session</button>
+                    </div></div>`;
+                return;
+            }
+            const card = srsQueue[srsIdx];
+            area.innerHTML = `
+                <div class="srs-progress">${srsIdx + 1} / ${srsQueue.length} cards</div>
+                <div class="srs-card">
+                    <div class="srs-word">${escapeHtml(card.word)}</div>
+                    <div class="srs-mask srs-blur" id="srs-def-mask" onclick="revealSRS()" title="Click to reveal">
+                        <div class="srs-def">${escapeHtml(card.def || 'No definition')}<br>${card.cn ? '<span style="color:var(--secondary);font-size:.85rem">'+escapeHtml(card.cn)+'</span>' : ''}</div>
+                    </div>
+                    <p style="text-align:center;font-size:.8rem;color:var(--text-muted);margin-top:.3rem">Click definition to reveal</p>
+                    <div class="srs-rating" id="srs-rating-btns" style="display:none">
+                        <button class="srs-btn srs-btn-fail" onclick="rateSRS(0)">😞 Forgot</button>
+                        <button class="srs-btn srs-btn-hard" onclick="rateSRS(3)">😕 Hard</button>
+                        <button class="srs-btn srs-btn-ok"   onclick="rateSRS(4)">😊 OK</button>
+                        <button class="srs-btn srs-btn-easy" onclick="rateSRS(5)">🚀 Easy</button>
+                    </div>
+                </div>`;
+        }
+
+        function revealSRS() {
+            const mask = document.getElementById('srs-def-mask');
+            const btns = document.getElementById('srs-rating-btns');
+            if (mask) { mask.classList.remove('srs-blur'); mask.onclick = null; mask.title = ''; }
+            if (btns) btns.style.display = 'flex';
+        }
+
+        function rateSRS(quality) {
+            const card = srsQueue[srsIdx];
+            srsUpdate(card.word, quality);
+            srsIdx++;
+            renderSRSCard();
+        }
+
+        // ---- Add to SRS handler ----
+        function handleAddSRS(idx) {
+            if (!generatedWords[idx]) return;
+            const w = generatedWords[idx];
+            const added = srsAddWord(w.word, w.def || '', w.cn || '');
+            const btn = document.getElementById(`srs-add-${idx}`);
+            if (btn) {
+                btn.textContent = added ? '✅ Added!' : '✅ Already in SRS';
+                btn.classList.add('added');
+                btn.disabled = true;
+            }
+        }
+
+        // ====================================================
+        // MULTI-FORMAT QUIZ
+        // ====================================================
+        let currentQuizType = 'mcq';
+
+        function setQuizType(type, btn) {
+            currentQuizType = type;
+            document.querySelectorAll('.quiz-type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        async function startSentenceCompletionQuiz(topic, level, quizBtn, quizOut) {
+            const prompt = `Generate 5 sentence completion exercises for Hong Kong DSE English students at ${level} level on the topic of "${topic}".
+
+For each exercise, provide a sentence with one key vocabulary word replaced by ___.
+Return ONLY valid JSON (no other text):
+{
+  "questions": [
+    {
+      "sentence": "The government implemented strict ___s to protect the environment.",
+      "answer": "regulation",
+      "hint": "a rule or law",
+      "explanation": "Regulation means an official rule or law that controls how something is done."
+    }
+  ]
+}`;
+
+            const raw = await callAI(prompt);
+            setLoading(quizBtn, false); quizBtn.innerHTML = '🚀 Start Quiz';
+            if (!raw) { quizOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Failed. Please try again.</p></div>`; return; }
+            const parsed = extractJson(raw);
+            if (!parsed?.questions?.length) { quizOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Could not parse quiz. Please try again.</p></div>`; return; }
+
+            let scIdx = 0, scScore = 0;
+            const scQs = parsed.questions;
+
+            function renderSCQ(idx) {
+                if (idx >= scQs.length) {
+                    const pct = Math.round((scScore/scQs.length)*100);
+                    let cls='score-low',emoji='📖',msg='Keep practising!';
+                    if(pct>=80){cls='score-great';emoji='🏆';msg='Excellent!';}
+                    else if(pct>=60){cls='score-good';emoji='👏';msg='Good effort!';}
+                    quizOut.innerHTML = `<div class="card score-card"><div class="score-circle ${cls}">${emoji}</div><div class="score-title">${scScore}/${scQs.length}</div><div class="score-subtitle">${pct}% correct · ${msg}</div><div class="action-row" style="justify-content:center"><button class="btn btn-red" onclick="scRestart()">🔄 Try Again</button><button class="btn btn-ghost" onclick="switchTab('generator')">💡 Generate Vocabulary</button></div></div>`;
+                    window.scRestart = function(){scIdx=0;scScore=0;renderSCQ(0);};
+                    return;
+                }
+                const q = scQs[idx];
+                const progress = Math.round((idx/scQs.length)*100);
+                quizOut.innerHTML = `
+                    <div class="quiz-progress">
+                        <span class="progress-label">Q${idx+1}/${scQs.length}</span>
+                        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progress}%"></div></div>
+                        <span class="progress-label">Score: ${scScore}</span>
+                    </div>
+                    <div class="quiz-question-card">
+                        <div class="quiz-q-number">Sentence Completion ${idx+1} of ${scQs.length}</div>
+                        <div class="quiz-q-text">${escapeHtml(q.sentence)}</div>
+                        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.3rem">Hint: ${escapeHtml(q.hint||'')}</p>
+                        <input type="text" class="sc-input" id="sc-input-${idx}" placeholder="Type the missing word…" autocomplete="off" aria-label="Your answer">
+                        <div class="action-row sc-submit">
+                            <button class="btn btn-primary" onclick="checkSC(${idx})">✓ Submit</button>
+                        </div>
+                        <div class="quiz-explanation" id="sc-explanation-${idx}"></div>
+                    </div>`;
+                document.getElementById(`sc-input-${idx}`).addEventListener('keydown', e => { if(e.key==='Enter') checkSC(idx); });
+            }
+
+            window.checkSC = function(idx) {
+                const input = document.getElementById(`sc-input-${idx}`);
+                const btn = input.parentElement.querySelector('button');
+                const explanation = document.getElementById(`sc-explanation-${idx}`);
+                const answer = (input.value||'').trim().toLowerCase();
+                const correct = scQs[idx].answer.toLowerCase();
+                const isCorrect = answer === correct;
+                if(isCorrect) scScore++;
+                input.disabled = true; if(btn) btn.disabled = true;
+                input.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
+                input.style.background = isCorrect ? 'var(--green-light)' : 'var(--red-light)';
+                explanation.innerHTML = `${isCorrect ? '✅' : `❌ The answer was: <strong>${escapeHtml(scQs[idx].answer)}</strong>`}<br>💡 ${escapeHtml(scQs[idx].explanation||'')}`;
+                explanation.classList.add('show');
+                setTimeout(() => { scIdx++; renderSCQ(scIdx); }, 2400);
+            };
+
+            renderSCQ(0);
+        }
+
+        async function startMatchingQuiz(topic, level, quizBtn, quizOut) {
+            const prompt = `Generate 5 vocabulary matching pairs for Hong Kong DSE English students at ${level} level on the topic of "${topic}".
+Return ONLY valid JSON:
+{
+  "pairs": [
+    { "word": "legislate", "definition": "to make laws" }
+  ]
+}`;
+
+            const raw = await callAI(prompt);
+            setLoading(quizBtn, false); quizBtn.innerHTML = '🚀 Start Quiz';
+            if (!raw) { quizOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Failed. Please try again.</p></div>`; return; }
+
+            let parsed;
+            try {
+                const m = raw.match(/\{[\s\S]*\}/);
+                parsed = m ? JSON.parse(m[0]) : null;
+            } catch { parsed = null; }
+            if (!parsed?.pairs?.length) { quizOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Could not parse. Please try again.</p></div>`; return; }
+
+            const pairs = parsed.pairs.slice(0, 5);
+            const shuffledDefs = shuffle(pairs);
+            let selectedWord = null, selectedDef = null;
+            let matched = 0;
+
+            function renderMatch() {
+                quizOut.innerHTML = `
+                    <div class="card">
+                        <div class="card-header"><div class="card-icon icon-red">🔗</div>
+                        <div><div class="card-title">Matching Exercise</div>
+                        <div class="card-hint">Click a word, then click its matching definition</div></div></div>
+                        <div class="match-grid">
+                            <div class="match-col" id="match-words">
+                                ${pairs.map((p,i) => `<button class="match-item" id="mw-${i}" onclick="matchSelectWord(${i})" aria-label="Word: ${escapeHtml(p.word)}">${escapeHtml(p.word)}</button>`).join('')}
+                            </div>
+                            <div class="match-col" id="match-defs">
+                                ${shuffledDefs.map((p,i) => `<button class="match-item" id="md-${i}" onclick="matchSelectDef(${i})" aria-label="Definition: ${escapeHtml(p.definition)}">${escapeHtml(p.definition)}</button>`).join('')}
+                            </div>
+                        </div>
+                        <div id="match-result" style="text-align:center;margin-top:1rem;font-size:.9rem;color:var(--text-muted)"></div>
+                    </div>`;
+                selectedWord = null; selectedDef = null; matched = 0;
+            }
+
+            window.matchSelectWord = function(i) {
+                if (document.getElementById(`mw-${i}`).classList.contains('matched-correct')) return;
+                document.querySelectorAll('#match-words .match-item').forEach(b => b.classList.remove('selected'));
+                selectedWord = i;
+                document.getElementById(`mw-${i}`).classList.add('selected');
+                tryMatch();
+            };
+            window.matchSelectDef = function(i) {
+                if (document.getElementById(`md-${i}`).classList.contains('matched-correct')) return;
+                document.querySelectorAll('#match-defs .match-item').forEach(b => b.classList.remove('selected'));
+                selectedDef = i;
+                document.getElementById(`md-${i}`).classList.add('selected');
+                tryMatch();
+            };
+
+            function tryMatch() {
+                if (selectedWord === null || selectedDef === null) return;
+                const def = shuffledDefs[selectedDef].definition;
+                const correctDef = pairs[selectedWord].definition;
+                if (def === correctDef) {
+                    document.getElementById(`mw-${selectedWord}`).classList.remove('selected');
+                    document.getElementById(`mw-${selectedWord}`).classList.add('matched-correct');
+                    document.getElementById(`mw-${selectedWord}`).disabled = true;
+                    document.getElementById(`md-${selectedDef}`).classList.remove('selected');
+                    document.getElementById(`md-${selectedDef}`).classList.add('matched-correct');
+                    document.getElementById(`md-${selectedDef}`).disabled = true;
+                    matched++;
+                    document.getElementById('match-result').textContent = `✅ Correct! ${matched}/${pairs.length} matched`;
+                    if (matched === pairs.length) {
+                        setTimeout(() => {
+                            quizOut.innerHTML += `<div class="card score-card" style="margin-top:1rem"><div class="score-circle score-great">🏆</div><div class="score-title">All Matched!</div><div class="score-subtitle">Perfect score!</div><div class="action-row" style="justify-content:center"><button class="btn btn-red" onclick="renderMatch()">🔄 Shuffle Again</button><button class="btn btn-ghost" onclick="switchTab('generator')">💡 Generate Vocabulary</button></div></div>`;
+                        }, 600);
+                    }
+                } else {
+                    const wBtn = document.getElementById(`mw-${selectedWord}`);
+                    const dBtn = document.getElementById(`md-${selectedDef}`);
+                    wBtn.classList.add('matched-wrong');
+                    dBtn.classList.add('matched-wrong');
+                    document.getElementById('match-result').textContent = '❌ Not a match – try again';
+                    setTimeout(() => {
+                        wBtn.classList.remove('selected','matched-wrong');
+                        dBtn.classList.remove('selected','matched-wrong');
+                        document.getElementById('match-result').textContent = '';
+                    }, 1000);
+                }
+                selectedWord = null; selectedDef = null;
+            }
+
+            window.renderMatch = renderMatch;
+            renderMatch();
+        }
+
         document.getElementById('quizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const topic = document.getElementById('quizTopic').value.trim() || 'General English';
@@ -1207,10 +1667,20 @@ Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文)
             const quizOut = document.getElementById('quizOutput');
 
             setLoading(quizBtn, true, 'Generating Quiz…');
-            quizOut.innerHTML = `<div class="loading-text"><span class="spinner spinner-dark"></span> Generating quiz questions on "${topic}"…</div>`;
+            const quizTypeLabels = { mcq: 'multiple choice', sc: 'sentence completion', match: 'matching' };
+            quizOut.innerHTML = `<div class="loading-text"><span class="spinner spinner-dark"></span> Generating ${quizTypeLabels[currentQuizType] || 'quiz'} on "${escapeHtml(topic)}"…</div>`;
 
-            const prompt =
-`Generate a vocabulary quiz for Hong Kong DSE English students at ${level} level on the topic of "${topic}".
+            if (currentQuizType === 'sc') {
+                await startSentenceCompletionQuiz(topic, level, quizBtn, quizOut);
+                return;
+            }
+            if (currentQuizType === 'match') {
+                await startMatchingQuiz(topic, level, quizBtn, quizOut);
+                return;
+            }
+
+            // MCQ (existing logic)
+            const prompt = `Generate a vocabulary quiz for Hong Kong DSE English students at ${level} level on the topic of "${topic}".
 Create exactly 5 multiple-choice questions.
 
 Return ONLY valid JSON (no other text, no markdown code blocks) in this format:
@@ -1305,6 +1775,24 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
         const link = document.getElementById('back-btn-link');
         if (link) {
             link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
+<script>
+    // Theme toggle
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.querySelectorAll('.theme-moon').forEach(el => el.style.display = isDark ? 'none' : '');
+        document.querySelectorAll('.theme-sun').forEach(el => el.style.display = isDark ? '' : 'none');
+    }
+    (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.querySelectorAll('.theme-moon').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.theme-sun').forEach(el => el.style.display = '');
         }
     })();
 </script>

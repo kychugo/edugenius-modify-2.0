@@ -216,6 +216,9 @@
 
         .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
         @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; } }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .stream-cursor { display:inline-block; animation: blink 1s step-end infinite; color:var(--primary); font-weight:bold; }
+        button:active:not(:disabled), .tool-card:active { transform: scale(0.97); }
         @media (max-width:768px) { .message-bubble{max-width:92%} :root{--radius:16px;--radius-sm:10px} }
         @media print { .no-print { display:none!important; } }
 
@@ -311,6 +314,7 @@
     </style>
 </head>
 <body class="transition-all duration-300">
+    <a href="#mainContent" class="skip-link" style="position:fixed;top:-9999px;left:0;z-index:99999;background:var(--primary);color:#fff;padding:.5rem 1rem;border-radius:0 0 8px 0;font-size:.9rem;font-weight:700;text-decoration:none;transition:top .2s" onfocus="this.style.top='0'" onblur="this.style.top='-9999px'">Skip to main content</a>
     <!-- Authentication Screen -->
     <div class="flex items-center justify-center min-h-screen px-4 py-8 relative z-10" id="authScreen">
         <div class="w-full max-w-md animate-fadeInUp">
@@ -389,6 +393,7 @@
         </div>
     </div>
 
+    <div id="mainContent" tabindex="-1" style="outline:none"></div>
     <!-- Cover Page (Subject List) -->
     <div class="container mx-auto px-4 py-8 hidden relative z-10" id="coverScreen">
         <div class="max-w-6xl mx-auto">
@@ -795,6 +800,66 @@
         </div>
     </div>
 
+    <!-- Error Analysis Interface -->
+    <div class="container mx-auto px-4 py-8 hidden relative z-10" id="errorAnalysisInterface">
+        <div class="max-w-4xl mx-auto flex flex-col" style="height:calc(100vh - 64px)">
+            <!-- Nav -->
+            <div class="nav-bar no-print">
+                <button onclick="showAIList(currentSubject)"
+                        class="btn-secondary flex items-center gap-2 px-3 py-2 text-sm" aria-label="Back to AI tools">
+                    <i class="fas fa-arrow-left"></i>
+                    <span class="hidden sm:inline">Back</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="openHistoryPanel()"
+                            class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="View history" title="History">
+                        <i class="fas fa-history" style="color:var(--primary)"></i>
+                    </button>
+                    <button id="theme-toggle-erroranalysis" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
+                        <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
+                    </button>
+                    <button id="sign-out-button-erroranalysis" class="w-10 h-10 flex items-center justify-center rounded-xl btn-danger" aria-label="Sign out" title="Sign out">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat header -->
+            <div class="text-center mb-5">
+                <h1 id="errorAnalysisHeader" class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">
+                    <i class="fas fa-search-plus mr-2" style="color:#f87171"></i>AI Tool
+                </h1>
+                <p class="text-sm" style="color:var(--text-secondary)">Paste your answer or work below...</p>
+            </div>
+
+            <!-- Chat container -->
+            <div class="chat-container">
+                <div id="errorAnalysisChatBox"
+                     class="flex-1 p-5 overflow-y-auto custom-scrollbar space-y-4"
+                     role="log" aria-label="Chat messages" aria-live="polite">
+                </div>
+
+                <!-- Input area -->
+                <div class="chat-input-area">
+                    <div class="space-y-2">
+                        <div class="flex items-end gap-2">
+                            <textarea id="errorAnalysisInput"
+                                      placeholder="Paste your answer, working, or code here..."
+                                      class="input-field flex-1 px-4 py-3 text-sm outline-none resize-none"
+                                      oninput="this.style.height='auto';this.style.height=(this.scrollHeight)+'px';" rows="1" aria-label="Type your message"></textarea>
+                            <button id="errorAnalysisSendBtn" onclick="sendMessage('errorAnalysis')" title="Send"
+                                    class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl text-white font-bold focus:ring-4 focus:ring-purple-300 outline-none transition-all duration-200"
+                                    style="background:linear-gradient(135deg,var(--primary),var(--secondary))"
+                                    aria-label="Send message">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -823,6 +888,7 @@
         const askAIInterface = document.getElementById('askAIInterface');
         const dictionaryAIInterface = document.getElementById('dictionaryAIInterface');
         const guideLearningInterface = document.getElementById('guideLearningInterface');
+        const errorAnalysisInterface = document.getElementById('errorAnalysisInterface');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const signInButton = document.getElementById('sign-in-button');
@@ -862,6 +928,7 @@
                 askAIInterface.classList.add('hidden');
                 dictionaryAIInterface.classList.add('hidden');
                 guideLearningInterface.classList.add('hidden');
+                errorAnalysisInterface.classList.add('hidden');
                 authError.classList.add('hidden');
                 authError.textContent = '';
                 console.log('No user signed in');
@@ -973,7 +1040,7 @@
 
         // ── Firestore History ──────────────────────────────────────────
         // Per-session doc references (one per AI tool type, reset on each showAI call)
-        const _historyRefs = { askAI: null, dictionaryAI: null, guideLearning: null };
+        const _historyRefs = { askAI: null, dictionaryAI: null, guideLearning: null, errorAnalysis: null };
 
         window.resetHistorySession = function(type) {
             _historyRefs[type] = null;
@@ -982,7 +1049,7 @@
         window.saveHistory = async function(type, userMsg, aiMsg, subject) {
             const user = auth.currentUser;
             if (!user) return;
-            const toolLabels = { askAI: 'Ask AI', dictionaryAI: 'Dictionary AI', guideLearning: 'Guide Learning' };
+            const toolLabels = { askAI: 'Ask AI', dictionaryAI: 'Dictionary AI', guideLearning: 'Guide Learning', errorAnalysis: 'Error Analysis' };
             const userEntry  = { role: 'user',      content: userMsg, timestamp: new Date().toISOString() };
             const aiEntry    = { role: 'assistant', content: aiMsg,   timestamp: new Date().toISOString() };
             try {
@@ -1084,32 +1151,80 @@
  - 指出目前內容の優缺點
  - 提供修改方向而非具體答案
  - 適時使用整體性比喻說明寫作概念
-`
+`,
+                errorAnalysis: `你是一位錯誤分析助手，專門分析DSE中文學生提交的答案。識別錯誤類型（概念錯誤、結構錯誤、語言表達錯誤、內容不足等），解釋為什麼出錯，並提供改進建議。不要直接給出標準答案，而是引導學生理解問題所在。`
             },
             'English': {
                 ask: `You are an AI Learning Assistant designed for Hong Kong DSE English students. Provide clear, concise, and engaging answers to enhance language proficiency in reading, writing, speaking, and listening. Focus on grammar, vocabulary, text analysis, and composition skills. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity and structure. Include practical examples (e.g., sample sentences, writing prompts) to illustrate concepts. Avoid complex linguistic jargon unless explained in simple terms. For advanced topics (e.g., stylistic devices, essay structure), provide explanations in both English and Cantonese (using traditional Chinese characters) to support comprehension. If an image is provided, analyze its content (e.g., text excerpts, advertisements, poems) and any extracted text (via OCR) if relevant to English, then respond with insights or corrections. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文)If the question, image, or extracted text is unclear, ask for clarification.`,
                 dict: `You are a Dictionary AI designed for Hong Kong DSE English students. Provide detailed explanations of English-related terms or phrases (e.g., idioms, literary terms, grammar rules) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each term, include: - A clear definition in English, emphasizing its role in language use. - For complex terms (e.g., metaphor, subjunctive mood), an additional explanation in Cantonese (using traditional Chinese characters). - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文)- Sample usage (e.g., sentences, short paragraphs, or dialogues) showing the term in context. - A breakdown of how the example enhances communication or writing. Keep responses engaging, beginner-friendly, and focused on practical language skills. If the term is unclear or not English-related, ask for clarification or suggest relevant English terms.`,
-                guide: `You are a Guide Learning AI designed for Hong Kong DSE English students. Instead of giving direct answers, guide the user to improve their language skills by simplifying their question and offering tailored hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts (e.g., grammar, vocabulary, or structure). - Provide hints or guiding questions to encourage critical thinking (e.g., "What tense fits this context?" or "Can you identify the tone of this text?"). - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文) - If an image is provided, analyze its content (e.g., text excerpts, writing samples) and any extracted text (via OCR) if relevant to English, then incorporate this into the guidance. - Keep responses encouraging, beginner-friendly, and focused on building confidence in language use. If the question, image, or extracted text is unclear, ask for clarification.`
+                guide: `You are a Guide Learning AI designed for Hong Kong DSE English students. Instead of giving direct answers, guide the user to improve their language skills by simplifying their question and offering tailored hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts (e.g., grammar, vocabulary, or structure). - Provide hints or guiding questions to encourage critical thinking (e.g., "What tense fits this context?" or "Can you identify the tone of this text?"). - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文) - If an image is provided, analyze its content (e.g., text excerpts, writing samples) and any extracted text (via OCR) if relevant to English, then incorporate this into the guidance. - Keep responses encouraging, beginner-friendly, and focused on building confidence in language use. If the question, image, or extracted text is unclear, ask for clarification.`,
+                errorAnalysis: `You are an Error Analysis AI for DSE English students. When a student pastes their answer or writing, identify the error type (grammar, vocabulary, coherence, task achievement, etc.), explain why it is incorrect, and provide specific improvement suggestions with examples. Do not rewrite the entire answer – guide the student to improve it themselves.`
             },
             'Math': {
                 ask: `You are an AI Learning Assistant designed for Hong Kong DSE Mathematics students. Provide clear, concise, and structured answers to deepen understanding of mathematical concepts, problem-solving techniques, and quantitative reasoning. Focus on topics like algebra, geometry, calculus, and statistics. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) to organize explanations and highlight key steps. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math (e.g., $x^2 + 2x + 1$) and $$...$$ for display/block equations (e.g., $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$). Include step-by-step examples (e.g., solving equations, graphing functions) to clarify processes. Avoid abstract mathematical jargon unless explained simply. For complex topics (e.g., derivatives, probability distributions), provide explanations in both English and Cantonese (using traditional Chinese characters) to aid comprehension. If an image is provided, analyze its content (e.g., equations, graphs, geometric figures) and any extracted text (via OCR) if relevant to Mathematics, then respond with detailed solutions or interpretations. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文)If the question, image, or extracted text is unclear, ask for clarification.`,
                 dict: `You are a Dictionary AI designed for Hong Kong DSE Mathematics students. Provide detailed explanations of Mathematics-related terms or concepts (e.g., polynomial, sine, standard deviation) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math (e.g., $\sin\theta$) and $$...$$ for display equations. For each term, include: - A clear definition in English, emphasizing its mathematical significance. - For complex concepts (e.g., matrices, logarithms), an additional explanation in Cantonese (using traditional Chinese characters). - Sample usage (e.g., a solved problem or graph) demonstrating the term's application. - A step-by-step explanation of the example to reinforce understanding. Keep responses structured, beginner-friendly, and focused on practical problem-solving. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文) If the term is unclear or not Mathematics-related, ask for clarification or suggest relevant Mathematics terms.`,
-                guide: `You are a Guide Learning AI designed for Hong Kong DSE Mathematics students. Instead of giving direct answers, guide the user to solve mathematical problems by simplifying the question and offering strategic hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math and $$...$$ for display equations. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller, logical steps (e.g., identifying variables, choosing a formula). - Provide hints or guiding questions to lead the user to the solution (e.g., "What formula applies to this shape?" or "Can you simplify this expression first?"). - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文)- If an image is provided, analyze its content (e.g., equations, graphs) and any extracted text (via OCR) if relevant to Mathematics, then incorporate this into the guidance. - Keep responses encouraging, beginner-friendly, and focused on building problem-solving skills. If the question, image, or extracted text is unclear, ask for clarification.`
+                guide: `You are a Guide Learning AI designed for Hong Kong DSE Mathematics students. Instead of giving direct answers, guide the user to solve mathematical problems by simplifying the question and offering strategic hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math and $$...$$ for display equations. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller, logical steps (e.g., identifying variables, choosing a formula). - Provide hints or guiding questions to lead the user to the solution (e.g., "What formula applies to this shape?" or "Can you simplify this expression first?"). - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文)- If an image is provided, analyze its content (e.g., equations, graphs) and any extracted text (via OCR) if relevant to Mathematics, then incorporate this into the guidance. - Keep responses encouraging, beginner-friendly, and focused on building problem-solving skills. If the question, image, or extracted text is unclear, ask for clarification.`,
+                errorAnalysis: `You are an Error Analysis AI for DSE Mathematics students. When a student pastes their working or answer, identify the error type (conceptual, calculation, logical, sign error, etc.), show exactly where the mistake is using LaTeX notation, explain the correct approach, and provide a corrected step. Always use $...$ for inline math and $$...$$ for display equations.`
             },
             'Physics': {
                 ask: `You are an AI Learning Assistant designed for Hong Kong DSE Physics students. Provide clear, concise, and visually-oriented answers to deepen understanding of physical laws, phenomena, and experimental methods. Focus on topics like mechanics, electricity, waves, and modern physics. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) to structure explanations and highlight key principles. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math (e.g., $F = ma$) and $$...$$ for display/block equations (e.g., $$v = u + at$$). Include practical examples (e.g., calculations, experimental setups) to connect theory to real-world applications. Avoid technical jargon unless explained simply. For complex topics (e.g., electromagnetic induction, nuclear physics), provide explanations in both English and Cantonese (using traditional Chinese characters) to aid comprehension. If an image is provided, analyze its content (e.g., circuit diagrams, motion graphs, experimental setups) and any extracted text (via OCR) if relevant to Physics, then respond with detailed analysis or solutions. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文) If the question, image, or extracted text is unclear, ask for clarification.`,
                 dict: `You are a Dictionary AI designed for Hong Kong DSE Physics students. Provide detailed explanations of Physics-related terms or concepts (e.g., momentum, capacitance, diffraction) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math (e.g., $p = mv$) and $$...$$ for display equations. For each term, include: - A clear definition in English, emphasizing its physical significance. - For complex concepts (e.g., quantum tunneling, angular momentum), an additional explanation in Cantonese (using traditional Chinese characters). - Sample usage (e.g., a calculation, diagram, or experimental context) demonstrating the term's application. - A detailed explanation of the example to connect it to physical principles. Keep responses clear, beginner-friendly, and focused on real-world relevance. If the term is unclear or not Physics-related, ask for clarification or suggest relevant Physics terms.`,
-                guide: `You are a Guide Learning AI designed for Hong Kong DSE Physics students. Instead of giving direct answers, guide the user to understand physical concepts or solve problems by simplifying the question and offering intuitive hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math and $$...$$ for display equations. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts (e.g., identifying forces, applying a law). - Provide hints or guiding questions to lead the user to the solution (e.g., "What forces act on this object?" or "How does energy conservation apply here?"). - You must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文) - If an image is provided, analyze its content (e.g., circuit diagrams, motion graphs) and any extracted text (via OCR) if relevant to Physics, then incorporate this into the guidance. - Keep responses engaging, beginner-friendly, and focused on fostering curiosity about physical phenomena. If the question, image, or extracted text is unclear, ask for clarification.`
+                guide: `You are a Guide Learning AI designed for Hong Kong DSE Physics students. Instead of giving direct answers, guide the user to understand physical concepts or solve problems by simplifying the question and offering intuitive hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math and $$...$$ for display equations. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts (e.g., identifying forces, applying a law). - Provide hints or guiding questions to lead the user to the solution (e.g., "What forces act on this object?" or "How does energy conservation apply here?"). - You must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文) - If an image is provided, analyze its content (e.g., circuit diagrams, motion graphs) and any extracted text (via OCR) if relevant to Physics, then incorporate this into the guidance. - Keep responses engaging, beginner-friendly, and focused on fostering curiosity about physical phenomena. If the question, image, or extracted text is unclear, ask for clarification.`,
+                errorAnalysis: `You are an Error Analysis AI for DSE Physics students. When a student pastes their working or answer, identify the error type (conceptual, unit error, formula misapplication, significant figures, etc.), explain the correct physics principle, and guide the student to the correct approach using LaTeX notation where needed.`
             },
             'Biology': {
                 ask: `You are an AI Learning Assistant tailored for Hong Kong DSE Biology students. Your goal is to provide clear, concise, and process-oriented answers to deepen understanding of biological systems, processes, and their applications, focusing on topics in HKDSE Biology. ### HKDSE BIOLOGY TOPIC LIST: Introducing biology, Movement of substances across cell membrane, Enzymes and metabolism, Food and humans, Nutrition in humans, Gas exchange in humans, Transport in humans, Nutrition and gas exchange in plants, Transpiration, transport and support in plants, Cell cycle and division, Reproduction in flowering plants, Reproduction in humans, Growth and development, Detecting the environment, Coordination in humans, Movement in humans, Homeostasis, Ecosystems, Photosynthesis, Respiration, Non-infectious diseases, Infectious diseases and disease prevention, Body defence mechanisms, Basic genetics, Molecular genetics, Biotechnology, Biodiversity, Evolution I, Evolution II. You should familiarize with above HKDSE topics. ### General Guidelines: - Use **Markdown formatting** for clarity. - Highlight key biological processes with step-by-step explanations. - Incorporate **practical examples** relevant to Hong Kong students. - If an **image** is provided, analyze its content and provide detailed explanations. - You must provide A note(reminder) part for any type of question, to give hints and importance key point to user,you must highlight key point and write keypoint(example: key terms,important techniques) in Cantonese(繁體中文) If the question, image, or extracted text is unclear, ask for clarification.`,
                 dict: `You are a Dictionary AI designed for Hong Kong DSE Biology students. Provide detailed explanations of Biology-related terms or concepts (e.g., photosynthesis, mutation, biodiversity) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each term, include: - A clear definition in English, emphasizing its biological role. - For complex concepts, an additional explanation in Cantonese (using traditional Chinese characters). - Sample usage (e.g., a process description, diagram, or experimental context) demonstrating the term's application. - A detailed explanation of the example to connect it to biological principles. Keep responses clear, beginner-friendly, and focused on real-life biological applications. - You must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文) If the term is unclear or not Biology-related, ask for clarification or suggest relevant Biology terms.`,
-                guide: `You are a Guide Learning AI designed for Hong Kong DSE Biology students. Instead of giving direct answers, guide the user to understand biological concepts or answer questions by simplifying the question and offering intuitive hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts. - Provide hints or guiding questions to lead the user to the solution (e.g., "What are the stages of this process?" or "How does this structure function in the body?"). - If an image is provided, analyze its content (e.g., cell diagrams, food webs) and any extracted text (via OCR) if relevant to Biology, then incorporate this into the guidance. - Keep responses engaging, beginner-friendly, and focused on fostering curiosity about living systems. - You must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文)If the question, image, or extracted text is unclear, ask for clarification.`
+                guide: `You are a Guide Learning AI designed for Hong Kong DSE Biology students. Instead of giving direct answers, guide the user to understand biological concepts or answer questions by simplifying the question and offering intuitive hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts. - Provide hints or guiding questions to lead the user to the solution (e.g., "What are the stages of this process?" or "How does this structure function in the body?"). - If an image is provided, analyze its content (e.g., cell diagrams, food webs) and any extracted text (via OCR) if relevant to Biology, then incorporate this into the guidance. - Keep responses engaging, beginner-friendly, and focused on fostering curiosity about living systems. - You must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文)If the question, image, or extracted text is unclear, ask for clarification.`,
+                errorAnalysis: `You are an Error Analysis AI for DSE Biology students. When a student pastes their answer, identify the error type (factual, terminology, incomplete explanation, etc.), explain the correct biological concept using accepted DSE terminology, and suggest how to improve the answer to meet marking scheme standards.`
             },
             'ICT': {
-                ask: `You are an AI Learning Assistant designed for Hong Kong DSE Information and Communication Technology students. Provide clear, concise, and practical answers to deepen understanding of technology, coding, and digital systems. Focus on topics like programming, networking, databases, and cybersecurity. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) to structure explanations and highlight key technical points. Include hands-on examples to illustrate concepts. Avoid technical jargon unless explained simply. For complex topics, provide explanations in both English and Cantonese (using traditional Chinese characters) to aid comprehension. If an image is provided, analyze its content (e.g., code screenshots, network diagrams, UI designs) and any extracted text (via OCR) if relevant to ICT, then respond with detailed analysis or solutions. - you must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文) If the question, image, or extracted text is unclear, ask for clarification.`,
-                dict: `You are a Dictionary AI designed for Hong Kong DSE Information and Communication Technology students. Provide detailed explanations of ICT-related terms or concepts (e.g., algorithm, firewall, SQL query) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each term, include: - A clear definition in English, emphasizing its technical significance. - For complex concepts (e.g., machine learning, blockchain), an additional explanation in Cantonese (using traditional Chinese characters). - Sample usage (e.g., a code snippet, network setup, or application scenario) demonstrating the term's practical use. - A detailed explanation of the example to clarify its functionality. Keep responses practical, beginner-friendly, and focused on real-world ICT applications. -you must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example:important techniques,hints) in Cantonese(繁體中文)If the term is unclear or not ICT-related, ask for clarification or suggest relevant ICT terms.`,
-                guide: `You are a Guide Learning AI designed for Hong Kong DSE Information and Communication Technology students. Instead of giving direct answers, guide the user to understand technical concepts or solve problems by simplifying the question and offering practical hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts. - Provide hints or guiding questions to lead the user to the solution (e.g., "What does this code loop do?" or "Which protocol suits this network?"). - If an image is provided, analyze its content (e.g., code screenshots, network diagrams) and any extracted text (via OCR) if relevant to ICT, then incorporate this into the guidance. - Keep responses engaging, beginner-friendly, and focused on building technical confidence. Unless the question, image, or extracted text is unclear, ask for clarification.`
+                ask: `You are an AI Learning Assistant for Hong Kong DSE ICT students. You provide clear, structured, and practical answers about programming, networking, databases, and cybersecurity topics from the HKDSE ICT syllabus.
+
+HKDSE ICT TOPIC COVERAGE:
+- Compulsory Part: Computational thinking, Python programming (variables, data types, control structures, functions, file handling, data structures: lists/stacks/queues), algorithms (linear/binary search, selection/insertion/bubble sort), program testing and debugging (syntax errors, run-time errors, logical errors, overflow, truncation)
+- Elective Part 1: Algorithm and Programming (advanced sorting, recursion, complexity)
+- Elective Part 2: Database Management (SQL, entity-relationship diagrams, normalisation)  
+- Elective Part 3: Computer Networking (OSI model, TCP/IP, HTTP, DNS, network security)
+- Elective Part 4: Multimedia and Internet Communication
+
+RESPONSE GUIDELINES:
+- Use **Markdown formatting** with clear headings and bullet points
+- Include Python code blocks (\`\`\`python) for all code examples – only use syllabus-appropriate Python constructs (avoid map/filter/lambda unless required)
+- For algorithms, show step-by-step trace tables when helpful
+- For networking, describe OSI layers clearly with real-world analogies
+- For databases, include sample SQL queries with explanation
+- Provide explanations in both English and Cantonese (繁體中文) for complex topics
+- If an image is provided (e.g. code screenshot, network diagram, flowchart), analyze it and respond accordingly
+- **IMPORTANT 📌 重點提示：** End every response with a 📌 HKDSE Key Point box in Cantonese (繁體中文) highlighting exam-relevant tips, common pitfalls, and important techniques
+- If the question is unclear, ask for clarification`,
+                dict: `You are a Dictionary AI for Hong Kong DSE ICT students. You explain ICT terms and concepts with precision and clarity.
+
+For each term or concept, provide:
+1. **Definition** – Clear English definition emphasising technical significance
+2. **繁體中文解釋** – Cantonese explanation for complex concepts (e.g. recursion, normalisation, OSI model)
+3. **Practical Example** – A concrete code snippet (\`\`\`python), SQL query, network diagram description, or application scenario
+4. **Step-by-step Breakdown** – Explain the example in detail, relating it to the HKDSE ICT syllabus
+5. **📌 HKDSE考試重點** – Key exam points and common mistakes in Cantonese (繁體中文)
+
+SCOPE: Python programming, algorithms, data structures, file handling, databases (SQL/ER diagrams/normalisation), networking (OSI/TCP-IP/protocols), cybersecurity, multimedia.
+
+Use **Markdown formatting** throughout. Keep responses practical and beginner-friendly. If the term is not ICT-related, say so and suggest a related ICT term.`,
+                guide: `You are a Guide Learning AI for Hong Kong DSE ICT students. Your role is to guide students to discover answers themselves through the Socratic method – never give direct answers.
+
+For each question:
+1. **Restate** the question in both English and Traditional Chinese (繁體中文) to confirm understanding
+2. **Decompose** the problem into smaller logical sub-steps (e.g. identify inputs/outputs, choose the right data structure, trace the algorithm)
+3. **Hint Ladder** – Provide 2-3 progressively more specific guiding questions that lead the student toward the solution without revealing it (e.g. "What happens to the pointer when we move to the next element?" or "Which condition causes the loop to terminate?")
+4. **Reflection prompt** – End with one open question encouraging the student to evaluate their approach: "Can you think of a case where your solution might not work correctly?"
+5. **📌 HKDSE Guide Note** – In Cantonese (繁體中文), highlight the key technique or algorithm involved, common exam traps, and suggest a related topic to review
+
+IMPORTANT:
+- If the student seems stuck after 3 exchanges on the same question, offer a partial explanation but still withhold the final answer
+- If an image is provided (e.g. code screenshot, flowchart), analyze it and frame your guiding questions around what you see
+- Use Markdown formatting with code blocks for hints involving code
+- Keep responses encouraging and confidence-building`,
+                errorAnalysis: `You are an Error Analysis AI for DSE ICT students. When a student pastes their code, algorithm trace, or answer, identify the error type (syntax error, logical error, runtime error, algorithm error, missing edge case, etc.), explain exactly why it is wrong, and provide a corrected code snippet or explanation. Use Python code blocks and relate feedback to the HKDSE ICT syllabus.`
             }
         };
 
@@ -1118,7 +1233,8 @@
         let histories = {
             'askAI': [],
             'dictionaryAI': [],
-            'guideLearning': []
+            'guideLearning': [],
+            'errorAnalysis': []
         };
 
         // Theme management
@@ -1144,6 +1260,7 @@
             document.getElementById('askAIInterface').classList.add('hidden');
             document.getElementById('dictionaryAIInterface').classList.add('hidden');
             document.getElementById('guideLearningInterface').classList.add('hidden');
+            document.getElementById('errorAnalysisInterface').classList.add('hidden');
         }
 
         function showAIList(subject) {
@@ -1153,6 +1270,7 @@
             document.getElementById('askAIInterface').classList.add('hidden');
             document.getElementById('dictionaryAIInterface').classList.add('hidden');
             document.getElementById('guideLearningInterface').classList.add('hidden');
+            document.getElementById('errorAnalysisInterface').classList.add('hidden');
 
             document.getElementById('aiListHeader').innerHTML = `<i class="fas fa-${getSubjectIcon(subject)} mr-3"></i>${subject} AI Tools`;
             
@@ -1180,6 +1298,14 @@
                     description: 'Get guided hints and step-by-step help',
                     action: () => showAI(subject, 'guideLearning'),
                     color: 'from-purple-400 to-purple-600',
+                    iconColorClass: 'text-white'
+                },
+                {
+                    name: 'Error Analysis',
+                    icon: 'fas fa-search-plus',
+                    description: 'Paste your answer – AI identifies your mistakes and explains how to improve',
+                    action: () => showAI(subject, 'errorAnalysis'),
+                    color: 'from-red-400 to-rose-600',
                     iconColorClass: 'text-white'
                 }
             ];
@@ -1277,6 +1403,8 @@
                 window.open('./mensyu2.html?back=' + encodeURIComponent(subject), '_blank');
             } else if (toolName === 'English Writing Practice') {
                 window.open('./eng-writing.html?back=' + encodeURIComponent(subject), '_blank');
+            } else if (toolName === 'Error Analysis') {
+                showAI(subject, 'errorAnalysis');
             } else if (toolName === 'ICT Coding Review Platform') {
                 window.open('./coding.html?back=' + encodeURIComponent(subject), '_blank');
             } else if (toolName === 'Exam Paper Generator') {
@@ -1307,25 +1435,28 @@
             document.getElementById('askAIInterface').classList.add('hidden');
             document.getElementById('dictionaryAIInterface').classList.add('hidden');
             document.getElementById('guideLearningInterface').classList.add('hidden');
+            document.getElementById('errorAnalysisInterface').classList.add('hidden');
             
             document.getElementById(type + 'Interface').classList.remove('hidden');
 
             const headers = {
                 askAI: document.getElementById('askAIHeader'),
                 dictionaryAI: document.getElementById('dictionaryAIHeader'),
-                guideLearning: document.getElementById('guideLearningHeader')
+                guideLearning: document.getElementById('guideLearningHeader'),
+                errorAnalysis: document.getElementById('errorAnalysisHeader')
             };
             
             const toolNames = {
                 askAI: 'Ask AI',
                 dictionaryAI: 'Dictionary AI',
-                guideLearning: 'Guide Learning'
+                guideLearning: 'Guide Learning',
+                errorAnalysis: 'Error Analysis'
             };
 
             headers[type].innerHTML = `<i class="fas fa-${getToolIcon(type)} mr-2 text-${getToolColor(type)}-500"></i>${toolNames[type]} - ${subject}`;
             
             // Map the interface type name to the key used in the SUBJECTS object
-            const typeToSubjectKey = { askAI: 'ask', dictionaryAI: 'dict', guideLearning: 'guide' };
+            const typeToSubjectKey = { askAI: 'ask', dictionaryAI: 'dict', guideLearning: 'guide', errorAnalysis: 'errorAnalysis' };
             const systemPrompt = SUBJECTS[subject][typeToSubjectKey[type]];
             histories[type] = [{ role: "system", content: systemPrompt }];
             
@@ -1339,7 +1470,8 @@
             const icons = {
                 askAI: 'robot',
                 dictionaryAI: 'book',
-                guideLearning: 'compass'
+                guideLearning: 'compass',
+                errorAnalysis: 'search-plus'
             };
             return icons[type] || 'robot';
         }
@@ -1348,7 +1480,8 @@
             const colors = {
                 askAI: 'blue',
                 dictionaryAI: 'green',
-                guideLearning: 'purple'
+                guideLearning: 'purple',
+                errorAnalysis: 'red'
             };
             return colors[type] || 'blue';
         }
@@ -1358,13 +1491,15 @@
             const toolNames = {
                 askAI: 'AI Assistant',
                 dictionaryAI: 'Dictionary AI',
-                guideLearning: 'Guide AI'
+                guideLearning: 'Guide AI',
+                errorAnalysis: 'Error Analysis AI'
             };
             
             const welcomeMessages = {
                 askAI: `Hello! How can I assist you with ${subject} today?`,
                 dictionaryAI: 'Hello! Enter a term to learn more.',
-                guideLearning: 'Hello! Ask a question to get started.'
+                guideLearning: 'Hello! Ask a question to get started with guided learning. I will help you think through it step by step using hints. After my response, you can click <strong>💡 Get Hint</strong> to get a more specific hint if you need one.',
+                errorAnalysis: 'Hello! Paste your answer or work below. I will identify the type of error (conceptual, calculation, language, etc.) and explain how to fix it step by step.'
             };
 
             chatBox.innerHTML = `
@@ -1501,114 +1636,198 @@
             }
         }
         
-        // Replaced sendRequest function to build the correct API payload
+        // Streaming sendRequest function
         async function sendRequest(type, messageContent, loadingMessageId, base64Image = null) {
             let userMessagePayload;
-
             if (base64Image) {
                 userMessagePayload = {
                     role: "user",
                     content: [
-                        {
-                            type: "image_url",
-                            image_url: {
-                                url: base64Image,
-                                detail: "high"
-                            }
-                        },
-                        {
-                            type: "text",
-                            text: messageContent
-                        }
+                        { type: "image_url", image_url: { url: base64Image, detail: "high" } },
+                        { type: "text", text: messageContent }
                     ]
                 };
             } else {
-                userMessagePayload = {
-                    role: "user",
-                    content: messageContent
-                };
+                userMessagePayload = { role: "user", content: messageContent };
             }
-
             histories[type].push(userMessagePayload);
-
             const validMessages = histories[type].filter(msg => msg.content);
+            if (validMessages.length === 0) throw new Error('No valid messages to send.');
 
-            if (validMessages.length === 0) {
-                throw new Error('No valid messages to send.');
-            }
-
-            // When the current message includes an image, only use vision-capable models.
-            // glm and deepseek do NOT support vision.
             const modelsToTry = base64Image ? VISION_MODELS : FALLBACK_MODELS;
 
-            // Helper: for non-vision models, strip any image_url parts from history so they
-            // don't receive unsupported multimodal content; keep only the text parts.
             function getMessagesForModel(model, messages) {
                 if (VISION_MODELS.includes(model)) return messages;
                 return messages.map(msg => {
                     if (Array.isArray(msg.content)) {
                         const textPart = msg.content.find(p => p.type === 'text');
-                        if (!textPart) {
-                            console.warn('Multimodal message has no text part; dropping from history for non-vision model.');
-                            return null;
-                        }
+                        if (!textPart) return null;
                         return { ...msg, content: textPart.text };
                     }
                     return msg;
                 }).filter(msg => msg && msg.content);
             }
 
-            try {
-                let aiResponse = null;
-                for (const model of modelsToTry) {
-                    try {
-                        const messagesForModel = getMessagesForModel(model, validMessages);
-                        const response = await fetch(POLLINATIONS_API_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                messages: messagesForModel,
-                                model: model,
-                                stream: false,
-                                temperature: 0,
-                                max_tokens: 4096
-                            })
-                        });
+            // Remove the plain loading bubble and create a streaming bubble
+            removeMessage(loadingMessageId);
+            const streamId = 'stream-' + Date.now();
+            addStreamingBubble(type, streamId);
 
-                        if (!response.ok) {
-                            console.warn(`Model ${model} failed with status ${response.status}, trying next model...`);
-                            continue;
-                        }
+            let aiResponse = null;
+            for (const model of modelsToTry) {
+                try {
+                    const messagesForModel = getMessagesForModel(model, validMessages);
+                    const response = await fetch(POLLINATIONS_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            messages: messagesForModel,
+                            model: model,
+                            stream: true,
+                            temperature: 0,
+                            max_tokens: 4096
+                        })
+                    });
 
-                        const responseText = await response.text();
-                        const data = JSON.parse(responseText);
-                        const content = data.choices?.[0]?.message?.content;
-                        if (content) { aiResponse = content; break; }
-                        console.warn(`Model ${model} returned no content, trying next model...`);
-                    } catch (modelError) {
-                        console.warn(`Model ${model} failed with error: ${modelError.message}, trying next model...`);
+                    if (!response.ok) {
+                        console.warn(`Model ${model} failed with status ${response.status}`);
+                        continue;
                     }
-                }
 
-                if (!aiResponse) throw new Error('All models failed to generate a response');
-                
-                histories[type].push({ role: "assistant", content: aiResponse });
-                
-                removeMessage(loadingMessageId);
-                addAIMessage(type, aiResponse);
+                    // Stream the response
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let accum = '';
+                    let streamedText = '';
+                    let done = false;
 
-                // Save this Q&A pair to Firestore (non-blocking)
-                if (window.saveHistory) {
-                    window.saveHistory(type, messageContent, aiResponse, currentSubject);
+                    while (!done) {
+                        const { value, done: doneReading } = await reader.read();
+                        done = doneReading;
+                        if (value) {
+                            accum += decoder.decode(value, { stream: true });
+                            const lines = accum.split('\n');
+                            accum = lines.pop(); // keep incomplete last line
+                            for (const line of lines) {
+                                const trimmed = line.trim();
+                                if (!trimmed || trimmed === 'data: [DONE]') continue;
+                                if (trimmed.startsWith('data: ')) {
+                                    try {
+                                        const json = JSON.parse(trimmed.slice(6));
+                                        const delta = json.choices?.[0]?.delta?.content;
+                                        if (delta) {
+                                            streamedText += delta;
+                                            updateStreamingBubble(streamId, streamedText);
+                                        }
+                                    } catch (e) { console.warn('Malformed SSE chunk:', trimmed, e); }
+                                }
+                            }
+                        }
+                    }
+
+                    if (streamedText) {
+                        aiResponse = streamedText;
+                        break;
+                    }
+                    console.warn(`Model ${model} streaming returned no content`);
+                } catch (modelError) {
+                    console.warn(`Model ${model} streaming failed: ${modelError.message}`);
                 }
-                
-            } catch (error) {
-                console.error('Request Error:', error);
-                throw error;
             }
+
+            if (!aiResponse) {
+                removeStreamingBubble(streamId);
+                throw new Error('All models failed to generate a response');
+            }
+
+            finalizeStreamingBubble(type, streamId, aiResponse);
+            histories[type].push({ role: "assistant", content: aiResponse });
+
+            if (window.saveHistory) {
+                window.saveHistory(type, messageContent, aiResponse, currentSubject);
+            }
+        }
+
+        function addStreamingBubble(type, streamId) {
+            const chatBox = document.getElementById(`${type}ChatBox`);
+            const messageDiv = document.createElement('div');
+            messageDiv.id = streamId;
+            messageDiv.className = 'flex justify-start';
+            messageDiv.innerHTML = `
+                <div class="message-bubble ai-bubble p-4 max-w-xs md:max-w-md lg:max-w-2xl">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                             style="background:linear-gradient(135deg,var(--primary),var(--secondary))">
+                            <i class="fas fa-${getToolIcon(type)} text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-sm mb-2" style="color:var(--text-primary)">AI Assistant</p>
+                            <div class="stream-content prose prose-sm max-w-none text-sm" style="color:var(--text-primary)">
+                                <span class="stream-cursor">&#9611;</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function updateStreamingBubble(streamId, text) {
+            const bubble = document.getElementById(streamId);
+            if (!bubble) return;
+            const content = bubble.querySelector('.stream-content');
+            if (!content) return;
+            content.innerHTML = formatMarkdown(text) + '<span class="stream-cursor">&#9611;</span>';
+            const chatBox = bubble.closest('[id$="ChatBox"]');
+            if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function finalizeStreamingBubble(type, streamId, fullText) {
+            const bubble = document.getElementById(streamId);
+            if (!bubble) return;
+            const isGuide = type === 'guideLearning';
+            const content = bubble.querySelector('.stream-content');
+            if (content) {
+                content.innerHTML = formatMarkdown(fullText);
+                content.classList.remove('stream-content');
+                content.classList.add('prose', 'prose-sm', 'max-w-none', 'text-sm');
+            }
+            if (['Math', 'Physics'].includes(currentSubject) && window.MathJax) {
+                MathJax.typesetPromise([bubble]).catch(e => console.warn('MathJax error:', e));
+            }
+            const innerDiv = bubble.querySelector('.flex-1');
+            if (innerDiv) {
+                const hintBtn = isGuide ? `
+                    <button onclick="requestHint('guideLearning')" class="msg-action-btn" style="background:rgba(139,92,246,.12);color:#7c3aed;" aria-label="Get another hint">
+                        <i class="fas fa-lightbulb mr-1"></i>&#128161; Get Hint
+                    </button>` : '';
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'mt-3 flex gap-2 flex-wrap';
+                actionsDiv.innerHTML = `
+                    <button onclick="copyMessage(this)" class="msg-action-btn" aria-label="Copy message">
+                        <i class="fas fa-copy mr-1"></i>Copy
+                    </button>
+                    <button onclick="shareMessage(this)" class="msg-action-btn" aria-label="Share message">
+                        <i class="fas fa-share mr-1"></i>Share
+                    </button>
+                    ${hintBtn}`;
+                innerDiv.appendChild(actionsDiv);
+            }
+        }
+
+        function removeStreamingBubble(streamId) {
+            const bubble = document.getElementById(streamId);
+            if (bubble) bubble.remove();
+        }
+
+        function requestHint(type) {
+            if (type !== 'guideLearning') return;
+            const input = document.getElementById(`${type}Input`);
+            input.value = 'Please give me a more specific hint for the same question.';
+            sendMessage(type);
         }
 
         // ===== END: DEBUGGED AND UPDATED CODE =====
@@ -1699,13 +1918,17 @@
                             <p class="font-bold text-sm mb-2" style="color:${errorColor}">AI Assistant</p>
                             <div class="prose prose-sm max-w-none text-sm" style="color:var(--text-primary)">${formatMarkdown(content)}</div>
                             ${!isError ? `
-                                <div class="mt-3 flex gap-2">
+                                <div class="mt-3 flex gap-2 flex-wrap">
                                     <button onclick="copyMessage(this)" class="msg-action-btn" aria-label="Copy message">
                                         <i class="fas fa-copy mr-1"></i>Copy
                                     </button>
                                     <button onclick="shareMessage(this)" class="msg-action-btn" aria-label="Share message">
                                         <i class="fas fa-share mr-1"></i>Share
                                     </button>
+                                    ${type === 'guideLearning' ? `
+                                    <button onclick="requestHint('guideLearning')" class="msg-action-btn" style="background:rgba(139,92,246,.12);color:#7c3aed;" aria-label="Get another hint">
+                                        <i class="fas fa-lightbulb mr-1"></i>💡 Get Hint
+                                    </button>` : ''}
                                 </div>
                             ` : ''}
                         </div>
@@ -1961,7 +2184,7 @@
                     closeHistoryPanel();
                     return;
                 }
-                const interfaces = ['askAIInterface', 'dictionaryAIInterface', 'guideLearningInterface'];
+                const interfaces = ['askAIInterface', 'dictionaryAIInterface', 'guideLearningInterface', 'errorAnalysisInterface'];
                 const currentInterface = interfaces.find(id => !document.getElementById(id).classList.contains('hidden'));
                 if (currentInterface) {
                     showAIList(currentSubject);
@@ -1971,7 +2194,7 @@
 
         // Paste event handling for images
         document.addEventListener('paste', (e) => {
-            const activeInterface = ['askAIInterface', 'guideLearningInterface'].find(id => 
+            const activeInterface = ['askAIInterface', 'guideLearningInterface', 'errorAnalysisInterface'].find(id => 
                 !document.getElementById(id).classList.contains('hidden')
             );
             
@@ -2006,6 +2229,7 @@
         window.addUserMessage = addUserMessage;
         window.addAIMessage = addAIMessage;
         window.histories = histories;
+        window.requestHint = requestHint;
 
         // Handle ?openSubject= URL param (used by external tool pages to return to the correct AI list)
         (function() {
@@ -2041,7 +2265,7 @@
                 <i class="fas fa-history" style="color:var(--primary);font-size:1.1rem"></i>
                 <span class="font-bold text-base" style="color:var(--text-primary)">Chat History</span>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
                 <select id="hpFilterTool" onchange="applyHPFilter()"
                         class="btn-secondary text-xs px-2 py-1.5 rounded-lg outline-none cursor-pointer"
                         style="background:var(--glass-bg);color:var(--text-primary);border:1px solid var(--glass-border)">
@@ -2049,11 +2273,19 @@
                     <option value="Ask AI">Ask AI</option>
                     <option value="Dictionary AI">Dictionary AI</option>
                     <option value="Guide Learning">Guide Learning</option>
+                    <option value="Error Analysis">Error Analysis</option>
                     <option value="Code Review">Code Review</option>
                     <option value="Exam Paper Generator">Exam Paper Generator</option>
                     <option value="English Writing">English Writing</option>
                     <option value="Vocabulary Generator">Vocabulary Generator</option>
                 </select>
+                <input type="text" id="hpSearch" placeholder="🔍 Search history…"
+                       oninput="applyHPFilter()"
+                       style="background:var(--glass-bg);color:var(--text-primary);border:1px solid var(--glass-border);border-radius:8px;padding:.35rem .7rem;font-size:.78rem;outline:none;min-width:0;flex:1;max-width:160px;">
+                <button onclick="exportHistoryText()" title="Export history as text" aria-label="Export history"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl btn-secondary">
+                    <i class="fas fa-download" style="color:var(--text-secondary)"></i>
+                </button>
                 <button onclick="closeHistoryPanel()"
                         class="w-9 h-9 flex items-center justify-center rounded-xl btn-secondary"
                         aria-label="Close history panel">
@@ -2075,7 +2307,7 @@
     <script>
         // ── Inline History Panel ──────────────────────────────────────────
         let _hp = { all:[], filtered:[], lastDoc:null, loading:false, filterTool:'' };
-        const _HP_CHAT_TOOL_MAP = { 'Ask AI': 'askAI', 'Dictionary AI': 'dictionaryAI', 'Guide Learning': 'guideLearning' };
+        const _HP_CHAT_TOOL_MAP = { 'Ask AI': 'askAI', 'Dictionary AI': 'dictionaryAI', 'Guide Learning': 'guideLearning', 'Error Analysis': 'errorAnalysis' };
 
         function _hpEscape(s) {
             return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -2093,6 +2325,7 @@
         }
         function _hpToolColor(tool) {
             const m = {'Ask AI':'#7c3aed','Dictionary AI':'#10b981','Guide Learning':'#8b5cf6',
+                       'Error Analysis':'#ef4444',
                        'Code Review':'#06b6d4','Exam Paper Generator':'#f59e0b',
                        'English Writing':'#14b8a6','Vocabulary Generator':'#eab308',
                        '文言文翻譯':'#ef4444','文樞翻譯':'#ef4444','Vocabulary':'#eab308'};
@@ -2100,6 +2333,7 @@
         }
         function _hpToolIcon(tool) {
             const m = {'Ask AI':'robot','Dictionary AI':'book','Guide Learning':'compass',
+                       'Error Analysis':'search-plus',
                        'Code Review':'terminal','Exam Paper Generator':'file-alt',
                        'English Writing':'pen-fancy','Vocabulary Generator':'lightbulb',
                        '文言文翻譯':'scroll','文樞翻譯':'scroll','Vocabulary':'lightbulb'};
@@ -2154,6 +2388,13 @@
                         title="Continue chat" aria-label="Continue chat">
                     <i class="fas fa-comment-dots" aria-hidden="true"></i>
                 </button>` : '';
+            const starred = (JSON.parse(localStorage.getItem('hp_starred') || '{}')).hasOwnProperty(s.id);
+            const starBtn = `
+                <button onclick="event.stopPropagation();toggleHPStar('${s.id}', this)"
+                        style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.8rem;background:${starred ? 'rgba(245,158,11,.15)' : 'rgba(0,0,0,.05)'};color:${starred ? '#f59e0b' : 'var(--text-secondary)'};border:none;cursor:pointer;"
+                        title="${starred ? 'Unstar' : 'Star'}" aria-label="${starred ? 'Unstar session' : 'Star session'}">
+                    <i class="fas fa-star"></i>
+                </button>`;
             return `
             <div class="hp-session-card" id="hp-card-${s.id}">
                 <div class="hp-session-header" onclick="toggleHPCard('${s.id}')"
@@ -2171,6 +2412,7 @@
                     </div>
                     <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
                         <span style="font-size:.7rem;color:var(--text-secondary)">${_hpEscape(time)}</span>
+                        ${starBtn}
                         ${continueBtn}
                         <button onclick="event.stopPropagation();deleteHPSession('${s.id}')"
                                 class="btn-danger" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.7rem"
@@ -2246,12 +2488,19 @@
 
         function applyHPFilter() {
             _hp.filterTool = document.getElementById('hpFilterTool').value;
-            _hp.filtered = _hp.filterTool
-                ? _hp.all.filter(s=>s.tool===_hp.filterTool)
-                : [..._hp.all];
+            const searchEl = document.getElementById('hpSearch');
+            const keyword = (searchEl ? searchEl.value.trim().toLowerCase() : '');
+            _hp.filtered = _hp.all.filter(s => {
+                const toolMatch = !_hp.filterTool || s.tool === _hp.filterTool;
+                const keywordMatch = !keyword ||
+                    (s.summary || '').toLowerCase().includes(keyword) ||
+                    (s.tool || '').toLowerCase().includes(keyword) ||
+                    (s.subject || '').toLowerCase().includes(keyword);
+                return toolMatch && keywordMatch;
+            });
             _hpRenderSessions(_hp.filtered);
             document.getElementById('historyPanelLoadMore').style.display =
-                (_hp.lastDoc && !_hp.filterTool) ? 'block' : 'none';
+                (_hp.lastDoc && !_hp.filterTool && !keyword) ? 'block' : 'none';
         }
 
         async function loadMoreHP() {
@@ -2289,6 +2538,8 @@
             // Reset state and load fresh
             _hp = { all:[], filtered:[], lastDoc:null, loading:false, filterTool:'' };
             document.getElementById('hpFilterTool').value = '';
+            const _searchEl = document.getElementById('hpSearch');
+            if (_searchEl) _searchEl.value = '';
             document.getElementById('hpList').innerHTML =
                 `<div style="text-align:center;padding:2rem"><i class="fas fa-spinner fa-spin" style="color:var(--primary);font-size:1.5rem"></i></div>`;
             document.getElementById('historyPanelLoadMore').style.display = 'none';
@@ -2316,6 +2567,42 @@
             backdrop.classList.remove('open');
             panel.classList.remove('open');
             setTimeout(() => { backdrop.style.display = 'none'; }, 350);
+        }
+
+        function toggleHPStar(id, btn) {
+            const stored = JSON.parse(localStorage.getItem('hp_starred') || '{}');
+            const isStarred = stored.hasOwnProperty(id);
+            if (isStarred) { delete stored[id]; } else { stored[id] = true; }
+            localStorage.setItem('hp_starred', JSON.stringify(stored));
+            btn.style.background = isStarred ? 'rgba(0,0,0,.05)' : 'rgba(245,158,11,.15)';
+            btn.style.color = isStarred ? 'var(--text-secondary)' : '#f59e0b';
+            btn.title = isStarred ? 'Star' : 'Unstar';
+        }
+
+        function exportHistoryText() {
+            const sessions = _hp.filtered.length ? _hp.filtered : _hp.all;
+            if (!sessions.length) { alert('No history to export.'); return; }
+            let text = 'EduGenius AI Chat History Export\n';
+            text += `Exported: ${new Date().toLocaleString('en-HK')}\n`;
+            text += '='.repeat(50) + '\n\n';
+            sessions.forEach(s => {
+                text += `[${s.tool || 'Unknown Tool'} \u2013 ${s.subject || ''}]\n`;
+                text += `Date: ${_hpFmtDate(s.updatedAt)} ${_hpFmtTime(s.updatedAt)}\n`;
+                text += `Summary: ${s.summary || ''}\n`;
+                text += '-'.repeat(40) + '\n';
+                (s.messages || []).forEach(m => {
+                    const role = m.role === 'user' ? 'You' : 'AI';
+                    text += `${role}: ${(m.content || '').substring(0, 800)}\n\n`;
+                });
+                text += '\n';
+            });
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `edugenius-history-${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
