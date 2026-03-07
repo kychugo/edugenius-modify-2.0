@@ -464,8 +464,26 @@
                 max-height: 100px; /* Or a sufficiently large value */
             }
         }
+/* ---- Dark mode ---- */
+.dark body { background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0d1a2e 100%); color: #e2e8f0; }
+.dark nav { background: rgba(15,15,40,0.95) !important; }
+.dark .glass-effect { background: rgba(15,15,40,0.85); }
+.dark .bg-white { background: rgba(15,15,40,0.85) !important; color: #e2e8f0; }
+.dark .character-card { background: rgba(15,15,40,0.85) !important; }
+.dark .floating-original { background: rgba(15,15,40,0.95); }
+.dark .floating-content { color: #e2e8f0; }
+.dark .test-control-panel { background: rgba(15,15,40,0.95); color: #e2e8f0; }
+/* Micro-interactions */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+/* Focus ring */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(124,58,237,.5);
+    outline-offset: 2px;
+}
     </style>
-</head>
 <body>
     <!-- Auth guard overlay -->
     <div id="auth-guard-overlay" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,40,.96);backdrop-filter:blur(8px);">

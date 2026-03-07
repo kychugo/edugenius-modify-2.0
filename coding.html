@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered Python code review tool – submit your code and get instant feedback from EduGenius AI.">
     <title>AI Code Review - EduGenius</title>
 
     <!-- External Libraries -->
@@ -101,6 +102,45 @@
         .completion-blank { background:rgba(124,58,237,.25); border-bottom:2px solid var(--primary); padding:0.1rem 0.4rem; border-radius:4px; color:#a78bfa; font-weight:700; }
         .completion-input { width:100%; min-height:120px; font-family:'Monaco','Menlo','Ubuntu Mono',monospace; font-size:0.85rem; padding:0.75rem; border-radius:10px; border:1.5px solid rgba(124,58,237,.3); background:#1a1a2e; color:#e2e8f0; resize:vertical; }
         .completion-input:focus { outline:none; border-color:var(--primary); }
+
+.dark {
+    --primary: #a78bfa;
+    --primary-dark: #7c3aed;
+    --secondary: #22d3ee;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --bg-main: #0d0d1a;
+    --glass-bg: rgba(15,15,40,0.85);
+    --glass-border: rgba(255,255,255,0.08);
+    --shadow-glow: 0 0 60px rgba(124,58,237,0.18);
+}
+.dark body { background-color: var(--bg-main); color: var(--text-primary); }
+.dark body::before {
+    background:
+        radial-gradient(ellipse 80% 60% at 15% 5%, rgba(124,58,237,.32) 0%,transparent 55%),
+        radial-gradient(ellipse 60% 50% at 85% 85%, rgba(6,182,212,.22) 0%,transparent 55%);
+}
+.dark .glass-card { background: var(--glass-bg); border-color: var(--glass-border); }
+.dark .input-field { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+.dark .input-field::placeholder { color: #64748b; }
+.dark .btn-back { background: rgba(15,15,40,.8); color: var(--primary); }
+.dark .section-label { color: #94a3b8; }
+.dark .feedback-placeholder { color: #94a3b8; }
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .CodeMirror { height: 200px; }
+    .advanced-tools-grid { grid-template-columns: 1fr !important; }
+}
+/* Micro-interactions */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+/* Focus ring */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(124,58,237,.5);
+    outline-offset: 2px;
+}
     </style>
 </head>
 <body class="transition-all duration-300">
@@ -122,6 +162,9 @@
             <a id="back-btn-link" href="./index.html" class="btn-back px-4 py-2 text-sm" aria-label="Back">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
+            <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.1);color:var(--primary);font-size:1rem;transition:all .2s">
+                <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
+            </button>
         </div>
 
         <!-- Page header -->

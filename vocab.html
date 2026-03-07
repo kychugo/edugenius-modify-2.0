@@ -782,8 +782,45 @@
         .match-item.selected { border-color:var(--primary); background:var(--primary-light); color:var(--primary); font-weight:700; }
         .match-item.matched-correct { border-color:var(--green); background:var(--green-light); color:#065f46; }
         .match-item.matched-wrong { border-color:var(--red); background:var(--red-light); color:#991b1b; }
+/* ---- Dark mode ---- */
+.dark body { background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0d1a2e 100%); color: #e2e8f0; }
+.dark .card { background: rgba(15,15,40,0.85); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; }
+.dark .site-header { background: rgba(15,15,40,0.95); }
+.dark .tab-bar { background: rgba(15,15,40,0.9); }
+.dark .tab-btn { color: #94a3b8; }
+.dark .tab-btn.active { background: linear-gradient(135deg, #7c3aed, #06b6d4); color: white; }
+.dark .vocab-card { background: rgba(30,20,60,.8); border-color: rgba(124,58,237,.3); }
+.dark .vocab-word { color: #a78bfa; }
+.dark .quiz-question-card { background: rgba(15,15,40,0.9); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+.dark .quiz-q-text { color: #e2e8f0; }
+.dark .quiz-option { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+.dark .quiz-option:hover:not(:disabled) { background: rgba(124,58,237,.2); border-color: #7c3aed; color: #a78bfa; }
+.dark .score-panel { background: rgba(15,15,40,.8); border-color: rgba(124,58,237,.3); }
+.dark .score-item { background: rgba(30,20,60,.8); border-color: rgba(124,58,237,.2); }
+.dark input[type="text"], .dark select { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+.dark footer { color: #94a3b8; border-top-color: rgba(255,255,255,.08); }
+.dark .back-btn { background: rgba(124,58,237,.2); color: #a78bfa; }
+.dark .hero h1 { color: #e2e8f0; }
+.dark .card-title { color: #e2e8f0; }
+.dark .brand { color: #e2e8f0; }
+.dark label { color: #e2e8f0; }
+.dark .srs-card { background: rgba(30,20,60,.8); border-color: rgba(124,58,237,.3); }
+.dark .srs-word { color: #a78bfa; }
+.dark .quiz-type-btn { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #94a3b8; }
+.dark .quiz-type-btn.active { border-color: #7c3aed; background: rgba(124,58,237,.2); color: #a78bfa; }
+.dark .match-item { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+.dark .sc-input { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+/* Micro-interactions */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+/* Focus ring */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(124,58,237,.5);
+    outline-offset: 2px;
+}
     </style>
-</head>
 <body>
     <!-- Auth guard overlay -->
     <div id="auth-guard-overlay" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,40,.96);backdrop-filter:blur(8px);">

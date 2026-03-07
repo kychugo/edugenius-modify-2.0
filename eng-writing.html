@@ -540,8 +540,33 @@
         .template-starter { font-size: 0.78rem; color: var(--primary); font-style: italic; margin-top: 0.4rem; border-top: 1px solid #e5e7eb; padding-top: 0.4rem; }
         .use-template-btn { font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 6px; border: none; background: var(--primary-light); color: var(--primary); font-family: inherit; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
         .use-template-btn:hover { background: #e0e7ff; }
+/* ---- Dark mode ---- */
+.dark body { background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0d1a2e 100%); color: #e2e8f0; }
+.dark .card { background: rgba(15,15,40,0.85); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; }
+.dark .site-header { background: rgba(15,15,40,0.95); }
+.dark .template-card { background: rgba(15,15,40,0.85); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+.dark .template-name { color: #e2e8f0; }
+.dark input[type="text"], .dark select, .dark textarea { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.15); color: #e2e8f0; }
+.dark footer { color: #94a3b8; border-top-color: rgba(255,255,255,.08); }
+.dark .back-btn { background: rgba(124,58,237,.2); color: #a78bfa; }
+.dark .hero h1 { color: #e2e8f0; }
+.dark .card-title { color: #e2e8f0; }
+.dark .brand { color: #e2e8f0; }
+.dark label { color: #e2e8f0; }
+.dark .templates-toggle { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.1); color: #e2e8f0; }
+.dark .templates-body { background: rgba(15,15,40,.8); border-color: rgba(255,255,255,.08); }
+.dark .status-bar { background: rgba(15,15,40,.8); color: #e2e8f0; }
+/* Micro-interactions */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+/* Focus ring */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(124,58,237,.5);
+    outline-offset: 2px;
+}
     </style>
-</head>
 <body>
     <!-- Auth guard overlay -->
     <div id="auth-guard-overlay" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,40,.96);backdrop-filter:blur(8px);">
