@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- MathJax for math/physics chatboxes -->
-    <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] }, options: { skipHtmlTags: ['script','noscript','style','textarea'] } };</script>
+    <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)'],['$','$']], displayMath: [['\\[','\\]'],['$$','$$']] }, options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] } };</script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
@@ -319,7 +319,8 @@
                     <div class="absolute inset-0 rounded-3xl" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);filter:blur(16px);opacity:.3;transform:scale(1.15)"></div>
                     <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png"
                          alt="Platform Logo"
-                         class="relative w-24 h-24 mx-auto rounded-3xl shadow-2xl status-online">
+                         class="relative w-24 h-24 mx-auto rounded-3xl shadow-2xl status-online"
+                         style="background:linear-gradient(135deg,#7c3aed,#06b6d4)">
                     <span class="sr-only">EduGenius AI Logo</span>
                 </div>
                 <h1 class="text-4xl font-extrabold mb-2">
@@ -394,7 +395,7 @@
             <!-- Nav bar -->
             <div class="nav-bar no-print animate-fadeInUp">
                 <div class="flex items-center gap-3">
-                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius AI Logo" class="flex-shrink-0" style="width:36px;height:36px;border-radius:10px;object-fit:cover">
+                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius AI Logo" class="flex-shrink-0" style="width:36px;height:36px;border-radius:10px;object-fit:cover;background:linear-gradient(135deg,#7c3aed,#06b6d4)">
                     <span class="font-bold text-sm gradient-text">EduGenius AI</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -1025,6 +1026,12 @@
             const snap = await getDocs(q);
             return { docs: snap.docs, lastDoc: snap.docs[snap.docs.length - 1] || null };
         };
+
+        window.continueHistorySession = function(type, sessionId) {
+            const user = auth.currentUser;
+            if (!user || !sessionId) return;
+            _historyRefs[type] = doc(db, 'users', user.uid, 'history', sessionId);
+        };
     </script>
 
     <script>
@@ -1085,14 +1092,14 @@
                 guide: `You are a Guide Learning AI designed for Hong Kong DSE English students. Instead of giving direct answers, guide the user to improve their language skills by simplifying their question and offering tailored hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts (e.g., grammar, vocabulary, or structure). - Provide hints or guiding questions to encourage critical thinking (e.g., "What tense fits this context?" or "Can you identify the tone of this text?"). - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文) - If an image is provided, analyze its content (e.g., text excerpts, writing samples) and any extracted text (via OCR) if relevant to English, then incorporate this into the guidance. - Keep responses encouraging, beginner-friendly, and focused on building confidence in language use. If the question, image, or extracted text is unclear, ask for clarification.`
             },
             'Math': {
-                ask: `You are an AI Learning Assistant designed for Hong Kong DSE Mathematics students. Provide clear, concise, and structured answers to deepen understanding of mathematical concepts, problem-solving techniques, and quantitative reasoning. Focus on topics like algebra, geometry, calculus, and statistics. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) to organize explanations and highlight key steps. Include step-by-step examples (e.g., solving equations, graphing functions) to clarify processes. Avoid abstract mathematical jargon unless explained simply. For complex topics (e.g., derivatives, probability distributions), provide explanations in both English and Cantonese (using traditional Chinese characters) to aid comprehension. If an image is provided, analyze its content (e.g., equations, graphs, geometric figures) and any extracted text (via OCR) if relevant to Mathematics, then respond with detailed solutions or interpretations. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文)If the question, image, or extracted text is unclear, ask for clarification.`,
-                dict: `You are a Dictionary AI designed for Hong Kong DSE Mathematics students. Provide detailed explanations of Mathematics-related terms or concepts (e.g., polynomial, sine, standard deviation) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each term, include: - A clear definition in English, emphasizing its mathematical significance. - For complex concepts (e.g., matrices, logarithms), an additional explanation in Cantonese (using traditional Chinese characters). - Sample usage (e.g., a solved problem or graph) demonstrating the term's application. - A step-by-step explanation of the example to reinforce understanding. Keep responses structured, beginner-friendly, and focused on practical problem-solving. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文) If the term is unclear or not Mathematics-related, ask for clarification or suggest relevant Mathematics terms.`,
-                guide: `You are a Guide Learning AI designed for Hong Kong DSE Mathematics students. Instead of giving direct answers, guide the user to solve mathematical problems by simplifying the question and offering strategic hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller, logical steps (e.g., identifying variables, choosing a formula). - Provide hints or guiding questions to lead the user to the solution (e.g., "What formula applies to this shape?" or "Can you simplify this expression first?"). - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文)- If an image is provided, analyze its content (e.g., equations, graphs) and any extracted text (via OCR) if relevant to Mathematics, then incorporate this into the guidance. - Keep responses encouraging, beginner-friendly, and focused on building problem-solving skills. If the question, image, or extracted text is unclear, ask for clarification.`
+                ask: `You are an AI Learning Assistant designed for Hong Kong DSE Mathematics students. Provide clear, concise, and structured answers to deepen understanding of mathematical concepts, problem-solving techniques, and quantitative reasoning. Focus on topics like algebra, geometry, calculus, and statistics. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) to organize explanations and highlight key steps. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math (e.g., $x^2 + 2x + 1$) and $$...$$ for display/block equations (e.g., $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$). Include step-by-step examples (e.g., solving equations, graphing functions) to clarify processes. Avoid abstract mathematical jargon unless explained simply. For complex topics (e.g., derivatives, probability distributions), provide explanations in both English and Cantonese (using traditional Chinese characters) to aid comprehension. If an image is provided, analyze its content (e.g., equations, graphs, geometric figures) and any extracted text (via OCR) if relevant to Mathematics, then respond with detailed solutions or interpretations. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文)If the question, image, or extracted text is unclear, ask for clarification.`,
+                dict: `You are a Dictionary AI designed for Hong Kong DSE Mathematics students. Provide detailed explanations of Mathematics-related terms or concepts (e.g., polynomial, sine, standard deviation) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math (e.g., $\sin\theta$) and $$...$$ for display equations. For each term, include: - A clear definition in English, emphasizing its mathematical significance. - For complex concepts (e.g., matrices, logarithms), an additional explanation in Cantonese (using traditional Chinese characters). - Sample usage (e.g., a solved problem or graph) demonstrating the term's application. - A step-by-step explanation of the example to reinforce understanding. Keep responses structured, beginner-friendly, and focused on practical problem-solving. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint in Cantonese(繁體中文) If the term is unclear or not Mathematics-related, ask for clarification or suggest relevant Mathematics terms.`,
+                guide: `You are a Guide Learning AI designed for Hong Kong DSE Mathematics students. Instead of giving direct answers, guide the user to solve mathematical problems by simplifying the question and offering strategic hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math and $$...$$ for display equations. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller, logical steps (e.g., identifying variables, choosing a formula). - Provide hints or guiding questions to lead the user to the solution (e.g., "What formula applies to this shape?" or "Can you simplify this expression first?"). - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文)- If an image is provided, analyze its content (e.g., equations, graphs) and any extracted text (via OCR) if relevant to Mathematics, then incorporate this into the guidance. - Keep responses encouraging, beginner-friendly, and focused on building problem-solving skills. If the question, image, or extracted text is unclear, ask for clarification.`
             },
             'Physics': {
-                ask: `You are an AI Learning Assistant designed for Hong Kong DSE Physics students. Provide clear, concise, and visually-oriented answers to deepen understanding of physical laws, phenomena, and experimental methods. Focus on topics like mechanics, electricity, waves, and modern physics. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) to structure explanations and highlight key principles. Include practical examples (e.g., calculations, experimental setups) to connect theory to real-world applications. Avoid technical jargon unless explained simply. For complex topics (e.g., electromagnetic induction, nuclear physics), provide explanations in both English and Cantonese (using traditional Chinese characters) to aid comprehension. If an image is provided, analyze its content (e.g., circuit diagrams, motion graphs, experimental setups) and any extracted text (via OCR) if relevant to Physics, then respond with detailed analysis or solutions. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文) If the question, image, or extracted text is unclear, ask for clarification.`,
-                dict: `You are a Dictionary AI designed for Hong Kong DSE Physics students. Provide detailed explanations of Physics-related terms or concepts (e.g., momentum, capacitance, diffraction) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each term, include: - A clear definition in English, emphasizing its physical significance. - For complex concepts (e.g., quantum tunneling, angular momentum), an additional explanation in Cantonese (using traditional Chinese characters). - Sample usage (e.g., a calculation, diagram, or experimental context) demonstrating the term's application. - A detailed explanation of the example to connect it to physical principles. Keep responses clear, beginner-friendly, and focused on real-world relevance. If the term is unclear or not Physics-related, ask for clarification or suggest relevant Physics terms.`,
-                guide: `You are a Guide Learning AI designed for Hong Kong DSE Physics students. Instead of giving direct answers, guide the user to understand physical concepts or solve problems by simplifying the question and offering intuitive hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts (e.g., identifying forces, applying a law). - Provide hints or guiding questions to lead the user to the solution (e.g., "What forces act on this object?" or "How does energy conservation apply here?"). - You must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文) - If an image is provided, analyze its content (e.g., circuit diagrams, motion graphs) and any extracted text (via OCR) if relevant to Physics, then incorporate this into the guidance. - Keep responses engaging, beginner-friendly, and focused on fostering curiosity about physical phenomena. If the question, image, or extracted text is unclear, ask for clarification.`
+                ask: `You are an AI Learning Assistant designed for Hong Kong DSE Physics students. Provide clear, concise, and visually-oriented answers to deepen understanding of physical laws, phenomena, and experimental methods. Focus on topics like mechanics, electricity, waves, and modern physics. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) to structure explanations and highlight key principles. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math (e.g., $F = ma$) and $$...$$ for display/block equations (e.g., $$v = u + at$$). Include practical examples (e.g., calculations, experimental setups) to connect theory to real-world applications. Avoid technical jargon unless explained simply. For complex topics (e.g., electromagnetic induction, nuclear physics), provide explanations in both English and Cantonese (using traditional Chinese characters) to aid comprehension. If an image is provided, analyze its content (e.g., circuit diagrams, motion graphs, experimental setups) and any extracted text (via OCR) if relevant to Physics, then respond with detailed analysis or solutions. - A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文) If the question, image, or extracted text is unclear, ask for clarification.`,
+                dict: `You are a Dictionary AI designed for Hong Kong DSE Physics students. Provide detailed explanations of Physics-related terms or concepts (e.g., momentum, capacitance, diffraction) entered by the user. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math (e.g., $p = mv$) and $$...$$ for display equations. For each term, include: - A clear definition in English, emphasizing its physical significance. - For complex concepts (e.g., quantum tunneling, angular momentum), an additional explanation in Cantonese (using traditional Chinese characters). - Sample usage (e.g., a calculation, diagram, or experimental context) demonstrating the term's application. - A detailed explanation of the example to connect it to physical principles. Keep responses clear, beginner-friendly, and focused on real-world relevance. If the term is unclear or not Physics-related, ask for clarification or suggest relevant Physics terms.`,
+                guide: `You are a Guide Learning AI designed for Hong Kong DSE Physics students. Instead of giving direct answers, guide the user to understand physical concepts or solve problems by simplifying the question and offering intuitive hints. Use Markdown formatting (e.g., **bold**, *italic*, ### for headings) for clarity. Always use LaTeX notation for all mathematical expressions: use $...$ for inline math and $$...$$ for display equations. For each question: - Restate the user's question in both English and Traditional Chinese (繁體中文) to ensure understanding. - Break the question into smaller parts (e.g., identifying forces, applying a law). - Provide hints or guiding questions to lead the user to the solution (e.g., "What forces act on this object?" or "How does energy conservation apply here?"). - You must provide A note(reminder) part to give hints and importance key point to user,you must highlight key point and write keypoint(example: formula,important techniques) in Cantonese(繁體中文) - If an image is provided, analyze its content (e.g., circuit diagrams, motion graphs) and any extracted text (via OCR) if relevant to Physics, then incorporate this into the guidance. - Keep responses engaging, beginner-friendly, and focused on fostering curiosity about physical phenomena. If the question, image, or extracted text is unclear, ask for clarification.`
             },
             'Biology': {
                 ask: `You are an AI Learning Assistant tailored for Hong Kong DSE Biology students. Your goal is to provide clear, concise, and process-oriented answers to deepen understanding of biological systems, processes, and their applications, focusing on topics in HKDSE Biology. ### HKDSE BIOLOGY TOPIC LIST: Introducing biology, Movement of substances across cell membrane, Enzymes and metabolism, Food and humans, Nutrition in humans, Gas exchange in humans, Transport in humans, Nutrition and gas exchange in plants, Transpiration, transport and support in plants, Cell cycle and division, Reproduction in flowering plants, Reproduction in humans, Growth and development, Detecting the environment, Coordination in humans, Movement in humans, Homeostasis, Ecosystems, Photosynthesis, Respiration, Non-infectious diseases, Infectious diseases and disease prevention, Body defence mechanisms, Basic genetics, Molecular genetics, Biotechnology, Biodiversity, Evolution I, Evolution II. You should familiarize with above HKDSE topics. ### General Guidelines: - Use **Markdown formatting** for clarity. - Highlight key biological processes with step-by-step explanations. - Incorporate **practical examples** relevant to Hong Kong students. - If an **image** is provided, analyze its content and provide detailed explanations. - You must provide A note(reminder) part for any type of question, to give hints and importance key point to user,you must highlight key point and write keypoint(example: key terms,important techniques) in Cantonese(繁體中文) If the question, image, or extracted text is unclear, ask for clarification.`,
@@ -1784,6 +1791,18 @@
                 mathBlocks.push(match);
                 return placeholder;
             });
+            // Protect display math $$...$$
+            html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
+                const placeholder = `%%MATHBLOCK_${mathBlocks.length}%%`;
+                mathBlocks.push(`<div class="overflow-x-auto my-2">${match}</div>`);
+                return placeholder;
+            });
+            // Protect inline math $...$
+            html = html.replace(/\$([^\$\n]+?)\$/g, (match) => {
+                const placeholder = `%%MATHBLOCK_${mathBlocks.length}%%`;
+                mathBlocks.push(match);
+                return placeholder;
+            });
 
             // Step 2: Process line by line
             const lines = html.split('\n');
@@ -1984,6 +2003,9 @@
         window.shareMessage = shareMessage;
         window.toggleTheme = toggleTheme;
         window.handleToolClick = handleToolClick;
+        window.addUserMessage = addUserMessage;
+        window.addAIMessage = addAIMessage;
+        window.histories = histories;
 
         // Handle ?openSubject= URL param (used by external tool pages to return to the correct AI list)
         (function() {
@@ -2053,6 +2075,7 @@
     <script>
         // ── Inline History Panel ──────────────────────────────────────────
         let _hp = { all:[], filtered:[], lastDoc:null, loading:false, filterTool:'' };
+        const _HP_CHAT_TOOL_MAP = { 'Ask AI': 'askAI', 'Dictionary AI': 'dictionaryAI', 'Guide Learning': 'guideLearning' };
 
         function _hpEscape(s) {
             return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -2114,6 +2137,7 @@
             const color = _hpToolColor(s.tool);
             const icon  = _hpToolIcon(s.tool);
             const time  = _hpFmtTime(s.updatedAt);
+            const isChatSession = Object.keys(_HP_CHAT_TOOL_MAP).includes(s.tool);
             const msgs  = (s.messages||[]).slice(0,40);
             const msgHtml = msgs.map(m => {
                 const isUser = m.role==='user';
@@ -2124,6 +2148,12 @@
             }).join('');
             const extra = (s.messages||[]).length > 40
                 ? `<p style="text-align:center;font-size:.7rem;color:var(--text-secondary);padding:.4rem 0">… ${s.messages.length-40} more messages not shown</p>` : '';
+            const continueBtn = isChatSession ? `
+                <button onclick="event.stopPropagation();_hpContinueChat('${s.id}')"
+                        style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.7rem;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;cursor:pointer;"
+                        title="Continue chat" aria-label="Continue chat">
+                    <i class="fas fa-comment-dots" aria-hidden="true"></i>
+                </button>` : '';
             return `
             <div class="hp-session-card" id="hp-card-${s.id}">
                 <div class="hp-session-header" onclick="toggleHPCard('${s.id}')"
@@ -2141,6 +2171,7 @@
                     </div>
                     <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
                         <span style="font-size:.7rem;color:var(--text-secondary)">${_hpEscape(time)}</span>
+                        ${continueBtn}
                         <button onclick="event.stopPropagation();deleteHPSession('${s.id}')"
                                 class="btn-danger" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.7rem"
                                 title="Delete" aria-label="Delete session">
@@ -2182,6 +2213,35 @@
             } else {
                 alert('Failed to delete. Please try again.');
             }
+        }
+
+        function _hpContinueChat(sessionId) {
+            const session = _hp.all.find(s => s.id === sessionId);
+            if (!session) return;
+            const toolMap = _HP_CHAT_TOOL_MAP;
+            const type = toolMap[session.tool];
+            if (!type) return;
+            const subject = session.subject;
+            if (!subject || !window.showAI) return;
+            closeHistoryPanel();
+            // Navigate to the chatbox (this resets history and chatbox)
+            window.showAI(subject, type);
+            // Re-populate chatbox with saved messages
+            const chatBox = document.getElementById(type + 'ChatBox');
+            if (!chatBox) return;
+            chatBox.innerHTML = '';
+            const msgs = session.messages || [];
+            msgs.forEach(m => {
+                if (m.role === 'user') {
+                    if (window.addUserMessage) window.addUserMessage(type, m.content || '');
+                    if (window.histories && window.histories[type]) window.histories[type].push({ role: 'user', content: m.content || '' });
+                } else if (m.role === 'assistant') {
+                    if (window.addAIMessage) window.addAIMessage(type, m.content || '');
+                    if (window.histories && window.histories[type]) window.histories[type].push({ role: 'assistant', content: m.content || '' });
+                }
+            });
+            // Continue saving new messages to the same Firestore document
+            if (window.continueHistorySession) window.continueHistorySession(type, sessionId);
         }
 
         function applyHPFilter() {
