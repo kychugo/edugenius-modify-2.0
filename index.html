@@ -1498,7 +1498,7 @@ IMPORTANT:
             const welcomeMessages = {
                 askAI: `Hello! How can I assist you with ${subject} today?`,
                 dictionaryAI: 'Hello! Enter a term to learn more.',
-                guideLearning: 'Hello! Ask a question to get started with guided learning. I will help you think through it step by step using hints. After my response, you can click <strong>💡 Get Another Hint</strong> to get a more specific hint if you need one.',
+                guideLearning: 'Hello! Ask a question to get started with guided learning. I will help you think through it step by step using hints. After my response, you can click <strong>💡 Get Hint</strong> to get a more specific hint if you need one.',
                 errorAnalysis: 'Hello! Paste your answer or work below. I will identify the type of error (conceptual, calculation, language, etc.) and explain how to fix it step by step.'
             };
 
@@ -1722,7 +1722,7 @@ IMPORTANT:
                                             streamedText += delta;
                                             updateStreamingBubble(streamId, streamedText);
                                         }
-                                    } catch (e) { /* ignore malformed chunks */ }
+                                    } catch (e) { console.warn('Malformed SSE chunk:', trimmed, e); }
                                 }
                             }
                         }
