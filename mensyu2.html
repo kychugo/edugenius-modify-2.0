@@ -529,6 +529,9 @@
                         <a href="./mensyu-tran.html" class="nav-btn transition-colors" style="color: var(--dark-color); text-decoration: none;" aria-label="翻譯工具">
                             <i class="fas fa-language mr-2"></i>翻譯
                         </a>
+                        <a href="./history.html" class="nav-btn transition-colors" style="color: var(--dark-color); text-decoration: none;" aria-label="歷史記錄">
+                            <i class="fas fa-history mr-2"></i>歷史
+                        </a>
                         <button onclick="toggleTestPanel()" class="nav-btn transition-colors text-xs" style="color: var(--accent-color);" aria-label="測試控制">
                             <i class="fas fa-cogs mr-1"></i>測試
                         </button>
@@ -1758,6 +1761,10 @@ ${text}`;
         const response = await makeApiRequest(messages);
         if (!response) throw new Error('Translation failed');
         displayFormattedResult(response);
+        // Save to Firestore history (non-blocking)
+        if (window.saveHistoryRecord) {
+            window.saveHistoryRecord('文樞翻譯', '中文', text, text, response);
+        }
     } catch (error) {
         console.error('Translation Error:', error);
         document.getElementById('translation-content').innerHTML = `
@@ -2098,6 +2105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -2107,14 +2115,36 @@ document.addEventListener('DOMContentLoaded', function() {
             appId: "1:547074181663:web:6e3afd6c7c1ec6ae43232a"
         });
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const overlay = document.getElementById('auth-guard-overlay');
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 if (overlay) overlay.style.display = 'none';
+                window._fbUser = user;
             } else {
                 window.location.replace('./index.html');
             }
         });
+        window.saveHistoryRecord = async function(tool, subject, summary, userContent, aiContent) {
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                await addDoc(collection(db, 'users', user.uid, 'history'), {
+                    tool: tool,
+                    subject: subject,
+                    page: 'mensyu2',
+                    summary: summary.substring(0, 100),
+                    messages: [
+                        { role: 'user', content: userContent, timestamp: new Date().toISOString() },
+                        { role: 'assistant', content: aiContent, timestamp: new Date().toISOString() }
+                    ],
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+            } catch (e) {
+                console.warn('History save failed:', e);
+            }
+        };
     </script>
 </body>
 </html>

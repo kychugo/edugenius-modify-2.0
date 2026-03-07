@@ -111,6 +111,9 @@
             <a href="./index.html" class="btn-back px-4 py-2 text-sm" aria-label="Back to EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">
                 <i class="fas fa-arrow-left"></i> Back to EduGenius
             </a>
+            <a href="./history.html" class="btn-back px-4 py-2 text-sm" aria-label="View history">
+                <i class="fas fa-history"></i> History
+            </a>
         </div>
 
         <!-- Page header -->
@@ -341,6 +344,11 @@ ${codeContent}
                 displayFeedback('Analyzing code with AI...', 'loading');
                 const feedback = await callGrokAPI(prompt);
                 displayFeedback(feedback, 'success');
+                // Save to Firestore history (non-blocking)
+                if (window.saveHistoryRecord) {
+                    const snippet = codeContent.substring(0, 500) + (codeContent.length > 500 ? '\n...' : '');
+                    window.saveHistoryRecord(question, snippet, feedback);
+                }
             } catch (error) {
                 displayFeedback(`Error: ${error.message}. Please check your API configuration.`, 'error');
             } finally {
@@ -577,6 +585,7 @@ ${codeContent}
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -586,14 +595,36 @@ ${codeContent}
             appId: "1:547074181663:web:6e3afd6c7c1ec6ae43232a"
         });
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const overlay = document.getElementById('auth-guard-overlay');
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 if (overlay) overlay.style.display = 'none';
+                window._fbUser = user;
             } else {
                 window.location.replace('./index.html');
             }
         });
+        window.saveHistoryRecord = async function(question, codeSnippet, feedback) {
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                await addDoc(collection(db, 'users', user.uid, 'history'), {
+                    tool: 'Code Review',
+                    subject: 'ICT',
+                    page: 'coding',
+                    summary: question.substring(0, 100),
+                    messages: [
+                        { role: 'user', content: `Question: ${question}\n\nCode:\n${codeSnippet}`, timestamp: new Date().toISOString() },
+                        { role: 'assistant', content: feedback, timestamp: new Date().toISOString() }
+                    ],
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+            } catch (e) {
+                console.warn('History save failed:', e);
+            }
+        };
     </script>
 </body>
 </html>
