@@ -535,6 +535,9 @@
             <a href="./index.html" class="back-btn" aria-label="Back to EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">
                 <span class="back-arrow">←</span> Back
             </a>
+            <a href="./history.html" class="back-btn" aria-label="View history">
+                🕐 History
+            </a>
         </div>
     </header>
 
@@ -843,6 +846,10 @@ Format the output as:
 
             currentTask = await callAI(prompt);
             taskOutput.innerHTML = formatTaskResponse(currentTask);
+            // Save task to Firestore history (non-blocking)
+            if (window.saveWritingTask) {
+                window.saveWritingTask(genre, topic, currentTask);
+            }
 
             // Restore UI
             generateTaskBtn.disabled = false;
@@ -872,6 +879,10 @@ The essay should aim for Level 7 in Content (fully relevant, creative, well-supp
 
             currentEssay = await callAI(prompt);
             essayOutput.innerHTML = formatEssayResponse(currentEssay, currentGenre);
+            // Save essay to Firestore history (non-blocking)
+            if (window.saveWritingEssay) {
+                window.saveWritingEssay(currentEssay);
+            }
 
             generateEssayBtn.disabled = false;
             generateEssayBtn.innerHTML = '🖊️ Generate Sample Essay';
@@ -903,6 +914,7 @@ The essay should aim for Level 7 in Content (fully relevant, creative, well-supp
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -912,14 +924,53 @@ The essay should aim for Level 7 in Content (fully relevant, creative, well-supp
             appId: "1:547074181663:web:6e3afd6c7c1ec6ae43232a"
         });
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const overlay = document.getElementById('auth-guard-overlay');
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 if (overlay) overlay.style.display = 'none';
+                window._fbUser = user;
             } else {
                 window.location.replace('./index.html');
             }
         });
+        let _writingSessionRef = null;
+        window.saveWritingTask = async function(genre, topic, taskContent) {
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                const newRef = doc(collection(db, 'users', user.uid, 'history'));
+                await setDoc(newRef, {
+                    tool: 'English Writing',
+                    subject: 'English',
+                    page: 'eng-writing',
+                    summary: `${genre}: ${topic}`.substring(0, 100),
+                    messages: [
+                        { role: 'user', content: `Genre: ${genre}\nTopic: ${topic}`, timestamp: new Date().toISOString() },
+                        { role: 'assistant', content: taskContent, timestamp: new Date().toISOString() }
+                    ],
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+                _writingSessionRef = newRef;
+            } catch (e) {
+                console.warn('History save failed:', e);
+            }
+        };
+        window.saveWritingEssay = async function(essayContent) {
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                if (_writingSessionRef) {
+                    await updateDoc(_writingSessionRef, {
+                        messages: arrayUnion({ role: 'assistant', content: `[Sample Essay]\n${essayContent}`, timestamp: new Date().toISOString() }),
+                        updatedAt: serverTimestamp()
+                    });
+                }
+            } catch (e) {
+                console.warn('History save failed:', e);
+            }
+        };
     </script>
 
 </body>

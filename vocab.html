@@ -768,6 +768,7 @@
             </a>
             <span class="header-subtitle">📚 Vocabulary Tools</span>
             <a href="./index.html" class="back-btn" aria-label="Back to EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">← Back</a>
+            <a href="./history.html" class="back-btn" aria-label="View history">🕐 History</a>
         </div>
     </header>
 
@@ -1086,6 +1087,11 @@ Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文)
                     ${renderVocabCards(generatedWords)}
                 </div>`;
 
+            // Save to Firestore history (non-blocking)
+            if (window.saveHistoryRecord) {
+                window.saveHistoryRecord('Vocabulary Generator', topic, level, raw.substring(0, 3000));
+            }
+
             setLoading(genBtn, false);
             genBtn.innerHTML = '💡 Generate Vocabulary';
             quizFromGenBtn.classList.remove('hidden');
@@ -1251,6 +1257,7 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -1260,14 +1267,36 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
             appId: "1:547074181663:web:6e3afd6c7c1ec6ae43232a"
         });
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const overlay = document.getElementById('auth-guard-overlay');
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 if (overlay) overlay.style.display = 'none';
+                window._fbUser = user;
             } else {
                 window.location.replace('./index.html');
             }
         });
+        window.saveHistoryRecord = async function(tool, topic, level, content) {
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                await addDoc(collection(db, 'users', user.uid, 'history'), {
+                    tool: tool,
+                    subject: 'English',
+                    page: 'vocab',
+                    summary: `${tool}: ${topic} (${level})`.substring(0, 100),
+                    messages: [
+                        { role: 'user', content: `Topic: ${topic}\nLevel: ${level}`, timestamp: new Date().toISOString() },
+                        { role: 'assistant', content: content, timestamp: new Date().toISOString() }
+                    ],
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+            } catch (e) {
+                console.warn('History save failed:', e);
+            }
+        };
     </script>
 
 </body>

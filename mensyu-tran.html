@@ -898,6 +898,9 @@ background: rgba(255, 255, 255, 0.4);
 <a href="./index.html" class="back-btn" aria-label="返回 EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">
     <i class="fas fa-arrow-left"></i> EduGenius
 </a>
+<a href="./history.html" class="back-btn" aria-label="查看歷史記錄">
+    <i class="fas fa-history"></i> 歷史
+</a>
 <!-- Translation logo replaced with platform image -->
 <div class="header-brand">
   <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius AI Logo" aria-hidden="true" style="width:52px;height:52px;border-radius:14px;object-fit:cover;flex-shrink:0">
@@ -1232,6 +1235,10 @@ const response = await callTranslateAPI(prompt);
 if (response && response.choices && response.choices[0].message.content) {
 const translatedText = response.choices[0].message.content;
 displayFormattedResult(translatedText);
+// Save to Firestore history (non-blocking)
+if (window.saveHistoryRecord) {
+    window.saveHistoryRecord(text, translatedText);
+}
 } else {
 showError('翻譯失敗，請稍後再試');
 }
@@ -1579,6 +1586,7 @@ return gk_fileData[filename] || "";
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
     const app = initializeApp({
         apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
         authDomain: "login-system-9c566.firebaseapp.com",
@@ -1588,14 +1596,36 @@ return gk_fileData[filename] || "";
         appId: "1:547074181663:web:6e3afd6c7c1ec6ae43232a"
     });
     const auth = getAuth(app);
+    const db = getFirestore(app);
     const overlay = document.getElementById('auth-guard-overlay');
     onAuthStateChanged(auth, (user) => {
         if (user) {
             if (overlay) overlay.style.display = 'none';
+            window._fbUser = user;
         } else {
             window.location.replace('./index.html');
         }
     });
+    window.saveHistoryRecord = async function(originalText, translatedText) {
+        const user = window._fbUser;
+        if (!user) return;
+        try {
+            await addDoc(collection(db, 'users', user.uid, 'history'), {
+                tool: '文言文翻譯',
+                subject: '中文',
+                page: 'mensyu-tran',
+                summary: originalText.substring(0, 100),
+                messages: [
+                    { role: 'user', content: originalText, timestamp: new Date().toISOString() },
+                    { role: 'assistant', content: translatedText, timestamp: new Date().toISOString() }
+                ],
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+        } catch (e) {
+            console.warn('History save failed:', e);
+        }
+    };
 </script>
 </body>
 </html>

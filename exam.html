@@ -43,7 +43,7 @@
         }
 
         /* Back button */
-        .back-btn-bar { margin-bottom:20px; }
+        .back-btn-bar { margin-bottom:20px; display:flex; align-items:center; gap:10px; }
         .back-btn {
             display:inline-flex; align-items:center; gap:8px;
             padding:8px 16px; font-size:.85rem; font-weight:700;
@@ -197,6 +197,9 @@
     <div class="back-btn-bar relative z-10">
         <a href="./index.html" class="back-btn" aria-label="Back to EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">
             <i class="fas fa-arrow-left"></i> Back to EduGenius
+        </a>
+        <a href="./history.html" class="back-btn" aria-label="View history" style="margin-left:auto">
+            <i class="fas fa-history"></i> History
         </a>
     </div>
 
@@ -617,7 +620,10 @@ Requirements:
                 outputDiv.innerHTML = formatResponse(content);
                 MathJax.typesetPromise();
                 exportButton.disabled = false;
-                
+                // Save to Firestore history (non-blocking)
+                if (window.saveHistoryRecord) {
+                    window.saveHistoryRecord(subject, topics, difficulty, content);
+                }
                 outputDiv.scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
                 console.error('Error:', error);
@@ -761,6 +767,7 @@ Requirements:
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -770,14 +777,36 @@ Requirements:
             appId: "1:547074181663:web:6e3afd6c7c1ec6ae43232a"
         });
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const overlay = document.getElementById('auth-guard-overlay');
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 if (overlay) overlay.style.display = 'none';
+                window._fbUser = user;
             } else {
                 window.location.replace('./index.html');
             }
         });
+        window.saveHistoryRecord = async function(subject, topics, difficulty, content) {
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                await addDoc(collection(db, 'users', user.uid, 'history'), {
+                    tool: 'Exam Paper Generator',
+                    subject: subject,
+                    page: 'exam',
+                    summary: `${subject} – ${topics.join(', ')}`.substring(0, 100),
+                    messages: [
+                        { role: 'user', content: `Subject: ${subject}\nTopics: ${topics.join(', ')}\nDifficulty: ${difficulty}`, timestamp: new Date().toISOString() },
+                        { role: 'assistant', content: content, timestamp: new Date().toISOString() }
+                    ],
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+            } catch (e) {
+                console.warn('History save failed:', e);
+            }
+        };
     </script>
 </body>
 </html>
