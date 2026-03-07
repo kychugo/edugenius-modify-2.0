@@ -842,7 +842,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
                 <span class="brand-name">EduGenius</span>
             </a>
             <span class="header-subtitle">📚 Vocabulary Tools</span>
-            <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">← Back</a>
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode"
+                        style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(79,70,229,.1);color:var(--primary);font-size:1rem;transition:all .2s;flex-shrink:0">
+                    <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
+                </button>
+                <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">← Back</a>
+            </div>
         </div>
     </header>
 
@@ -1769,6 +1775,24 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
         const link = document.getElementById('back-btn-link');
         if (link) {
             link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
+<script>
+    // Theme toggle
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.querySelectorAll('.theme-moon').forEach(el => el.style.display = isDark ? 'none' : '');
+        document.querySelectorAll('.theme-sun').forEach(el => el.style.display = isDark ? '' : 'none');
+    }
+    (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.querySelectorAll('.theme-moon').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.theme-sun').forEach(el => el.style.display = '');
         }
     })();
 </script>
