@@ -532,11 +532,8 @@
                 <span class="brand-name">EduGenius</span>
             </a>
             <span class="header-subtitle">✍️ English Writing Practice</span>
-            <a href="./index.html" class="back-btn" aria-label="Back to EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">
+            <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">
                 <span class="back-arrow">←</span> Back
-            </a>
-            <a href="./history.html" class="back-btn" aria-label="View history">
-                🕐 History
             </a>
         </div>
     </header>
@@ -973,5 +970,15 @@ The essay should aim for Level 7 in Content (fully relevant, creative, well-supp
         };
     </script>
 
+<script>
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const back = params.get('back');
+        const link = document.getElementById('back-btn-link');
+        if (link) {
+            link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
 </body>
 </html>

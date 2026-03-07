@@ -195,11 +195,8 @@
     </div>
     <!-- Back button -->
     <div class="back-btn-bar relative z-10">
-        <a href="./index.html" class="back-btn" aria-label="Back to EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">
-            <i class="fas fa-arrow-left"></i> Back to EduGenius
-        </a>
-        <a href="./history.html" class="back-btn" aria-label="View history" style="margin-left:auto">
-            <i class="fas fa-history"></i> History
+        <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">
+            <i class="fas fa-arrow-left"></i> Back
         </a>
     </div>
 
@@ -808,5 +805,15 @@ Requirements:
             }
         };
     </script>
+<script>
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const back = params.get('back');
+        const link = document.getElementById('back-btn-link');
+        if (link) {
+            link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
 </body>
 </html>

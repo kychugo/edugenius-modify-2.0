@@ -12,6 +12,9 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- MathJax for math/physics chatboxes -->
+    <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] }, options: { skipHtmlTags: ['script','noscript','style','textarea'] } };</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
         :root {
@@ -396,15 +399,14 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="openHistoryPanel()"
-                       class="btn-secondary flex items-center gap-1.5 px-3 md:px-4 py-2 text-sm" aria-label="View history">
+                            class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="View history" title="History">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
-                        <span class="hidden md:inline">History</span>
                     </button>
                     <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button" class="btn-danger px-4 py-2 text-sm" aria-label="Sign out">
-                        <i class="fas fa-sign-out-alt mr-1.5"></i>Sign Out
+                    <button id="sign-out-button" class="w-10 h-10 flex items-center justify-center rounded-xl btn-danger" aria-label="Sign out" title="Sign out">
+                        <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </div>
@@ -526,21 +528,20 @@
             <!-- Nav -->
             <div class="nav-bar no-print animate-fadeInUp">
                 <button onclick="showCover()"
-                        class="btn-secondary flex items-center gap-2 px-4 py-2 text-sm" aria-label="Back to subjects">
+                        class="btn-secondary flex items-center gap-2 px-3 py-2 text-sm" aria-label="Back to subjects">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Back to Subjects</span>
+                    <span class="hidden sm:inline">Back</span>
                 </button>
                 <div class="flex items-center gap-2">
                     <button onclick="openHistoryPanel()"
-                       class="btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm" aria-label="View history">
+                            class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="View history" title="History">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
-                        <span class="hidden md:inline">History</span>
                     </button>
                     <button id="theme-toggle-ai-list" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button-ai-list" class="btn-danger px-4 py-2 text-sm" aria-label="Sign out">
-                        <i class="fas fa-sign-out-alt mr-1.5"></i>Sign Out
+                    <button id="sign-out-button-ai-list" class="w-10 h-10 flex items-center justify-center rounded-xl btn-danger" aria-label="Sign out" title="Sign out">
+                        <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </div>
@@ -573,22 +574,20 @@
             <!-- Nav -->
             <div class="nav-bar no-print">
                 <button onclick="showAIList(currentSubject)"
-                        class="btn-secondary flex items-center gap-2 px-3 md:px-4 py-2 text-sm" aria-label="Back to AI tools">
+                        class="btn-secondary flex items-center gap-2 px-3 py-2 text-sm" aria-label="Back to AI tools">
                     <i class="fas fa-arrow-left"></i>
-                    <span class="hidden md:inline">Back to Tools</span>
+                    <span class="hidden sm:inline">Back</span>
                 </button>
                 <div class="flex items-center gap-2">
                     <button onclick="openHistoryPanel()"
-                       class="btn-secondary flex items-center gap-1.5 px-2 md:px-3 py-2 text-sm" aria-label="View history">
+                            class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="View history" title="History">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
-                        <span class="hidden md:inline">History</span>
                     </button>
                     <button id="theme-toggle-askai" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button-askai" class="btn-danger flex items-center gap-1.5 px-3 md:px-4 py-2 text-sm" aria-label="Sign out">
+                    <button id="sign-out-button-askai" class="w-10 h-10 flex items-center justify-center rounded-xl btn-danger" aria-label="Sign out" title="Sign out">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span class="hidden md:inline">Sign Out</span>
                     </button>
                 </div>
             </div>
@@ -657,22 +656,20 @@
             <!-- Nav -->
             <div class="nav-bar no-print">
                 <button onclick="showAIList(currentSubject)"
-                        class="btn-secondary flex items-center gap-2 px-3 md:px-4 py-2 text-sm" aria-label="Back to AI tools">
+                        class="btn-secondary flex items-center gap-2 px-3 py-2 text-sm" aria-label="Back to AI tools">
                     <i class="fas fa-arrow-left"></i>
-                    <span class="hidden md:inline">Back to Tools</span>
+                    <span class="hidden sm:inline">Back</span>
                 </button>
                 <div class="flex items-center gap-2">
                     <button onclick="openHistoryPanel()"
-                       class="btn-secondary flex items-center gap-1.5 px-2 md:px-3 py-2 text-sm" aria-label="View history">
+                            class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="View history" title="History">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
-                        <span class="hidden md:inline">History</span>
                     </button>
                     <button id="theme-toggle-dictionaryai" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button-dictionaryai" class="btn-danger flex items-center gap-1.5 px-3 md:px-4 py-2 text-sm" aria-label="Sign out">
+                    <button id="sign-out-button-dictionaryai" class="w-10 h-10 flex items-center justify-center rounded-xl btn-danger" aria-label="Sign out" title="Sign out">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span class="hidden md:inline">Sign Out</span>
                     </button>
                 </div>
             </div>
@@ -721,22 +718,20 @@
             <!-- Nav -->
             <div class="nav-bar no-print">
                 <button onclick="showAIList(currentSubject)"
-                        class="btn-secondary flex items-center gap-2 px-3 md:px-4 py-2 text-sm" aria-label="Back to AI tools">
+                        class="btn-secondary flex items-center gap-2 px-3 py-2 text-sm" aria-label="Back to AI tools">
                     <i class="fas fa-arrow-left"></i>
-                    <span class="hidden md:inline">Back to Tools</span>
+                    <span class="hidden sm:inline">Back</span>
                 </button>
                 <div class="flex items-center gap-2">
                     <button onclick="openHistoryPanel()"
-                       class="btn-secondary flex items-center gap-1.5 px-2 md:px-3 py-2 text-sm" aria-label="View history">
+                            class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="View history" title="History">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
-                        <span class="hidden md:inline">History</span>
                     </button>
                     <button id="theme-toggle-guidelearning" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
-                    <button id="sign-out-button-guidelearning" class="btn-danger flex items-center gap-1.5 px-3 md:px-4 py-2 text-sm" aria-label="Sign out">
+                    <button id="sign-out-button-guidelearning" class="w-10 h-10 flex items-center justify-center rounded-xl btn-danger" aria-label="Sign out" title="Sign out">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span class="hidden md:inline">Sign Out</span>
                     </button>
                 </div>
             </div>
@@ -1188,7 +1183,7 @@
                     name: '文樞--古典文學互動學習平台',
                     icon: 'fas fa-scroll',
                     description: '古典文學互動學習',
-                    action: () => window.open('./mensyu2.html', '_blank'),
+                    action: () => window.open('./mensyu2.html?back=' + encodeURIComponent(subject), '_blank'),
                     color: 'from-red-400 to-red-600',
                     iconColorClass: 'text-white'
                 });
@@ -1200,7 +1195,7 @@
                         name: 'English Writing Practice',
                         icon: 'fas fa-pen-fancy',
                         description: 'Improve your English writing skills',
-                        action: () => window.open('./eng-writing.html', '_blank'),
+                        action: () => window.open('./eng-writing.html?back=' + encodeURIComponent(subject), '_blank'),
                         color: 'from-teal-400 to-teal-600',
                         iconColorClass: 'text-teal-900 dark:text-white'
                     },
@@ -1208,7 +1203,7 @@
                         name: 'Vocabulary Generator',
                         icon: 'fas fa-lightbulb',
                         description: 'Generate custom vocabulary lists',
-                        action: () => window.open('./vocab.html#generator', '_blank'),
+                        action: () => window.open('./vocab.html?back=' + encodeURIComponent(subject) + '#generator', '_blank'),
                         color: 'from-yellow-400 to-yellow-500',
                         iconColorClass: 'text-yellow-900 dark:text-white'
                     },
@@ -1216,7 +1211,7 @@
                         name: 'Vocabulary Quiz',
                         icon: 'fas fa-question-circle',
                         description: 'Test your vocabulary knowledge',
-                        action: () => window.open('./vocab.html#quiz', '_blank'),
+                        action: () => window.open('./vocab.html?back=' + encodeURIComponent(subject) + '#quiz', '_blank'),
                         color: 'from-red-400 to-red-600',
                         iconColorClass: 'text-white'
                     }
@@ -1228,7 +1223,7 @@
                     name: 'Exam Paper Generator',
                     icon: 'fas fa-file-signature',
                     description: 'Generate practice exam papers',
-                    action: () => window.open('./exam.html', '_blank'),
+                    action: () => window.open('./exam.html?back=' + encodeURIComponent(subject), '_blank'),
                     color: 'from-orange-400 to-orange-500',
                     iconColorClass: 'text-orange-900 dark:text-white'
                 });
@@ -1239,7 +1234,7 @@
                     name: 'ICT Coding Review Platform',
                     icon: 'fas fa-terminal',
                     description: 'Review and improve your code',
-                    action: () => window.open('./coding.html', '_blank'),
+                    action: () => window.open('./coding.html?back=' + encodeURIComponent(subject), '_blank'),
                     color: 'from-cyan-400 to-cyan-500',
                     iconColorClass: 'text-cyan-900 dark:text-white'
                 });
@@ -1272,18 +1267,17 @@
             } else if (toolName === 'Guide Learning') {
                 showAI(subject, 'guideLearning');
             } else if (toolName === '文樞--古典文學互動學習平台') {
-                // NOTE: If this URL needs to be changed, update it here
-                window.open('./mensyu2.html', '_blank');
+                window.open('./mensyu2.html?back=' + encodeURIComponent(subject), '_blank');
             } else if (toolName === 'English Writing Practice') {
-                window.open('./eng-writing.html', '_blank');
+                window.open('./eng-writing.html?back=' + encodeURIComponent(subject), '_blank');
             } else if (toolName === 'ICT Coding Review Platform') {
-                window.open('./coding.html', '_blank');
+                window.open('./coding.html?back=' + encodeURIComponent(subject), '_blank');
             } else if (toolName === 'Exam Paper Generator') {
-                window.open('./exam.html', '_blank');
+                window.open('./exam.html?back=' + encodeURIComponent(subject), '_blank');
             } else if (toolName === 'Vocabulary Generator') {
-                window.open('./vocab.html#generator', '_blank');
+                window.open('./vocab.html?back=' + encodeURIComponent(subject) + '#generator', '_blank');
             } else if (toolName === 'Vocabulary Quiz') {
-                window.open('./vocab.html#quiz', '_blank');
+                window.open('./vocab.html?back=' + encodeURIComponent(subject) + '#quiz', '_blank');
             }
         }
 
@@ -1714,6 +1708,10 @@
             
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
+            // Render math for Math and Physics subjects
+            if (!isError && ['Math', 'Physics'].includes(currentSubject) && window.MathJax) {
+                MathJax.typesetPromise([messageDiv]).catch(e => console.warn('MathJax error:', e));
+            }
         }
 
         function setButtonLoading(button, isLoading) {
@@ -1764,12 +1762,26 @@
         function formatMarkdown(text) {
             if (!text) return '';
 
-            // Step 1: Protect code blocks first so their content is not mangled
+            // Step 1: Protect code blocks and math expressions so their content is not mangled
             const codeBlocks = [];
             let html = text.replace(/```[\s\S]*?```/g, (match) => {
                 const inner = match.replace(/^```[^\n]*\n?/, '').replace(/```$/, '');
                 const placeholder = `%%CODEBLOCK_${codeBlocks.length}%%`;
                 codeBlocks.push(`<pre class="bg-gray-200 dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-200 p-3 rounded-lg overflow-x-auto my-2"><code>${inner.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></pre>`);
+                return placeholder;
+            });
+
+            // Protect display math \[...\]
+            const mathBlocks = [];
+            html = html.replace(/\\\[[\s\S]*?\\\]/g, (match) => {
+                const placeholder = `%%MATHBLOCK_${mathBlocks.length}%%`;
+                mathBlocks.push(`<div class="overflow-x-auto my-2">${match}</div>`);
+                return placeholder;
+            });
+            // Protect inline math \(...\)
+            html = html.replace(/\\\([\s\S]*?\\\)/g, (match) => {
+                const placeholder = `%%MATHBLOCK_${mathBlocks.length}%%`;
+                mathBlocks.push(match);
                 return placeholder;
             });
 
@@ -1845,15 +1857,25 @@
                     flushList();
                     const idx = parseInt(trimmed.replace('%%CODEBLOCK_', '').replace('%%', ''), 10);
                     output.push(codeBlocks[idx]);
+                } else if (trimmed.startsWith('%%MATHBLOCK_')) {
+                    flushList();
+                    const idx = parseInt(trimmed.replace('%%MATHBLOCK_', '').replace('%%', ''), 10);
+                    output.push(mathBlocks[idx]);
                 } else {
                     flushList();
-                    output.push(`<p class="my-1">${applyInline(trimmed)}</p>`);
+                    // Restore any inline math blocks within paragraph text
+                    let line = applyInline(trimmed);
+                    line = line.replace(/%%MATHBLOCK_(\d+)%%/g, (_, i) => mathBlocks[parseInt(i, 10)]);
+                    output.push(`<p class="my-1">${line}</p>`);
                 }
             }
             flushList();
             if (tableLines.length > 0) flushTable();
 
-            return output.join('\n');
+            // Restore any remaining math placeholders that weren't on standalone lines
+            let result = output.join('\n');
+            result = result.replace(/%%MATHBLOCK_(\d+)%%/g, (_, i) => mathBlocks[parseInt(i, 10)]);
+            return result;
 
             function applyInline(s) {
                 return s
@@ -1962,6 +1984,31 @@
         window.shareMessage = shareMessage;
         window.toggleTheme = toggleTheme;
         window.handleToolClick = handleToolClick;
+
+        // Handle ?openSubject= URL param (used by external tool pages to return to the correct AI list)
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const openSubject = params.get('openSubject');
+            if (openSubject) {
+                // Remove the query param from the URL without reload
+                history.replaceState(null, '', window.location.pathname);
+                const cover = document.getElementById('coverScreen');
+                if (!cover) return;
+                // If coverScreen is already visible, navigate immediately
+                if (!cover.classList.contains('hidden')) {
+                    showAIList(openSubject);
+                    return;
+                }
+                // Otherwise wait for auth guard to show coverScreen
+                const observer = new MutationObserver(() => {
+                    if (!cover.classList.contains('hidden')) {
+                        observer.disconnect();
+                        showAIList(openSubject);
+                    }
+                });
+                observer.observe(cover, { attributes: true, attributeFilter: ['class'] });
+            }
+        })();
     </script>
 
     <!-- ── Inline History Panel ─────────────────────────────────────────── -->
