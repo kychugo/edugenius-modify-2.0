@@ -502,8 +502,8 @@
         <div class="max-container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-4">
-                    <a href="./index.html" class="nav-btn transition-colors flex items-center" style="color: var(--primary-color); text-decoration: none; font-weight: 700;" aria-label="返回 EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">
-                        <i class="fas fa-arrow-left mr-1"></i><span class="hidden sm:inline">EduGenius</span>
+                    <a id="back-btn-link" href="./index.html" class="nav-btn transition-colors flex items-center" style="color: var(--primary-color); text-decoration: none; font-weight: 700;" aria-label="返回">
+                        <i class="fas fa-arrow-left mr-1"></i><span class="hidden sm:inline">返回</span>
                     </a>
                     <!-- Mensyu brand: platform logo image -->
                     <div class="flex items-center space-x-2">
@@ -2146,5 +2146,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
     </script>
+<script>
+    // Set back button to return to the correct AI list page
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const back = params.get('back');
+        const link = document.getElementById('back-btn-link');
+        if (link) {
+            link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
 </body>
 </html>

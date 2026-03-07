@@ -767,8 +767,7 @@
                 <span class="brand-name">EduGenius</span>
             </a>
             <span class="header-subtitle">📚 Vocabulary Tools</span>
-            <a href="./index.html" class="back-btn" aria-label="Back to EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">← Back</a>
-            <a href="./history.html" class="back-btn" aria-label="View history">🕐 History</a>
+            <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">← Back</a>
         </div>
     </header>
 
@@ -1299,5 +1298,15 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
         };
     </script>
 
+<script>
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const back = params.get('back');
+        const link = document.getElementById('back-btn-link');
+        if (link) {
+            link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
 </body>
 </html>

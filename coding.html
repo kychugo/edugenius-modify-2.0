@@ -108,11 +108,8 @@
 
         <!-- Back link + header -->
         <div class="flex items-center justify-between mb-6 animate-fadeInUp">
-            <a href="./index.html" class="btn-back px-4 py-2 text-sm" aria-label="Back to EduGenius" onclick="if(history.length>1){event.preventDefault();history.back();}">
-                <i class="fas fa-arrow-left"></i> Back to EduGenius
-            </a>
-            <a href="./history.html" class="btn-back px-4 py-2 text-sm" aria-label="View history">
-                <i class="fas fa-history"></i> History
+            <a id="back-btn-link" href="./index.html" class="btn-back px-4 py-2 text-sm" aria-label="Back">
+                <i class="fas fa-arrow-left"></i> Back
             </a>
         </div>
 
@@ -626,5 +623,15 @@ ${codeContent}
             }
         };
     </script>
+<script>
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const back = params.get('back');
+        const link = document.getElementById('back-btn-link');
+        if (link) {
+            link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+    })();
+</script>
 </body>
 </html>
