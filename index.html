@@ -221,6 +221,90 @@
         .theme-sun  { display:none; }
         .dark .theme-moon { display:none; }
         .dark .theme-sun  { display:inline-block; }
+
+        /* ── Inline History Panel ──────────────────────────────────── */
+        #historyPanelBackdrop {
+            display:none; position:fixed; inset:0; z-index:900;
+            background:rgba(0,0,0,.45); backdrop-filter:blur(4px);
+            -webkit-backdrop-filter:blur(4px);
+            opacity:0; transition:opacity .3s ease;
+        }
+        #historyPanelBackdrop.open { opacity:1; }
+        #historyPanel {
+            position:fixed; top:0; right:0; bottom:0; z-index:901;
+            width:min(480px,100vw);
+            background:var(--bg-main);
+            border-left:1px solid var(--glass-border);
+            box-shadow:-8px 0 32px rgba(0,0,0,.18);
+            display:flex; flex-direction:column;
+            transform:translateX(100%);
+            transition:transform .35s cubic-bezier(.16,1,.3,1);
+            overflow:hidden;
+        }
+        #historyPanel.open { transform:translateX(0); }
+        #historyPanelHeader {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:1rem 1.25rem;
+            background:var(--glass-bg);
+            border-bottom:1px solid var(--glass-border);
+            flex-shrink:0;
+        }
+        #historyPanelBody {
+            flex:1; overflow-y:auto; padding:1rem;
+        }
+        #historyPanelBody::-webkit-scrollbar { width:4px; }
+        #historyPanelBody::-webkit-scrollbar-track { background:transparent; }
+        #historyPanelBody::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+        .hp-session-card {
+            background:var(--glass-bg);
+            border:1px solid var(--glass-border);
+            border-radius:var(--radius-sm);
+            margin-bottom:.75rem;
+            overflow:hidden;
+            animation:fadeInUp .3s ease both;
+        }
+        .hp-session-header {
+            display:flex; align-items:center; gap:.75rem;
+            padding:.85rem 1rem; cursor:pointer;
+            transition:background .2s;
+        }
+        .hp-session-header:hover { background:rgba(124,58,237,.06); }
+        .hp-session-icon {
+            width:36px; height:36px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0; color:#fff; font-size:.85rem;
+        }
+        .hp-session-body {
+            max-height:0; overflow:hidden;
+            transition:max-height .35s ease, padding .2s;
+            padding:0 1rem;
+        }
+        .hp-session-body.open {
+            max-height:420px; overflow-y:auto;
+            padding:.75rem 1rem;
+        }
+        .hp-session-body::-webkit-scrollbar { width:3px; }
+        .hp-session-body::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+        .hp-msg-user {
+            background:linear-gradient(135deg,var(--primary),var(--secondary));
+            color:#fff; border-radius:12px 12px 4px 12px;
+            padding:.5rem .75rem; font-size:.78rem; margin-bottom:.4rem;
+            max-width:85%; word-break:break-word;
+        }
+        .hp-msg-ai {
+            background:var(--glass-bg); border:1px solid var(--glass-border);
+            color:var(--text-primary); border-radius:12px 12px 12px 4px;
+            padding:.5rem .75rem; font-size:.78rem; margin-bottom:.4rem;
+            max-width:85%; word-break:break-word;
+        }
+        .hp-date-divider {
+            text-align:center; font-size:.7rem; font-weight:700;
+            color:var(--text-secondary); margin:.75rem 0 .4rem;
+            text-transform:uppercase; letter-spacing:.06em;
+        }
+        #historyPanelLoadMore {
+            display:none; text-align:center; padding:.75rem 0;
+        }
     </style>
 </head>
 <body class="transition-all duration-300">
@@ -311,11 +395,11 @@
                     <span class="font-bold text-sm gradient-text">EduGenius AI</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="./history.html" target="_blank"
+                    <button onclick="openHistoryPanel()"
                        class="btn-secondary flex items-center gap-1.5 px-3 md:px-4 py-2 text-sm" aria-label="View history">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
                         <span class="hidden md:inline">History</span>
-                    </a>
+                    </button>
                     <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
@@ -447,11 +531,11 @@
                     <span>Back to Subjects</span>
                 </button>
                 <div class="flex items-center gap-2">
-                    <a href="./history.html" target="_blank"
+                    <button onclick="openHistoryPanel()"
                        class="btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm" aria-label="View history">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
                         <span class="hidden md:inline">History</span>
-                    </a>
+                    </button>
                     <button id="theme-toggle-ai-list" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
@@ -494,11 +578,11 @@
                     <span class="hidden md:inline">Back to Tools</span>
                 </button>
                 <div class="flex items-center gap-2">
-                    <a href="./history.html" target="_blank"
+                    <button onclick="openHistoryPanel()"
                        class="btn-secondary flex items-center gap-1.5 px-2 md:px-3 py-2 text-sm" aria-label="View history">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
                         <span class="hidden md:inline">History</span>
-                    </a>
+                    </button>
                     <button id="theme-toggle-askai" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
@@ -578,11 +662,11 @@
                     <span class="hidden md:inline">Back to Tools</span>
                 </button>
                 <div class="flex items-center gap-2">
-                    <a href="./history.html" target="_blank"
+                    <button onclick="openHistoryPanel()"
                        class="btn-secondary flex items-center gap-1.5 px-2 md:px-3 py-2 text-sm" aria-label="View history">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
                         <span class="hidden md:inline">History</span>
-                    </a>
+                    </button>
                     <button id="theme-toggle-dictionaryai" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
@@ -642,11 +726,11 @@
                     <span class="hidden md:inline">Back to Tools</span>
                 </button>
                 <div class="flex items-center gap-2">
-                    <a href="./history.html" target="_blank"
+                    <button onclick="openHistoryPanel()"
                        class="btn-secondary flex items-center gap-1.5 px-2 md:px-3 py-2 text-sm" aria-label="View history">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
                         <span class="hidden md:inline">History</span>
-                    </a>
+                    </button>
                     <button id="theme-toggle-guidelearning" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
                     </button>
@@ -1830,6 +1914,12 @@
                 }
             }
             if (e.key === 'Escape') {
+                // Close history panel first if open
+                const panel = document.getElementById('historyPanel');
+                if (panel && panel.classList.contains('open')) {
+                    closeHistoryPanel();
+                    return;
+                }
                 const interfaces = ['askAIInterface', 'dictionaryAIInterface', 'guideLearningInterface'];
                 const currentInterface = interfaces.find(id => !document.getElementById(id).classList.contains('hidden'));
                 if (currentInterface) {
@@ -1872,6 +1962,254 @@
         window.shareMessage = shareMessage;
         window.toggleTheme = toggleTheme;
         window.handleToolClick = handleToolClick;
+    </script>
+
+    <!-- ── Inline History Panel ─────────────────────────────────────────── -->
+    <div id="historyPanelBackdrop" onclick="closeHistoryPanel()" aria-hidden="true"></div>
+    <div id="historyPanel" role="dialog" aria-modal="true" aria-label="History panel">
+        <div id="historyPanelHeader">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-history" style="color:var(--primary);font-size:1.1rem"></i>
+                <span class="font-bold text-base" style="color:var(--text-primary)">Chat History</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="hpFilterTool" onchange="applyHPFilter()"
+                        class="btn-secondary text-xs px-2 py-1.5 rounded-lg outline-none cursor-pointer"
+                        style="background:var(--glass-bg);color:var(--text-primary);border:1px solid var(--glass-border)">
+                    <option value="">All Tools</option>
+                    <option value="Ask AI">Ask AI</option>
+                    <option value="Dictionary AI">Dictionary AI</option>
+                    <option value="Guide Learning">Guide Learning</option>
+                    <option value="Code Review">Code Review</option>
+                    <option value="Exam Paper Generator">Exam Paper Generator</option>
+                    <option value="English Writing">English Writing</option>
+                    <option value="Vocabulary Generator">Vocabulary Generator</option>
+                </select>
+                <button onclick="closeHistoryPanel()"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl btn-secondary"
+                        aria-label="Close history panel">
+                    <i class="fas fa-times" style="color:var(--text-secondary)"></i>
+                </button>
+            </div>
+        </div>
+        <div id="historyPanelBody">
+            <div id="hpList"></div>
+            <div id="historyPanelLoadMore">
+                <button id="hpLoadMoreBtn" onclick="loadMoreHP()"
+                        class="btn-secondary px-5 py-2 text-sm font-semibold rounded-xl">
+                    <i class="fas fa-chevron-down mr-2"></i>Load More
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Inline History Panel ──────────────────────────────────────────
+        let _hp = { all:[], filtered:[], lastDoc:null, loading:false, filterTool:'' };
+
+        function _hpEscape(s) {
+            return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                                .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+        function _hpFmtDate(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleDateString('en-HK',{year:'numeric',month:'short',day:'numeric'});
+        }
+        function _hpFmtTime(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleTimeString('en-HK',{hour:'2-digit',minute:'2-digit'});
+        }
+        function _hpToolColor(tool) {
+            const m = {'Ask AI':'#7c3aed','Dictionary AI':'#10b981','Guide Learning':'#8b5cf6',
+                       'Code Review':'#06b6d4','Exam Paper Generator':'#f59e0b',
+                       'English Writing':'#14b8a6','Vocabulary Generator':'#eab308',
+                       '文言文翻譯':'#ef4444','文樞翻譯':'#ef4444','Vocabulary':'#eab308'};
+            return m[tool]||'#7c3aed';
+        }
+        function _hpToolIcon(tool) {
+            const m = {'Ask AI':'robot','Dictionary AI':'book','Guide Learning':'compass',
+                       'Code Review':'terminal','Exam Paper Generator':'file-alt',
+                       'English Writing':'pen-fancy','Vocabulary Generator':'lightbulb',
+                       '文言文翻譯':'scroll','文樞翻譯':'scroll','Vocabulary':'lightbulb'};
+            return m[tool]||'robot';
+        }
+
+        function _hpRenderSessions(sessions) {
+            const list = document.getElementById('hpList');
+            if (!sessions.length) {
+                list.innerHTML = `
+                    <div style="text-align:center;padding:3rem 1rem">
+                        <div style="width:52px;height:52px;border-radius:14px;background:rgba(124,58,237,.10);
+                             display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                            <i class="fas fa-history" style="color:var(--primary);font-size:1.4rem"></i>
+                        </div>
+                        <p class="font-bold text-sm" style="color:var(--text-primary);margin-bottom:.4rem">No history yet</p>
+                        <p class="text-xs" style="color:var(--text-secondary)">Your AI interactions will appear here.</p>
+                    </div>`;
+                return;
+            }
+            // Group by date
+            const groups = {};
+            sessions.forEach(s => {
+                const d = _hpFmtDate(s.updatedAt);
+                if (!groups[d]) groups[d] = [];
+                groups[d].push(s);
+            });
+            list.innerHTML = Object.keys(groups).map(date => `
+                <div class="hp-date-divider">${_hpEscape(date)}</div>
+                ${groups[date].map(s => _hpRenderCard(s)).join('')}
+            `).join('');
+        }
+
+        function _hpRenderCard(s) {
+            const color = _hpToolColor(s.tool);
+            const icon  = _hpToolIcon(s.tool);
+            const time  = _hpFmtTime(s.updatedAt);
+            const msgs  = (s.messages||[]).slice(0,40);
+            const msgHtml = msgs.map(m => {
+                const isUser = m.role==='user';
+                const content = _hpEscape((m.content||'').substring(0,600));
+                return isUser
+                    ? `<div style="display:flex;justify-content:flex-end;margin-bottom:.3rem"><div class="hp-msg-user">${content}</div></div>`
+                    : `<div style="display:flex;justify-content:flex-start;margin-bottom:.3rem"><div class="hp-msg-ai">${content}</div></div>`;
+            }).join('');
+            const extra = (s.messages||[]).length > 40
+                ? `<p style="text-align:center;font-size:.7rem;color:var(--text-secondary);padding:.4rem 0">… ${s.messages.length-40} more messages not shown</p>` : '';
+            return `
+            <div class="hp-session-card" id="hp-card-${s.id}">
+                <div class="hp-session-header" onclick="toggleHPCard('${s.id}')"
+                     role="button" tabindex="0" aria-expanded="false" id="hp-header-${s.id}"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHPCard('${s.id}')}">
+                    <div class="hp-session-icon" style="background:linear-gradient(135deg,${color},${color}99)">
+                        <i class="fas fa-${icon}" aria-hidden="true"></i>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                        <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                            <span style="font-weight:700;font-size:.8rem;color:var(--text-primary)">${_hpEscape(s.tool||'')}</span>
+                            ${s.subject?`<span style="font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;background:rgba(124,58,237,.12);color:var(--text-primary)">${_hpEscape(s.subject)}</span>`:''}
+                        </div>
+                        <p style="font-size:.72rem;color:var(--text-secondary);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_hpEscape((s.summary||'').substring(0,70))}</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+                        <span style="font-size:.7rem;color:var(--text-secondary)">${_hpEscape(time)}</span>
+                        <button onclick="event.stopPropagation();deleteHPSession('${s.id}')"
+                                class="btn-danger" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.7rem"
+                                title="Delete" aria-label="Delete session">
+                            <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                        </button>
+                        <i class="fas fa-chevron-down" id="hp-chevron-${s.id}" aria-hidden="true" style="font-size:.65rem;color:var(--text-secondary);transition:transform .3s"></i>
+                    </div>
+                </div>
+                <div class="hp-session-body" id="hp-body-${s.id}">
+                    ${msgs.length ? msgHtml : '<p style="text-align:center;font-size:.78rem;color:var(--text-secondary);padding:.5rem 0">No messages</p>'}
+                    ${extra}
+                </div>
+            </div>`;
+        }
+
+        function toggleHPCard(id) {
+            const body    = document.getElementById('hp-body-'+id);
+            const chevron = document.getElementById('hp-chevron-'+id);
+            if (!body) return;
+            const isOpen = body.classList.toggle('open');
+            if (chevron) chevron.style.transform = isOpen ? 'rotate(180deg)' : '';
+            const header = document.getElementById('hp-header-'+id);
+            if (header) header.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        async function deleteHPSession(id) {
+            if (!confirm('Delete this history entry?')) return;
+            const user = window.auth && window.auth.currentUser;
+            if (!user) return;
+            const ok = window.deleteHistorySession
+                ? await window.deleteHistorySession(user.uid, id)
+                : false;
+            if (ok) {
+                _hp.all      = _hp.all.filter(s=>s.id!==id);
+                _hp.filtered = _hp.filtered.filter(s=>s.id!==id);
+                const card = document.getElementById('hp-card-'+id);
+                if (card) card.remove();
+                if (!_hp.filtered.length) _hpRenderSessions([]);
+            } else {
+                alert('Failed to delete. Please try again.');
+            }
+        }
+
+        function applyHPFilter() {
+            _hp.filterTool = document.getElementById('hpFilterTool').value;
+            _hp.filtered = _hp.filterTool
+                ? _hp.all.filter(s=>s.tool===_hp.filterTool)
+                : [..._hp.all];
+            _hpRenderSessions(_hp.filtered);
+            document.getElementById('historyPanelLoadMore').style.display =
+                (_hp.lastDoc && !_hp.filterTool) ? 'block' : 'none';
+        }
+
+        async function loadMoreHP() {
+            if (_hp.loading || !_hp.lastDoc) return;
+            _hp.loading = true;
+            const btn = document.getElementById('hpLoadMoreBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading…';
+            try {
+                const user = window.auth && window.auth.currentUser;
+                if (!user) return;
+                const result = await window.loadHistory(user.uid, _hp.lastDoc);
+                const newSessions = result.docs.map(d=>({id:d.id,...d.data()}));
+                _hp.lastDoc = result.lastDoc;
+                _hp.all = [..._hp.all, ...newSessions];
+                applyHPFilter();
+                document.getElementById('historyPanelLoadMore').style.display =
+                    (_hp.lastDoc && !_hp.filterTool) ? 'block' : 'none';
+            } catch(e) { console.error(e); }
+            finally {
+                _hp.loading = false;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-chevron-down mr-2"></i>Load More';
+            }
+        }
+
+        async function openHistoryPanel() {
+            const backdrop = document.getElementById('historyPanelBackdrop');
+            const panel    = document.getElementById('historyPanel');
+            backdrop.style.display = 'block';
+            requestAnimationFrame(() => {
+                backdrop.classList.add('open');
+                panel.classList.add('open');
+            });
+            // Reset state and load fresh
+            _hp = { all:[], filtered:[], lastDoc:null, loading:false, filterTool:'' };
+            document.getElementById('hpFilterTool').value = '';
+            document.getElementById('hpList').innerHTML =
+                `<div style="text-align:center;padding:2rem"><i class="fas fa-spinner fa-spin" style="color:var(--primary);font-size:1.5rem"></i></div>`;
+            document.getElementById('historyPanelLoadMore').style.display = 'none';
+            try {
+                const user = window.auth && window.auth.currentUser;
+                if (!user) {
+                    document.getElementById('hpList').innerHTML =
+                        '<p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:2rem">Please sign in to view history.</p>';
+                    return;
+                }
+                const result = await window.loadHistory(user.uid, null);
+                _hp.all     = result.docs.map(d=>({id:d.id,...d.data()}));
+                _hp.lastDoc = result.lastDoc;
+                applyHPFilter();
+            } catch(e) {
+                console.error(e);
+                document.getElementById('hpList').innerHTML =
+                    '<p style="text-align:center;color:#ef4444;font-size:.85rem;padding:2rem">Failed to load history. Please try again.</p>';
+            }
+        }
+
+        function closeHistoryPanel() {
+            const backdrop = document.getElementById('historyPanelBackdrop');
+            const panel    = document.getElementById('historyPanel');
+            backdrop.classList.remove('open');
+            panel.classList.remove('open');
+            setTimeout(() => { backdrop.style.display = 'none'; }, 350);
+        }
     </script>
 </body>
 </html>
