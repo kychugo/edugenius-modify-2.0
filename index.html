@@ -143,7 +143,7 @@
         .tool-card { transition:all .3s cubic-bezier(.4,0,.2,1); cursor:pointer; }
         .tool-card:hover { transform:translateX(8px); box-shadow:0 16px 40px rgba(0,0,0,.10),var(--shadow-glow); }
 
-        .message-bubble { position:relative;max-width:80%;word-wrap:break-word;animation:fadeInUp .35s cubic-bezier(.16,1,.3,1) both; }
+        .message-bubble { position:relative;max-width:80%;word-wrap:break-word;animation:fadeInUp .35s cubic-bezier(.16,1,.3,1) both;font-size:var(--chat-font-size, 1rem); }
 
         .user-bubble {
             background:linear-gradient(135deg,#7c3aed 0%,#5b21b6 100%);
@@ -157,6 +157,9 @@
             border:1px solid var(--glass-border); color:var(--text-primary);
             border-radius:20px 20px 20px 4px; box-shadow:0 4px 16px rgba(0,0,0,.08);
         }
+
+        /* Dynamic padding applied via JS settings */
+        .message-bubble.p-4 { padding: var(--bubble-padding, .75rem 1rem); }
 
         .loading-dots { display:inline-flex;align-items:center;gap:5px; }
         .loading-dots span { height:8px;width:8px;background:var(--primary);border-radius:50%;animation:dotPulse 1.2s ease-in-out infinite both; }
@@ -402,6 +405,10 @@
                     <button onclick="openHistoryPanel()"
                             class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="View history" title="History">
                         <i class="fas fa-history" style="color:var(--primary)"></i>
+                    </button>
+                    <button onclick="openSettingsPanel()"
+                            class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Settings" title="Settings">
+                        <i class="fas fa-cog" style="color:var(--primary)"></i>
                     </button>
                     <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary" aria-label="Toggle dark mode">
                         <i class="fas fa-moon theme-moon" style="color:var(--primary)"></i><i class="fas fa-sun theme-sun" style="color:var(--primary)"></i>
@@ -2061,6 +2068,15 @@
                 </button>
             </div>
         </div>
+        <div id="historyPanelSearch" style="padding:.6rem 1.25rem .4rem;background:var(--glass-bg);border-bottom:1px solid var(--glass-border);flex-shrink:0;">
+            <div style="position:relative;">
+                <i class="fas fa-search" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:.8rem;pointer-events:none"></i>
+                <input type="search" id="hpSearchInput" placeholder="Search sessions…"
+                       oninput="applyHPFilter()"
+                       style="width:100%;padding:.5rem .75rem .5rem 2.2rem;border:1px solid var(--glass-border);border-radius:10px;background:var(--bg-main);color:var(--text-primary);font-size:.82rem;outline:none;font-family:inherit;"
+                       aria-label="Search history sessions">
+            </div>
+        </div>
         <div id="historyPanelBody">
             <div id="hpList"></div>
             <div id="historyPanelLoadMore">
@@ -2071,6 +2087,94 @@
             </div>
         </div>
     </div>
+
+    <!-- ── Settings Panel ─────────────────────────────────────────── -->
+    <div id="settingsPanelBackdrop" onclick="closeSettingsPanel()" aria-hidden="true"
+         style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .3s ease;"></div>
+    <div id="settingsPanel" role="dialog" aria-modal="true" aria-label="Settings panel"
+         style="position:fixed;top:0;right:0;bottom:0;z-index:901;width:min(380px,100vw);background:var(--bg-main);border-left:1px solid var(--glass-border);box-shadow:-8px 0 32px rgba(0,0,0,.18);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:var(--glass-bg);border-bottom:1px solid var(--glass-border);flex-shrink:0;">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-cog" style="color:var(--primary);font-size:1.1rem"></i>
+                <span class="font-bold text-base" style="color:var(--text-primary)">Settings</span>
+            </div>
+            <button onclick="closeSettingsPanel()"
+                    class="w-9 h-9 flex items-center justify-center rounded-xl btn-secondary"
+                    aria-label="Close settings panel">
+                <i class="fas fa-times" style="color:var(--text-secondary)"></i>
+            </button>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:1.25rem;">
+            <!-- Font Size -->
+            <div style="margin-bottom:1.5rem;">
+                <p class="font-bold text-sm mb-3" style="color:var(--text-primary)">
+                    <i class="fas fa-text-height mr-2" style="color:var(--primary)"></i>Font Size
+                </p>
+                <div style="display:flex;gap:.5rem;">
+                    <button onclick="setFontSize('small')" id="fs-small"
+                            class="flex-1 py-2 rounded-xl font-semibold text-sm border transition-all"
+                            style="font-size:.8rem;border-color:var(--glass-border);background:var(--glass-bg);color:var(--text-secondary)">
+                        Aa–<br><span style="font-size:.7rem;font-weight:400">Small</span>
+                    </button>
+                    <button onclick="setFontSize('medium')" id="fs-medium"
+                            class="flex-1 py-2 rounded-xl font-semibold text-sm border transition-all"
+                            style="font-size:.95rem;border-color:var(--glass-border);background:var(--glass-bg);color:var(--text-secondary)">
+                        Aa<br><span style="font-size:.7rem;font-weight:400">Medium</span>
+                    </button>
+                    <button onclick="setFontSize('large')" id="fs-large"
+                            class="flex-1 py-2 rounded-xl font-semibold text-sm border transition-all"
+                            style="font-size:1.1rem;border-color:var(--glass-border);background:var(--glass-bg);color:var(--text-secondary)">
+                        Aa+<br><span style="font-size:.7rem;font-weight:400">Large</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Chat Density -->
+            <div style="margin-bottom:1.5rem;">
+                <p class="font-bold text-sm mb-3" style="color:var(--text-primary)">
+                    <i class="fas fa-compress-alt mr-2" style="color:var(--primary)"></i>Chat Bubble Density
+                </p>
+                <div style="display:flex;gap:.5rem;">
+                    <button onclick="setChatDensity('compact')" id="cd-compact"
+                            class="flex-1 py-2 rounded-xl font-semibold text-sm border transition-all"
+                            style="border-color:var(--glass-border);background:var(--glass-bg);color:var(--text-secondary)">
+                        Compact
+                    </button>
+                    <button onclick="setChatDensity('normal')" id="cd-normal"
+                            class="flex-1 py-2 rounded-xl font-semibold text-sm border transition-all"
+                            style="border-color:var(--glass-border);background:var(--glass-bg);color:var(--text-secondary)">
+                        Normal
+                    </button>
+                    <button onclick="setChatDensity('spacious')" id="cd-spacious"
+                            class="flex-1 py-2 rounded-xl font-semibold text-sm border transition-all"
+                            style="border-color:var(--glass-border);background:var(--glass-bg);color:var(--text-secondary)">
+                        Spacious
+                    </button>
+                </div>
+            </div>
+            <!-- Send on Enter -->
+            <div style="margin-bottom:1.5rem;">
+                <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+                    <span>
+                        <p class="font-bold text-sm" style="color:var(--text-primary)">
+                            <i class="fas fa-paper-plane mr-2" style="color:var(--primary)"></i>Send on Enter
+                        </p>
+                        <p style="font-size:.78rem;color:var(--text-secondary);margin-top:.2rem">Press ↵ to send, Shift+↵ for new line</p>
+                    </span>
+                    <button id="sendOnEnterToggle" role="switch" aria-checked="true"
+                            onclick="toggleSendOnEnter()"
+                            onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();toggleSendOnEnter()}"
+                            aria-label="Send on Enter"
+                            style="width:44px;height:24px;border-radius:12px;background:var(--primary);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none;">
+                        <div id="sendOnEnterKnob"
+                             style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;left:23px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2);"></div>
+                    </button>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Toast Notification Container ───────────────────────────── -->
+    <div id="toastContainer" style="position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:.5rem;pointer-events:none;"></div>
 
     <script>
         // ── Inline History Panel ──────────────────────────────────────────
@@ -2210,8 +2314,9 @@
                 const card = document.getElementById('hp-card-'+id);
                 if (card) card.remove();
                 if (!_hp.filtered.length) _hpRenderSessions([]);
+                showToast('History entry deleted', 'success');
             } else {
-                alert('Failed to delete. Please try again.');
+                showToast('Failed to delete. Please try again.', 'error');
             }
         }
 
@@ -2246,12 +2351,18 @@
 
         function applyHPFilter() {
             _hp.filterTool = document.getElementById('hpFilterTool').value;
-            _hp.filtered = _hp.filterTool
-                ? _hp.all.filter(s=>s.tool===_hp.filterTool)
-                : [..._hp.all];
+            const searchVal = (document.getElementById('hpSearchInput')?.value || '').toLowerCase().trim();
+            _hp.filtered = _hp.all.filter(s => {
+                const toolMatch = !_hp.filterTool || s.tool === _hp.filterTool;
+                const searchMatch = !searchVal ||
+                    (s.tool    || '').toLowerCase().includes(searchVal) ||
+                    (s.subject || '').toLowerCase().includes(searchVal) ||
+                    (s.summary || '').toLowerCase().includes(searchVal);
+                return toolMatch && searchMatch;
+            });
             _hpRenderSessions(_hp.filtered);
             document.getElementById('historyPanelLoadMore').style.display =
-                (_hp.lastDoc && !_hp.filterTool) ? 'block' : 'none';
+                (_hp.lastDoc && !_hp.filterTool && !searchVal) ? 'block' : 'none';
         }
 
         async function loadMoreHP() {
@@ -2289,6 +2400,8 @@
             // Reset state and load fresh
             _hp = { all:[], filtered:[], lastDoc:null, loading:false, filterTool:'' };
             document.getElementById('hpFilterTool').value = '';
+            const searchEl = document.getElementById('hpSearchInput');
+            if (searchEl) searchEl.value = '';
             document.getElementById('hpList').innerHTML =
                 `<div style="text-align:center;padding:2rem"><i class="fas fa-spinner fa-spin" style="color:var(--primary);font-size:1.5rem"></i></div>`;
             document.getElementById('historyPanelLoadMore').style.display = 'none';
@@ -2317,6 +2430,149 @@
             panel.classList.remove('open');
             setTimeout(() => { backdrop.style.display = 'none'; }, 350);
         }
+
+        // ── Settings Panel ────────────────────────────────────────────────
+        const _SETTINGS_KEY = 'edugenius_settings';
+        let _settings = { fontSize: 'medium', chatDensity: 'normal', sendOnEnter: true };
+
+        function _loadSettings() {
+            try {
+                const s = JSON.parse(localStorage.getItem(_SETTINGS_KEY) || '{}');
+                _settings = { ..._settings, ...s };
+            } catch {}
+            _applySettings();
+            _syncSettingsUI();
+        }
+
+        function _saveSettings() {
+            localStorage.setItem(_SETTINGS_KEY, JSON.stringify(_settings));
+        }
+
+        const _FS_MAP = { small: '14px', medium: '16px', large: '18px' };
+        const _CD_MAP = { compact: '.55rem .85rem', normal: '.75rem 1rem', spacious: '1rem 1.25rem' };
+
+        function _applySettings() {
+            // Font size
+            document.documentElement.style.setProperty('--chat-font-size', _FS_MAP[_settings.fontSize] || '16px');
+            // Chat density (bubble padding)
+            document.documentElement.style.setProperty('--bubble-padding', _CD_MAP[_settings.chatDensity] || '.75rem 1rem');
+        }
+
+        function _syncSettingsUI() {
+            ['small','medium','large'].forEach(s => {
+                const btn = document.getElementById('fs-' + s);
+                if (!btn) return;
+                const active = s === _settings.fontSize;
+                btn.style.borderColor = active ? 'var(--primary)' : 'var(--glass-border)';
+                btn.style.background  = active ? 'rgba(124,58,237,.12)' : 'var(--glass-bg)';
+                btn.style.color       = active ? 'var(--primary)' : 'var(--text-secondary)';
+            });
+            ['compact','normal','spacious'].forEach(s => {
+                const btn = document.getElementById('cd-' + s);
+                if (!btn) return;
+                const active = s === _settings.chatDensity;
+                btn.style.borderColor = active ? 'var(--primary)' : 'var(--glass-border)';
+                btn.style.background  = active ? 'rgba(124,58,237,.12)' : 'var(--glass-bg)';
+                btn.style.color       = active ? 'var(--primary)' : 'var(--text-secondary)';
+            });
+            const tog   = document.getElementById('sendOnEnterToggle');
+            const knob  = document.getElementById('sendOnEnterKnob');
+            if (tog && knob) {
+                const on = _settings.sendOnEnter;
+                tog.style.background = on ? 'var(--primary)' : '#94a3b8';
+                tog.setAttribute('aria-checked', on ? 'true' : 'false');
+                knob.style.left = on ? '23px' : '3px';
+            }
+        }
+
+        function setFontSize(size) {
+            _settings.fontSize = size;
+            _applySettings();
+            _syncSettingsUI();
+            _saveSettings();
+            showToast('Font size set to ' + size.charAt(0).toUpperCase() + size.slice(1), 'success');
+        }
+
+        function setChatDensity(density) {
+            _settings.chatDensity = density;
+            _applySettings();
+            _syncSettingsUI();
+            _saveSettings();
+            showToast('Chat density set to ' + density.charAt(0).toUpperCase() + density.slice(1), 'success');
+        }
+
+        function toggleSendOnEnter() {
+            _settings.sendOnEnter = !_settings.sendOnEnter;
+            _syncSettingsUI();
+            _saveSettings();
+            showToast('Send on Enter ' + (_settings.sendOnEnter ? 'enabled' : 'disabled'), 'info');
+            // Expose for chat input listeners
+            window._sendOnEnter = _settings.sendOnEnter;
+        }
+
+        function openSettingsPanel() {
+            const backdrop = document.getElementById('settingsPanelBackdrop');
+            const panel    = document.getElementById('settingsPanel');
+            backdrop.style.display = 'block';
+            requestAnimationFrame(() => {
+                backdrop.style.opacity = '1';
+                panel.style.transform  = 'translateX(0)';
+            });
+            _syncSettingsUI();
+        }
+
+        function closeSettingsPanel() {
+            const backdrop = document.getElementById('settingsPanelBackdrop');
+            const panel    = document.getElementById('settingsPanel');
+            backdrop.style.opacity = '0';
+            panel.style.transform  = 'translateX(100%)';
+            setTimeout(() => { backdrop.style.display = 'none'; }, 350);
+        }
+
+        // ── Toast Notifications ───────────────────────────────────────────
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const validTypes = ['success', 'error', 'info', 'warning'];
+            const safeType = validTypes.includes(type) ? type : 'info';
+            const icons  = { success: 'check-circle', error: 'exclamation-circle', info: 'info-circle', warning: 'exclamation-triangle' };
+            const colors = { success: '#10b981', error: '#ef4444', info: 'var(--primary)', warning: '#f59e0b' };
+            const id = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = id;
+            toast.setAttribute('role', 'status');
+            toast.setAttribute('aria-live', 'polite');
+            toast.style.cssText = `
+                display:flex;align-items:center;gap:.6rem;
+                padding:.6rem 1rem;border-radius:12px;
+                background:var(--glass-bg);backdrop-filter:blur(16px);
+                border:1px solid var(--glass-border);
+                box-shadow:0 4px 16px rgba(0,0,0,.15);
+                color:var(--text-primary);font-size:.85rem;font-weight:500;
+                pointer-events:auto;cursor:pointer;
+                max-width:340px;word-break:break-word;
+                animation:fadeInUp .3s cubic-bezier(.16,1,.3,1) both;
+                font-family:inherit;
+            `;
+            toast.innerHTML = `<i class="fas fa-${icons[safeType]}" style="color:${colors[safeType]};font-size:1rem;flex-shrink:0"></i><span>${_hpEscape(message)}</span>`;
+            toast.onclick = () => dismissToast(id);
+            container.appendChild(toast);
+            setTimeout(() => dismissToast(id), duration);
+        }
+
+        function dismissToast(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.style.animation = 'none';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(8px)';
+            el.style.transition = 'opacity .25s,transform .25s';
+            setTimeout(() => el.remove(), 260);
+        }
+
+        // Init settings on load
+        _loadSettings();
+        window._sendOnEnter = _settings.sendOnEnter;
     </script>
 </body>
 </html>

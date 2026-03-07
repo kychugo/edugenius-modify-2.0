@@ -686,6 +686,88 @@
             margin-bottom: 1.5rem;
         }
 
+        /* ---- Flashcard ---- */
+        .flashcard-scene {
+            perspective: 1200px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+            height: 280px;
+        }
+        .flashcard {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform .55s cubic-bezier(.4,.2,.2,1);
+            cursor: pointer;
+        }
+        .flashcard.flipped { transform: rotateY(180deg); }
+        .flashcard-face {
+            position: absolute; inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: var(--radius);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 2rem 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            user-select: none;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+        }
+        .flashcard-back {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            transform: rotateY(180deg);
+            color: var(--text);
+        }
+        .flashcard-word  { font-size: 2.4rem; font-weight: 800; letter-spacing: -.5px; margin-bottom: .5rem; }
+        .flashcard-pos   { font-size: .9rem; opacity: .8; font-style: italic; }
+        .flashcard-hint  { font-size: .75rem; opacity: .65; margin-top: 1.25rem; letter-spacing: .06em; text-transform: uppercase; }
+        .flashcard-def   { font-size: .975rem; line-height: 1.55; color: var(--text); margin-bottom: .6rem; }
+        .flashcard-example { font-size: .85rem; color: var(--text-muted); font-style: italic; margin-bottom: .5rem;
+                             border-left: 2px solid #c7d2fe; padding-left: .5rem; line-height: 1.4; }
+        .flashcard-cn    { font-size: .8rem; color: var(--primary); font-weight: 600;
+                           background: var(--primary-light); padding: .15rem .55rem; border-radius: 5px; display: inline-block; }
+        .fc-progress-bar-wrap {
+            height: 5px; background: var(--border); border-radius: 99px;
+            margin-bottom: 1.25rem; overflow: hidden;
+        }
+        .fc-progress-bar-fill {
+            height: 100%; border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width .35s ease;
+        }
+        .fc-controls {
+            display: flex; align-items: center; justify-content: center;
+            gap: .75rem; margin-bottom: 1rem;
+        }
+        .fc-counter {
+            font-size: .875rem; font-weight: 600; color: var(--text-muted);
+            min-width: 64px; text-align: center;
+        }
+        .fc-nav-btn {
+            width: 44px; height: 44px; border-radius: 50%;
+            border: 2px solid var(--border); background: var(--card-bg);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; transition: all .2s; color: var(--text); font-family: inherit;
+        }
+        .fc-nav-btn:hover:not(:disabled) { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .fc-nav-btn:disabled { opacity: .32; cursor: not-allowed; }
+        .fc-info-row {
+            display: flex; align-items: center; justify-content: center; gap: .6rem;
+            font-size: .8rem; color: var(--text-muted); margin-top: 1rem;
+        }
+        .fc-shuffle-btn, .fc-restart-btn {
+            background: none; border: 1px solid var(--border); border-radius: 7px;
+            padding: .3rem .7rem; font-size: .78rem; font-family: inherit;
+            cursor: pointer; color: var(--text-muted); transition: all .2s;
+        }
+        .fc-shuffle-btn:hover, .fc-restart-btn:hover { color: var(--primary); border-color: var(--primary); }
+
         /* ---- Utility ---- */
         .hidden { display: none !important; }
         .mt-1 { margin-top: 0.25rem; }
@@ -788,6 +870,11 @@
                     onclick="switchTab('generator')">
                 💡 Generator
             </button>
+            <button class="tab-btn" id="tab-flashcards" role="tab"
+                    aria-selected="false" aria-controls="panel-flashcards"
+                    onclick="switchTab('flashcards')">
+                🃏 Flashcards
+            </button>
             <button class="tab-btn" id="tab-quiz" role="tab"
                     aria-selected="false" aria-controls="panel-quiz"
                     onclick="switchTab('quiz')">
@@ -840,6 +927,11 @@
                         <button type="submit" id="genBtn" class="btn btn-yellow">
                             💡 Generate Vocabulary
                         </button>
+                        <button type="button" id="startFlashcardsFromGenBtn" class="btn btn-primary hidden"
+                                aria-label="Study generated vocabulary as flashcards"
+                                onclick="switchTab('flashcards', true)">
+                            🃏 Study as Flashcards
+                        </button>
                         <button type="button" id="startQuizFromGenBtn" class="btn btn-ghost hidden"
                                 onclick="switchTab('quiz', true)">
                             ✏️ Quiz These Words
@@ -858,7 +950,63 @@
         </div>
 
         <!-- ============================================================
-             TAB 2: Vocabulary Quiz
+             TAB 2: Flashcards
+             ============================================================ -->
+        <div class="tab-panel hidden" id="panel-flashcards" role="tabpanel" aria-labelledby="tab-flashcards">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background:#eef2ff;">🃏</div>
+                    <div>
+                        <div class="card-title">Flashcard Study Mode</div>
+                        <div class="card-hint">Click each card to reveal the definition · Use ← → to navigate</div>
+                    </div>
+                </div>
+
+                <form id="fcForm" novalidate>
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label for="fcTopic">Topic</label>
+                            <input type="text" id="fcTopic"
+                                   placeholder="e.g., Environment, Technology"
+                                   aria-label="Flashcard topic">
+                        </div>
+                        <div class="form-group">
+                            <label for="fcLevel">Level</label>
+                            <select id="fcLevel" aria-label="Flashcard level">
+                                <option value="DSE Foundation">DSE Foundation</option>
+                                <option value="DSE Core" selected>DSE Core</option>
+                                <option value="DSE Extended">DSE Extended</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fcCount">Number of Cards</label>
+                            <select id="fcCount" aria-label="Number of flashcards">
+                                <option value="6">6 cards</option>
+                                <option value="9" selected>9 cards</option>
+                                <option value="12">12 cards</option>
+                                <option value="15">15 cards</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="action-row" style="margin-top:0.75rem;">
+                        <button type="submit" id="fcBtn" class="btn btn-primary">
+                            🃏 Generate Flashcards
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="fcOutput">
+                <div class="empty-state">
+                    <div class="empty-icon">🃏</div>
+                    <p>Fill in a topic and click <strong>Generate Flashcards</strong>, or use <strong>Study as Flashcards</strong> from the Generator tab</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             TAB 3: Vocabulary Quiz
              ============================================================ -->
         <div class="tab-panel hidden" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz">
             <div class="card">
@@ -953,7 +1101,10 @@
 
         // ---- Tab switching ----
         function switchTab(name, fromGen = false) {
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.tab-panel').forEach(p => {
+                p.classList.add('hidden');
+                p.classList.remove('active');
+            });
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.remove('active');
                 b.setAttribute('aria-selected', 'false');
@@ -970,12 +1121,25 @@
                 if (topic) document.getElementById('quizTopic').value = topic;
                 document.getElementById('quizLevel').value = level;
             }
+
+            // If switching to flashcards from generator, use generated words or pre-fill
+            if (name === 'flashcards' && fromGen) {
+                const topic = document.getElementById('genTopic').value;
+                const level = document.getElementById('genLevel').value;
+                if (topic) document.getElementById('fcTopic').value = topic;
+                document.getElementById('fcLevel').value = level;
+                if (generatedWords.length) {
+                    renderFlashcards(generatedWords);
+                }
+            }
         }
 
         // Check URL hash on load
         (function() {
             if (window.location.hash === '#quiz') {
                 switchTab('quiz');
+            } else if (window.location.hash === '#flashcards') {
+                switchTab('flashcards');
             }
         })();
 
@@ -1093,7 +1257,175 @@ Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文)
 
             setLoading(genBtn, false);
             genBtn.innerHTML = '💡 Generate Vocabulary';
+            document.getElementById('startFlashcardsFromGenBtn').classList.remove('hidden');
             quizFromGenBtn.classList.remove('hidden');
+        });
+
+        // ====================================================
+        // FLASHCARDS
+        // ====================================================
+
+        let fcWords = [];
+        let fcIndex = 0;
+
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function renderFlashcards(words) {
+            if (!words || !words.length) return;
+            fcWords = [...words];
+            fcIndex = 0;
+            document.removeEventListener('keydown', fcKeyHandler);
+            const out = document.getElementById('fcOutput');
+            out.innerHTML = `
+                <div class="fc-progress-bar-wrap">
+                    <div class="fc-progress-bar-fill" id="fcProgressFill" style="width:0%"></div>
+                </div>
+                <div class="flashcard-scene" aria-label="Flashcard" role="region">
+                    <div class="flashcard" id="fcCard" onclick="flipCard()" tabindex="0"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();flipCard()}"
+                         aria-label="Flashcard front side — click or press Space to reveal definition"
+                         aria-live="polite">
+                        <div class="flashcard-face flashcard-front" id="fcFront">
+                            <div class="flashcard-word" id="fcWord"></div>
+                            <div class="flashcard-pos" id="fcPos"></div>
+                            <div class="flashcard-hint">Tap to reveal definition</div>
+                        </div>
+                        <div class="flashcard-face flashcard-back" id="fcBack">
+                            <div class="flashcard-def" id="fcDef"></div>
+                            <div class="flashcard-example" id="fcExample" style="display:none"></div>
+                            <div class="flashcard-cn" id="fcCn" style="display:none"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fc-controls">
+                    <button class="fc-nav-btn" id="fcPrev" onclick="fcNavigate(-1)"
+                            aria-label="Previous card" title="Previous (←)">&#8592;</button>
+                    <span class="fc-counter" id="fcCounter"></span>
+                    <button class="fc-nav-btn" id="fcNext" onclick="fcNavigate(1)"
+                            aria-label="Next card" title="Next (→)">&#8594;</button>
+                </div>
+                <div class="fc-info-row">
+                    <button class="fc-shuffle-btn" onclick="fcShuffle()" title="Shuffle cards">🔀 Shuffle</button>
+                    <button class="fc-restart-btn" onclick="fcRestart()" title="Restart from first card">↩ Restart</button>
+                </div>`;
+            document.addEventListener('keydown', fcKeyHandler);
+            updateFlashcard();
+        }
+
+        function fcKeyHandler(e) {
+            if (!document.getElementById('fcCard')) {
+                document.removeEventListener('keydown', fcKeyHandler);
+                return;
+            }
+            if (e.key === 'ArrowLeft')  { e.preventDefault(); fcNavigate(-1); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); fcNavigate(1); }
+            if (e.key === ' ' || e.key === 'Enter') {
+                if (document.activeElement && document.activeElement.id === 'fcCard') return;
+                e.preventDefault(); flipCard();
+            }
+        }
+
+        function updateFlashcard() {
+            const w = fcWords[fcIndex];
+            if (!w) return;
+            const card = document.getElementById('fcCard');
+            if (card) card.classList.remove('flipped');
+            document.getElementById('fcWord').textContent    = w.word    || '';
+            document.getElementById('fcPos').textContent     = w.pos     ? '(' + w.pos + ')' : '';
+            document.getElementById('fcDef').textContent     = w.def     || '';
+            const exEl = document.getElementById('fcExample');
+            const cnEl = document.getElementById('fcCn');
+            if (exEl) { exEl.textContent = w.example ? '"' + w.example + '"' : ''; exEl.style.display = w.example ? '' : 'none'; }
+            if (cnEl) { cnEl.textContent = w.cn ? '🇨🇳 ' + w.cn : '';             cnEl.style.display = w.cn      ? '' : 'none'; }
+            const total = fcWords.length;
+            const pct   = total > 1 ? Math.round((fcIndex / (total - 1)) * 100) : 100;
+            const fill  = document.getElementById('fcProgressFill');
+            if (fill) fill.style.width = pct + '%';
+            const counter = document.getElementById('fcCounter');
+            if (counter) counter.textContent = (fcIndex + 1) + ' / ' + total;
+            const prev = document.getElementById('fcPrev');
+            const next = document.getElementById('fcNext');
+            if (prev) prev.disabled = fcIndex === 0;
+            if (next) next.disabled = fcIndex === total - 1;
+        }
+
+        function flipCard() {
+            const card = document.getElementById('fcCard');
+            if (!card) return;
+            card.classList.toggle('flipped');
+            const isFlipped = card.classList.contains('flipped');
+            card.setAttribute('aria-label', isFlipped
+                ? 'Flashcard back side showing definition — press Space to flip back'
+                : 'Flashcard front side — press Space to reveal definition');
+        }
+
+        function fcNavigate(dir) {
+            const total = fcWords.length;
+            fcIndex = Math.max(0, Math.min(total - 1, fcIndex + dir));
+            updateFlashcard();
+        }
+
+        function fcShuffle() {
+            fcWords = shuffleArray(fcWords);
+            fcIndex = 0;
+            updateFlashcard();
+        }
+
+        function fcRestart() {
+            fcIndex = 0;
+            updateFlashcard();
+        }
+
+        document.getElementById('fcForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = document.getElementById('fcTopic').value.trim() || 'General English';
+            const level = document.getElementById('fcLevel').value;
+            const count = parseInt(document.getElementById('fcCount').value, 10);
+            const fcBtn  = document.getElementById('fcBtn');
+            const fcOut  = document.getElementById('fcOutput');
+
+            setLoading(fcBtn, true, 'Generating…');
+            fcOut.innerHTML = `<div class="loading-text"><span class="spinner spinner-dark"></span> Generating ${count} flashcards on "${topic}"…</div>`;
+
+            const prompt =
+`Generate a vocabulary list of exactly ${count} English words for Hong Kong DSE students at ${level} level on the topic of "${topic}".
+
+For EACH word, use this exact format:
+1. [WORD] ([part of speech])
+Definition: [Clear, concise English definition]
+Example: [A natural example sentence using the word]
+Chinese: [Traditional Chinese translation]
+
+2. [WORD] ...
+
+Important: Output exactly ${count} words. Use Traditional Chinese (繁體中文) for the Chinese translation.`;
+
+            const raw = await callAI(prompt);
+            if (!raw) {
+                fcOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Failed to generate flashcards. Please try again.</p></div>`;
+                setLoading(fcBtn, false);
+                fcBtn.innerHTML = '🃏 Generate Flashcards';
+                return;
+            }
+
+            const words = parseVocabList(raw);
+            if (!words.length) {
+                fcOut.innerHTML = `<div class="empty-state"><p style="color:#dc2626;">Could not parse flashcards. Please try again.</p></div>`;
+                setLoading(fcBtn, false);
+                fcBtn.innerHTML = '🃏 Generate Flashcards';
+                return;
+            }
+
+            setLoading(fcBtn, false);
+            fcBtn.innerHTML = '🃏 Generate Flashcards';
+            renderFlashcards(words);
         });
 
         // ====================================================
