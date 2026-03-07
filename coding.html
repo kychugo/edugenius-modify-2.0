@@ -141,6 +141,52 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     outline: 3px solid rgba(124,58,237,.5);
     outline-offset: 2px;
 }
+/* Code Review History Panel */
+#crHistoryBackdrop {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:900;
+    backdrop-filter:blur(2px); transition:opacity .3s;
+}
+#crHistoryBackdrop.open { opacity:1; }
+#crHistoryPanel {
+    position:fixed; top:0; right:0; bottom:0; z-index:901;
+    width:min(500px,100vw);
+    background:var(--bg-main);
+    border-left:1px solid var(--glass-border);
+    box-shadow:-8px 0 32px rgba(0,0,0,.18);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform .35s cubic-bezier(.16,1,.3,1);
+    overflow:hidden;
+}
+#crHistoryPanel.open { transform:translateX(0); }
+#crHistoryPanelHeader {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1rem 1.25rem;
+    background:var(--glass-bg);
+    border-bottom:1px solid var(--glass-border);
+    flex-shrink:0;
+}
+#crHistoryPanelBody { flex:1; overflow-y:auto; padding:1rem; }
+#crHistoryPanelBody::-webkit-scrollbar { width:4px; }
+#crHistoryPanelBody::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+.crh-card {
+    background:var(--glass-bg); border:1px solid var(--glass-border);
+    border-radius:12px; margin-bottom:.75rem; overflow:hidden;
+    animation:fadeInUp .3s ease both;
+}
+.crh-card-header {
+    display:flex; align-items:center; gap:.75rem;
+    padding:.85rem 1rem; cursor:pointer; transition:background .2s;
+}
+.crh-card-header:hover { background:rgba(124,58,237,.06); }
+.crh-card-body {
+    max-height:0; overflow:hidden;
+    transition:max-height .35s ease, padding .2s;
+    padding:0 1rem;
+}
+.crh-card-body.open { max-height:500px; overflow-y:auto; padding:.75rem 1rem; }
+.crh-card-body::-webkit-scrollbar { width:3px; }
+.crh-card-body::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
     </style>
 </head>
 <body class="transition-all duration-300">
@@ -162,9 +208,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
             <a id="back-btn-link" href="./index.html" class="btn-back px-4 py-2 text-sm" aria-label="Back">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.1);color:var(--primary);font-size:1rem;transition:all .2s">
-                <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="openCRHistory()" title="View Code Review History" aria-label="View history"
+                        style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.1);color:var(--primary);font-size:.95rem;transition:all .2s">
+                    <i class="fas fa-history"></i>
+                </button>
+                <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.1);color:var(--primary);font-size:1rem;transition:all .2s">
+                    <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
+                </button>
+            </div>
         </div>
 
         <!-- Page header -->
@@ -467,7 +519,7 @@ ${codeContent}
                     const response = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${POLLINATIONS_API_KEY}` },
-                        body: JSON.stringify({ model: model, messages: messages, temperature: 0.7, seed: Math.floor(Math.random() * 2147483647) })
+                        body: JSON.stringify({ model: model, messages: messages, temperature: 0.7, seed: Math.floor(Math.random() * 2147483647), max_tokens: 131072 })
                     });
                     if (!response.ok) {
                         console.warn(`Model ${model} failed with status ${response.status}, trying next model...`);
@@ -837,11 +889,37 @@ Return ONLY valid JSON:
             }
         }
     </script>
+    <!-- Code Review History Panel -->
+    <div id="crHistoryBackdrop" onclick="closeCRHistory()" aria-hidden="true"></div>
+    <div id="crHistoryPanel" role="dialog" aria-modal="true" aria-label="Code Review history">
+        <div id="crHistoryPanelHeader">
+            <div class="flex items-center gap-2">
+                <div style="width:28px;height:28px;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#7c3aed,#06b6d4);flex-shrink:0">
+                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius" style="width:100%;height:100%;object-fit:cover">
+                </div>
+                <span style="font-weight:700;font-size:.95rem;color:var(--text-primary)">Code Review History</span>
+            </div>
+            <button onclick="closeCRHistory()" aria-label="Close history"
+                    style="width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.05);color:var(--text-secondary);font-size:.85rem">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="crHistoryPanelBody">
+            <div id="crhList"></div>
+            <div id="crhLoadMoreWrap" style="display:none;text-align:center;padding:.75rem 0">
+                <button id="crhLoadMoreBtn" onclick="loadMoreCRH()"
+                        style="border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-primary);padding:.4rem 1.25rem;border-radius:10px;font-size:.8rem;font-weight:600;cursor:pointer">
+                    <i class="fas fa-chevron-down mr-1"></i> Load More
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase auth guard -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, limit, startAfter, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -881,6 +959,148 @@ Return ONLY valid JSON:
                 console.warn('History save failed:', e);
             }
         };
+
+        // ── Code Review History Panel ──────────────────────────────────
+        let _crh = { all:[], lastDoc:null, loading:false };
+
+        window.openCRHistory = async function() {
+            const backdrop = document.getElementById('crHistoryBackdrop');
+            const panel = document.getElementById('crHistoryPanel');
+            backdrop.style.display = 'block';
+            requestAnimationFrame(() => {
+                backdrop.classList.add('open');
+                panel.classList.add('open');
+            });
+            _crh = { all:[], lastDoc:null, loading:false };
+            const listEl = document.getElementById('crhList');
+            listEl.innerHTML = `<div style="text-align:center;padding:2rem"><i class="fas fa-spinner fa-spin" style="color:var(--primary);font-size:1.5rem"></i></div>`;
+            document.getElementById('crhLoadMoreWrap').style.display = 'none';
+            try {
+                const user = window._fbUser;
+                if (!user) { listEl.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:2rem">Please sign in to view history.</p>'; return; }
+                const ref = collection(db, 'users', user.uid, 'history');
+                const q = query(ref, where('tool','==','Code Review'), orderBy('updatedAt','desc'), limit(15));
+                const snap = await getDocs(q);
+                _crh.all = snap.docs.map(d => ({id:d.id,...d.data()}));
+                _crh.lastDoc = snap.docs[snap.docs.length-1] || null;
+                _crhRender(_crh.all);
+                document.getElementById('crhLoadMoreWrap').style.display = _crh.lastDoc ? 'block' : 'none';
+            } catch(e) {
+                console.error(e);
+                listEl.innerHTML = '<p style="text-align:center;color:#ef4444;font-size:.85rem;padding:2rem">Failed to load history.</p>';
+            }
+        };
+
+        window.closeCRHistory = function() {
+            const backdrop = document.getElementById('crHistoryBackdrop');
+            const panel = document.getElementById('crHistoryPanel');
+            backdrop.classList.remove('open');
+            panel.classList.remove('open');
+            setTimeout(() => { backdrop.style.display = 'none'; }, 380);
+        };
+
+        window.loadMoreCRH = async function() {
+            if (_crh.loading || !_crh.lastDoc) return;
+            _crh.loading = true;
+            const btn = document.getElementById('crhLoadMoreBtn');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Loading…'; }
+            try {
+                const user = window._fbUser;
+                if (!user) return;
+                const ref = collection(db, 'users', user.uid, 'history');
+                const q = query(ref, where('tool','==','Code Review'), orderBy('updatedAt','desc'), startAfter(_crh.lastDoc), limit(15));
+                const snap = await getDocs(q);
+                const more = snap.docs.map(d => ({id:d.id,...d.data()}));
+                _crh.lastDoc = snap.docs[snap.docs.length-1] || null;
+                _crh.all = [..._crh.all, ...more];
+                _crhRender(_crh.all);
+                document.getElementById('crhLoadMoreWrap').style.display = _crh.lastDoc ? 'block' : 'none';
+            } catch(e) { console.error(e); }
+            finally {
+                _crh.loading = false;
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Load More'; }
+            }
+        };
+
+        window.deleteCRHSession = async function(id) {
+            if (!confirm('Delete this history entry?')) return;
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                await deleteDoc(doc(db, 'users', user.uid, 'history', id));
+                _crh.all = _crh.all.filter(s => s.id !== id);
+                _crhRender(_crh.all);
+            } catch(e) { alert('Failed to delete. Please try again.'); }
+        };
+
+        function _crhEsc(s) {
+            return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        function _crhFmtTime(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleString('en-HK',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        }
+        window._crhToggle = function _crhToggle(id) {
+            const body = document.getElementById('crh-body-'+id);
+            const chev = document.getElementById('crh-chev-'+id);
+            if (!body) return;
+            const open = body.classList.toggle('open');
+            if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+        }
+
+        function _crhRenderCard(s) {
+            const msgs = s.messages || [];
+            const userMsg = msgs.find(m => m.role === 'user');
+            const aiMsg   = msgs.find(m => m.role === 'assistant');
+            const uc = userMsg ? userMsg.content || '' : '';
+            const qMatch = uc.match(/^Question:\s*([\s\S]*?)(?:\n\nCode:|$)/);
+            const cMatch = uc.match(/\n\nCode:\n([\s\S]*)/);
+            const question = qMatch ? qMatch[1].trim() : uc.substring(0,150);
+            const code     = cMatch ? cMatch[1].trim() : '';
+            const feedback = aiMsg ? (aiMsg.content||'').substring(0,700) : '';
+            const time = _crhFmtTime(s.updatedAt);
+            return `<div class="crh-card" id="crh-card-${s.id}">
+                <div class="crh-card-header" onclick="_crhToggle('${s.id}')" role="button" tabindex="0"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_crhToggle('${s.id}')}">
+                    <div style="width:36px;height:36px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#7c3aed,#06b6d4);flex-shrink:0">
+                        <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius" style="width:100%;height:100%;object-fit:cover">
+                    </div>
+                    <div style="flex:1;min-width:0">
+                        <p style="font-weight:700;font-size:.8rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_crhEsc(question.substring(0,60))}</p>
+                        <p style="font-size:.7rem;color:var(--text-secondary);margin-top:.1rem">${_crhEsc(time)}</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+                        <button onclick="event.stopPropagation();deleteCRHSession('${s.id}')"
+                                style="width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;background:rgba(239,68,68,.12);color:#ef4444;font-size:.7rem;display:flex;align-items:center;justify-content:center"
+                                title="Delete" aria-label="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <i class="fas fa-chevron-down" id="crh-chev-${s.id}" style="font-size:.65rem;color:var(--text-secondary);transition:transform .3s"></i>
+                    </div>
+                </div>
+                <div class="crh-card-body" id="crh-body-${s.id}">
+                    ${question ? `<div style="margin-bottom:.6rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Question</span><p style="font-size:.8rem;color:var(--text-primary);margin-top:.15rem">${_crhEsc(question.substring(0,300))}</p></div>` : ''}
+                    ${code ? `<div style="margin-bottom:.6rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Code Submitted</span><pre style="font-size:.72rem;background:#1a1a2e;color:#e2e8f0;padding:.6rem;border-radius:8px;overflow-x:auto;margin-top:.2rem;max-height:140px;overflow-y:auto;font-family:monospace">${_crhEsc(code.substring(0,800))}</pre></div>` : ''}
+                    ${feedback ? `<div><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">AI Feedback</span><p style="font-size:.78rem;color:var(--text-primary);margin-top:.15rem;white-space:pre-wrap;max-height:180px;overflow-y:auto">${_crhEsc(feedback)}</p></div>` : ''}
+                </div>
+            </div>`;
+        }
+
+        function _crhRender(sessions) {
+            const list = document.getElementById('crhList');
+            if (!sessions.length) {
+                list.innerHTML = `<div style="text-align:center;padding:3rem 1rem">
+                    <div style="width:48px;height:48px;border-radius:14px;background:rgba(124,58,237,.10);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                        <i class="fas fa-history" style="color:var(--primary);font-size:1.3rem"></i>
+                    </div>
+                    <p style="font-weight:700;font-size:.9rem;color:var(--text-primary);margin-bottom:.35rem">No history yet</p>
+                    <p style="font-size:.78rem;color:var(--text-secondary)">Submit code for review to start building history.</p>
+                </div>`;
+                return;
+            }
+            list.innerHTML = sessions.map(s => _crhRenderCard(s)).join('');
+        }
     </script>
 <script>
     (function() {

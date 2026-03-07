@@ -801,8 +801,8 @@
     </div>
 
     <!-- Error Analysis Interface -->
-    <div class="container mx-auto px-4 py-8 hidden relative z-10" id="errorAnalysisInterface">
-        <div class="max-w-4xl mx-auto flex flex-col" style="height:calc(100vh - 64px)">
+    <div class="container mx-auto px-4 py-6 hidden relative z-10" id="errorAnalysisInterface">
+        <div class="max-w-4xl mx-auto pb-8">
             <!-- Nav -->
             <div class="nav-bar no-print">
                 <button onclick="showAIList(currentSubject)"
@@ -824,36 +824,68 @@
                 </div>
             </div>
 
-            <!-- Chat header -->
-            <div class="text-center mb-5">
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style="background:linear-gradient(135deg,#ef4444,#dc2626)">
+                    <i class="fas fa-search-plus text-white text-xl"></i>
+                </div>
                 <h1 id="errorAnalysisHeader" class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">
-                    <i class="fas fa-search-plus mr-2" style="color:#f87171"></i>AI Tool
+                    Error Analysis
                 </h1>
-                <p class="text-sm" style="color:var(--text-secondary)">Paste your answer or work below...</p>
+                <p id="errorAnalysisSubDesc" class="text-sm" style="color:var(--text-secondary)">
+                    Paste your answer below for AI analysis
+                </p>
             </div>
 
-            <!-- Chat container -->
-            <div class="chat-container">
-                <div id="errorAnalysisChatBox"
-                     class="flex-1 p-5 overflow-y-auto custom-scrollbar space-y-4"
-                     role="log" aria-label="Chat messages" aria-live="polite">
+            <!-- Input Card -->
+            <div class="glass-card p-5 mb-5">
+                <div class="flex items-center justify-between mb-3">
+                    <label class="text-xs font-bold uppercase tracking-wider" style="color:var(--text-secondary)">
+                        <i class="fas fa-paste mr-1"></i> Your Answer / Working
+                    </label>
+                    <button onclick="clearEASession()" class="btn-secondary text-xs px-3 py-1.5 rounded-xl flex items-center gap-1">
+                        <i class="fas fa-redo mr-1"></i> New Analysis
+                    </button>
                 </div>
+                <textarea id="errorAnalysisInput"
+                          rows="7"
+                          class="input-field w-full px-4 py-3 text-sm outline-none resize-y"
+                          placeholder="Paste your answer, working, or code here..."
+                          aria-label="Your answer or working"></textarea>
+                <button id="errorAnalysisSendBtn"
+                        onclick="sendMessage('errorAnalysis')"
+                        class="w-full mt-4 py-3 rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-all duration-200"
+                        style="background:linear-gradient(135deg,#ef4444,#dc2626)"
+                        aria-label="Analyse my work">
+                    <i class="fas fa-search-plus"></i>
+                    Analyse My Work
+                </button>
+            </div>
 
-                <!-- Input area -->
-                <div class="chat-input-area">
-                    <div class="space-y-2">
-                        <div class="flex items-end gap-2">
-                            <textarea id="errorAnalysisInput"
-                                      placeholder="Paste your answer, working, or code here..."
-                                      class="input-field flex-1 px-4 py-3 text-sm outline-none resize-none"
-                                      oninput="this.style.height='auto';this.style.height=(this.scrollHeight)+'px';" rows="1" aria-label="Type your message"></textarea>
-                            <button id="errorAnalysisSendBtn" onclick="sendMessage('errorAnalysis')" title="Send"
-                                    class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl text-white font-bold focus:ring-4 focus:ring-purple-300 outline-none transition-all duration-200"
-                                    style="background:linear-gradient(135deg,var(--primary),var(--secondary))"
-                                    aria-label="Send message">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                            </button>
-                        </div>
+            <!-- Analysis Results Area -->
+            <div id="errorAnalysisChatBox" class="space-y-4" role="log" aria-label="Analysis results" aria-live="polite">
+                <!-- Results appear here -->
+            </div>
+
+            <!-- Follow-up input area (appears after first analysis) -->
+            <div id="eaFollowUpArea" class="mt-4 hidden">
+                <div class="glass-card p-4">
+                    <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--text-secondary)">
+                        <i class="fas fa-comment-dots mr-1"></i> Follow-up Question
+                    </p>
+                    <div class="flex items-end gap-2">
+                        <textarea id="eaFollowUpInput"
+                                  rows="2"
+                                  class="input-field flex-1 px-3 py-2 text-sm outline-none resize-none"
+                                  placeholder="Ask a follow-up question about the analysis..."
+                                  oninput="this.style.height='auto';this.style.height=(this.scrollHeight)+'px';"
+                                  aria-label="Follow-up question"></textarea>
+                        <button onclick="sendEAFollowUp()"
+                                class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl text-white font-bold transition-all duration-200"
+                                style="background:linear-gradient(135deg,#ef4444,#dc2626)"
+                                aria-label="Send follow-up">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1300,15 +1332,19 @@ IMPORTANT:
                     color: 'from-purple-400 to-purple-600',
                     iconColorClass: 'text-white'
                 },
-                {
+            ];
+
+            // Error Analysis is not available for 中文 subject
+            if (subject !== '中文') {
+                tools.push({
                     name: 'Error Analysis',
                     icon: 'fas fa-search-plus',
                     description: 'Paste your answer – AI identifies your mistakes and explains how to improve',
                     action: () => showAI(subject, 'errorAnalysis'),
                     color: 'from-red-400 to-rose-600',
                     iconColorClass: 'text-white'
-                }
-            ];
+                });
+            }
 
             // Add subject-specific tools
             if (subject === '中文') {
@@ -1455,6 +1491,22 @@ IMPORTANT:
 
             headers[type].innerHTML = `<i class="fas fa-${getToolIcon(type)} mr-2 text-${getToolColor(type)}-500"></i>${toolNames[type]} - ${subject}`;
             
+            // Update Error Analysis subtitle with subject-specific description
+            if (type === 'errorAnalysis') {
+                const eaDescs = {
+                    'English': 'Paste your writing or answer. AI identifies grammar, vocabulary, and coherence errors.',
+                    'Math': 'Paste your working or solution. AI identifies calculation and conceptual errors with step-by-step correction.',
+                    'Physics': 'Paste your answer or calculation. AI identifies physics errors and explains the correct approach.',
+                    'Biology': 'Paste your answer. AI identifies factual, terminology, and explanation errors.',
+                    'ICT': 'Paste your code or answer. AI identifies syntax, logical, and algorithmic errors.'
+                };
+                const subDescEl = document.getElementById('errorAnalysisSubDesc');
+                if (subDescEl) subDescEl.textContent = eaDescs[subject] || 'Paste your answer below for AI analysis';
+                // Reset the follow-up area when opening Error Analysis
+                const followUp = document.getElementById('eaFollowUpArea');
+                if (followUp) followUp.classList.add('hidden');
+            }
+            
             // Map the interface type name to the key used in the SUBJECTS object
             const typeToSubjectKey = { askAI: 'ask', dictionaryAI: 'dict', guideLearning: 'guide', errorAnalysis: 'errorAnalysis' };
             const systemPrompt = SUBJECTS[subject][typeToSubjectKey[type]];
@@ -1488,18 +1540,25 @@ IMPORTANT:
 
         function resetChatBox(type, subject) {
             const chatBox = document.getElementById(type + 'ChatBox');
+
+            // Error Analysis uses a form-based UI – just clear the results area
+            if (type === 'errorAnalysis') {
+                chatBox.innerHTML = '';
+                const followUp = document.getElementById('eaFollowUpArea');
+                if (followUp) followUp.classList.add('hidden');
+                return;
+            }
+
             const toolNames = {
                 askAI: 'AI Assistant',
                 dictionaryAI: 'Dictionary AI',
-                guideLearning: 'Guide AI',
-                errorAnalysis: 'Error Analysis AI'
+                guideLearning: 'Guide AI'
             };
             
             const welcomeMessages = {
                 askAI: `Hello! How can I assist you with ${subject} today?`,
                 dictionaryAI: 'Hello! Enter a term to learn more.',
-                guideLearning: 'Hello! Ask a question to get started with guided learning. I will help you think through it step by step using hints. After my response, you can click <strong>💡 Get Hint</strong> to get a more specific hint if you need one.',
-                errorAnalysis: 'Hello! Paste your answer or work below. I will identify the type of error (conceptual, calculation, language, etc.) and explain how to fix it step by step.'
+                guideLearning: 'Hello! Ask a question to get started with guided learning. I will help you think through it step by step using hints. After my response, you can click <strong>💡 Get Hint</strong> to get a more specific hint if you need one.'
             };
 
             chatBox.innerHTML = `
@@ -1816,6 +1875,11 @@ IMPORTANT:
                     ${hintBtn}`;
                 innerDiv.appendChild(actionsDiv);
             }
+            // Show follow-up area after first Error Analysis response
+            if (type === 'errorAnalysis') {
+                const followUp = document.getElementById('eaFollowUpArea');
+                if (followUp) followUp.classList.remove('hidden');
+            }
         }
 
         function removeStreamingBubble(streamId) {
@@ -1830,34 +1894,70 @@ IMPORTANT:
             sendMessage(type);
         }
 
+        function clearEASession() {
+            const chatBox = document.getElementById('errorAnalysisChatBox');
+            if (chatBox) chatBox.innerHTML = '';
+            const followUp = document.getElementById('eaFollowUpArea');
+            if (followUp) followUp.classList.add('hidden');
+            const followInput = document.getElementById('eaFollowUpInput');
+            if (followInput) { followInput.value = ''; followInput.style.height = 'auto'; }
+            histories['errorAnalysis'] = [{ role: 'system', content: SUBJECTS[currentSubject] ? (SUBJECTS[currentSubject].errorAnalysis || '') : '' }];
+            if (window.resetHistorySession) window.resetHistorySession('errorAnalysis');
+        }
+
+        function sendEAFollowUp() {
+            const input = document.getElementById('eaFollowUpInput');
+            const question = input ? input.value.trim() : '';
+            if (!question) return;
+            // Temporarily redirect sendMessage to use the follow-up input
+            const mainInput = document.getElementById('errorAnalysisInput');
+            if (mainInput) {
+                mainInput.value = question;
+                input.value = '';
+                input.style.height = 'auto';
+            }
+            sendMessage('errorAnalysis');
+        }
+
         // ===== END: DEBUGGED AND UPDATED CODE =====
 
         function addUserMessage(type, content, file) {
             const chatBox = document.getElementById(`${type}ChatBox`);
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex justify-end';
-            
+
             let imageHTML = '';
             if (file) {
                 const imageURL = URL.createObjectURL(file);
                 imageHTML = `<img src="${imageURL}" class="message-image max-w-full h-32 object-cover rounded-xl mt-2" alt="Uploaded image">`;
             }
 
-            messageDiv.innerHTML = `
-                <div class="message-bubble user-bubble p-4 max-w-xs md:max-w-md lg:max-w-lg">
-                    <div class="flex items-start gap-3">
-                        <div class="flex-1 min-w-0">
-                            <p class="font-bold text-sm mb-1 text-white opacity-80">You</p>
-                            <p class="text-sm text-white">${content.replace(/\n/g, '<br>')}</p>
-                            ${imageHTML}
-                        </div>
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                             style="background:rgba(255,255,255,.20)">
-                            <i class="fas fa-user text-white text-xs"></i>
+            // Error Analysis: show submitted work as a styled card, not a chat bubble
+            if (type === 'errorAnalysis') {
+                messageDiv.className = '';
+                messageDiv.innerHTML = `
+                    <div style="border:1.5px solid rgba(239,68,68,.25);border-radius:14px;padding:1rem;background:rgba(239,68,68,.04);margin-bottom:.5rem">
+                        <p class="font-bold text-xs mb-2 uppercase tracking-wider" style="color:#ef4444"><i class="fas fa-paste mr-1"></i>Submitted Work</p>
+                        <p class="text-sm" style="color:var(--text-primary);white-space:pre-wrap;word-break:break-word">${content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+                        ${imageHTML}
+                    </div>`;
+            } else {
+                messageDiv.className = 'flex justify-end';
+                messageDiv.innerHTML = `
+                    <div class="message-bubble user-bubble p-4 max-w-xs md:max-w-md lg:max-w-lg">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-1 min-w-0">
+                                <p class="font-bold text-sm mb-1 text-white opacity-80">You</p>
+                                <p class="text-sm text-white">${content.replace(/\n/g, '<br>')}</p>
+                                ${imageHTML}
+                            </div>
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                                 style="background:rgba(255,255,255,.20)">
+                                <i class="fas fa-user text-white text-xs"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
             
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -1942,6 +2042,11 @@ IMPORTANT:
             if (!isError && ['Math', 'Physics'].includes(currentSubject) && window.MathJax) {
                 MathJax.typesetPromise([messageDiv]).catch(e => console.warn('MathJax error:', e));
             }
+            // Show follow-up area after Error Analysis response
+            if (!isError && type === 'errorAnalysis') {
+                const followUp = document.getElementById('eaFollowUpArea');
+                if (followUp) followUp.classList.remove('hidden');
+            }
         }
 
         function setButtonLoading(button, isLoading) {
@@ -1956,6 +2061,8 @@ IMPORTANT:
             } else {
                 if (button.id.includes('dictionary')) {
                     iconContainer.innerHTML = `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
+                } else if (button.id.includes('errorAnalysis')) {
+                    iconContainer.innerHTML = `<i class="fas fa-search-plus mr-2"></i>Analyse My Work`;
                 } else {
                     iconContainer.innerHTML = `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
                 }
@@ -2334,7 +2441,8 @@ IMPORTANT:
         function _hpToolIcon(tool) {
             const m = {'Ask AI':'robot','Dictionary AI':'book','Guide Learning':'compass',
                        'Error Analysis':'search-plus',
-                       'Code Review':'terminal','Exam Paper Generator':'file-alt',
+                       'Code Review':'__img__https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png',
+                       'Exam Paper Generator':'file-alt',
                        'English Writing':'pen-fancy','Vocabulary Generator':'lightbulb',
                        '文言文翻譯':'scroll','文樞翻譯':'scroll','Vocabulary':'lightbulb'};
             return m[tool]||'robot';
@@ -2367,66 +2475,123 @@ IMPORTANT:
             `).join('');
         }
 
+        function _hpNonChatBody(s) {
+            const msgs = s.messages || [];
+            if (!msgs.length) return '<p style="text-align:center;font-size:.78rem;color:var(--text-secondary);padding:.5rem 0">No content</p>';
+            const userMsg = msgs.find(m => m.role === 'user');
+            const aiMsg   = msgs.find(m => m.role === 'assistant');
+            if (s.tool === 'Code Review') {
+                const uc = userMsg ? userMsg.content || '' : '';
+                const qMatch = uc.match(/^Question:\s*([\s\S]*?)(?:\n\nCode:|$)/);
+                const cMatch = uc.match(/\n\nCode:\n([\s\S]*)/);
+                const question = qMatch ? qMatch[1].trim() : uc.substring(0, 200);
+                const code = cMatch ? cMatch[1].trim() : '';
+                const feedback = aiMsg ? (aiMsg.content || '').substring(0, 600) : '';
+                return `<div style="padding:.5rem 0">
+                    ${question ? `<div style="margin-bottom:.6rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Question</span><p style="font-size:.78rem;color:var(--text-primary);margin-top:.15rem">${_hpEscape(question.substring(0,200))}</p></div>` : ''}
+                    ${code ? `<div style="margin-bottom:.6rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Code Submitted</span><pre style="font-size:.7rem;background:#1a1a2e;color:#e2e8f0;padding:.5rem .75rem;border-radius:8px;overflow-x:auto;margin-top:.2rem;max-height:110px;overflow-y:auto;font-family:monospace">${_hpEscape(code.substring(0,500))}</pre></div>` : ''}
+                    ${feedback ? `<div><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">AI Feedback Preview</span><p style="font-size:.77rem;color:var(--text-primary);margin-top:.15rem;white-space:pre-wrap;max-height:120px;overflow-y:auto">${_hpEscape(feedback)}</p></div>` : ''}
+                </div>`;
+            }
+            if (s.tool === 'Exam Paper Generator') {
+                const uc = userMsg ? userMsg.content || '' : '';
+                const examContent = aiMsg ? (aiMsg.content || '').substring(0, 600) : '';
+                return `<div style="padding:.5rem 0">
+                    ${uc ? `<div style="margin-bottom:.6rem;padding:.5rem .75rem;background:rgba(245,158,11,.08);border-left:3px solid #f59e0b;border-radius:0 8px 8px 0"><p style="font-size:.77rem;color:var(--text-primary);white-space:pre-wrap">${_hpEscape(uc.substring(0,200))}</p></div>` : ''}
+                    ${examContent ? `<div><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Generated Paper Preview</span><p style="font-size:.77rem;color:var(--text-primary);margin-top:.15rem;white-space:pre-wrap;max-height:140px;overflow-y:auto">${_hpEscape(examContent)}</p></div>` : ''}
+                </div>`;
+            }
+            // Default for English Writing, Vocabulary, etc.
+            const uc = userMsg ? (userMsg.content || '').substring(0, 300) : '';
+            const ac = aiMsg   ? (aiMsg.content   || '').substring(0, 400) : '';
+            return `<div style="padding:.5rem 0">
+                ${uc ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Input</span><p style="font-size:.77rem;color:var(--text-primary);margin-top:.15rem;white-space:pre-wrap">${_hpEscape(uc)}</p></div>` : ''}
+                ${ac ? `<div><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Result Preview</span><p style="font-size:.77rem;color:var(--text-primary);margin-top:.15rem;white-space:pre-wrap;max-height:120px;overflow-y:auto">${_hpEscape(ac)}</p></div>` : ''}
+            </div>`;
+        }
+
         function _hpRenderCard(s) {
             const color = _hpToolColor(s.tool);
-            const icon  = _hpToolIcon(s.tool);
+            const rawIcon = _hpToolIcon(s.tool);
             const time  = _hpFmtTime(s.updatedAt);
             const isChatSession = Object.keys(_HP_CHAT_TOOL_MAP).includes(s.tool);
-            const msgs  = (s.messages||[]).slice(0,40);
-            const msgHtml = msgs.map(m => {
-                const isUser = m.role==='user';
-                const content = _hpEscape((m.content||'').substring(0,600));
-                return isUser
-                    ? `<div style="display:flex;justify-content:flex-end;margin-bottom:.3rem"><div class="hp-msg-user">${content}</div></div>`
-                    : `<div style="display:flex;justify-content:flex-start;margin-bottom:.3rem"><div class="hp-msg-ai">${content}</div></div>`;
-            }).join('');
-            const extra = (s.messages||[]).length > 40
-                ? `<p style="text-align:center;font-size:.7rem;color:var(--text-secondary);padding:.4rem 0">… ${s.messages.length-40} more messages not shown</p>` : '';
-            const continueBtn = isChatSession ? `
-                <button onclick="event.stopPropagation();_hpContinueChat('${s.id}')"
-                        style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.7rem;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;cursor:pointer;"
-                        title="Continue chat" aria-label="Continue chat">
-                    <i class="fas fa-comment-dots" aria-hidden="true"></i>
-                </button>` : '';
             const starred = (JSON.parse(localStorage.getItem('hp_starred') || '{}')).hasOwnProperty(s.id);
+
+            // Build icon HTML – support EduGenius logo image for Code Review
+            const isImgIcon = rawIcon.startsWith('__img__');
+            const iconHtml = isImgIcon
+                ? `<img src="${rawIcon.slice(7)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" alt="${_hpEscape(s.tool)}">`
+                : `<i class="fas fa-${rawIcon}" aria-hidden="true"></i>`;
+
             const starBtn = `
                 <button onclick="event.stopPropagation();toggleHPStar('${s.id}', this)"
                         style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.8rem;background:${starred ? 'rgba(245,158,11,.15)' : 'rgba(0,0,0,.05)'};color:${starred ? '#f59e0b' : 'var(--text-secondary)'};border:none;cursor:pointer;"
                         title="${starred ? 'Unstar' : 'Star'}" aria-label="${starred ? 'Unstar session' : 'Star session'}">
                     <i class="fas fa-star"></i>
                 </button>`;
-            return `
-            <div class="hp-session-card" id="hp-card-${s.id}">
-                <div class="hp-session-header" onclick="toggleHPCard('${s.id}')"
-                     role="button" tabindex="0" aria-expanded="false" id="hp-header-${s.id}"
-                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHPCard('${s.id}')}">
-                    <div class="hp-session-icon" style="background:linear-gradient(135deg,${color},${color}99)">
-                        <i class="fas fa-${icon}" aria-hidden="true"></i>
-                    </div>
-                    <div style="flex:1;min-width:0">
-                        <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                            <span style="font-weight:700;font-size:.8rem;color:var(--text-primary)">${_hpEscape(s.tool||'')}</span>
-                            ${s.subject?`<span style="font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;background:rgba(124,58,237,.12);color:var(--text-primary)">${_hpEscape(s.subject)}</span>`:''}
+            const deleteBtn = `
+                <button onclick="event.stopPropagation();deleteHPSession('${s.id}')"
+                        class="btn-danger" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.7rem"
+                        title="Delete" aria-label="Delete session">
+                    <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                </button>`;
+
+            if (isChatSession) {
+                // Chat sessions: clicking the card directly continues the chat, no preview
+                return `
+                <div class="hp-session-card" id="hp-card-${s.id}">
+                    <div class="hp-session-header" onclick="_hpContinueChat('${s.id}')"
+                         role="button" tabindex="0"
+                         aria-label="Continue ${_hpEscape(s.tool||'')} session"
+                         style="cursor:pointer"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_hpContinueChat('${s.id}')}">
+                        <div class="hp-session-icon" style="background:linear-gradient(135deg,${color},${color}99)">
+                            ${iconHtml}
                         </div>
-                        <p style="font-size:.72rem;color:var(--text-secondary);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_hpEscape((s.summary||'').substring(0,70))}</p>
+                        <div style="flex:1;min-width:0">
+                            <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                                <span style="font-weight:700;font-size:.8rem;color:var(--text-primary)">${_hpEscape(s.tool||'')}</span>
+                                ${s.subject?`<span style="font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;background:rgba(124,58,237,.12);color:var(--text-primary)">${_hpEscape(s.subject)}</span>`:''}
+                            </div>
+                            <p style="font-size:.72rem;color:var(--text-secondary);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_hpEscape((s.summary||'').substring(0,70))}</p>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+                            <span style="font-size:.7rem;color:var(--text-secondary)">${_hpEscape(time)}</span>
+                            ${starBtn}
+                            ${deleteBtn}
+                            <span style="font-size:.62rem;color:var(--primary);font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:2px"><i class="fas fa-play" style="font-size:.5rem"></i> Continue</span>
+                        </div>
                     </div>
-                    <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
-                        <span style="font-size:.7rem;color:var(--text-secondary)">${_hpEscape(time)}</span>
-                        ${starBtn}
-                        ${continueBtn}
-                        <button onclick="event.stopPropagation();deleteHPSession('${s.id}')"
-                                class="btn-danger" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.7rem"
-                                title="Delete" aria-label="Delete session">
-                            <i class="fas fa-trash-alt" aria-hidden="true"></i>
-                        </button>
-                        <i class="fas fa-chevron-down" id="hp-chevron-${s.id}" aria-hidden="true" style="font-size:.65rem;color:var(--text-secondary);transition:transform .3s"></i>
+                </div>`;
+            } else {
+                // Non-chat sessions: expand/collapse with dedicated tool-specific content
+                return `
+                <div class="hp-session-card" id="hp-card-${s.id}">
+                    <div class="hp-session-header" onclick="toggleHPCard('${s.id}')"
+                         role="button" tabindex="0" aria-expanded="false" id="hp-header-${s.id}"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHPCard('${s.id}')}">
+                        <div class="hp-session-icon" style="background:linear-gradient(135deg,${color},${color}99)">
+                            ${iconHtml}
+                        </div>
+                        <div style="flex:1;min-width:0">
+                            <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                                <span style="font-weight:700;font-size:.8rem;color:var(--text-primary)">${_hpEscape(s.tool||'')}</span>
+                                ${s.subject?`<span style="font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;background:rgba(124,58,237,.12);color:var(--text-primary)">${_hpEscape(s.subject)}</span>`:''}
+                            </div>
+                            <p style="font-size:.72rem;color:var(--text-secondary);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_hpEscape((s.summary||'').substring(0,70))}</p>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+                            <span style="font-size:.7rem;color:var(--text-secondary)">${_hpEscape(time)}</span>
+                            ${starBtn}
+                            ${deleteBtn}
+                            <i class="fas fa-chevron-down" id="hp-chevron-${s.id}" aria-hidden="true" style="font-size:.65rem;color:var(--text-secondary);transition:transform .3s"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="hp-session-body" id="hp-body-${s.id}">
-                    ${msgs.length ? msgHtml : '<p style="text-align:center;font-size:.78rem;color:var(--text-secondary);padding:.5rem 0">No messages</p>'}
-                    ${extra}
-                </div>
-            </div>`;
+                    <div class="hp-session-body" id="hp-body-${s.id}">
+                        ${_hpNonChatBody(s)}
+                    </div>
+                </div>`;
+            }
         }
 
         function toggleHPCard(id) {
