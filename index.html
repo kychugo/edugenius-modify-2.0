@@ -1334,7 +1334,7 @@ IMPORTANT:
                 },
             ];
 
-            // Error Analysis is not available for 中文 subject
+            // Add Error Analysis for all subjects except 中文 (no 中文-specific analysis prompt exists)
             if (subject !== '中文') {
                 tools.push({
                     name: 'Error Analysis',
@@ -1901,7 +1901,8 @@ IMPORTANT:
             if (followUp) followUp.classList.add('hidden');
             const followInput = document.getElementById('eaFollowUpInput');
             if (followInput) { followInput.value = ''; followInput.style.height = 'auto'; }
-            histories['errorAnalysis'] = [{ role: 'system', content: SUBJECTS[currentSubject] ? (SUBJECTS[currentSubject].errorAnalysis || '') : '' }];
+            const systemPrompt = (SUBJECTS[currentSubject] && SUBJECTS[currentSubject].errorAnalysis) || '';
+            histories['errorAnalysis'] = [{ role: 'system', content: systemPrompt }];
             if (window.resetHistorySession) window.resetHistorySession('errorAnalysis');
         }
 

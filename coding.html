@@ -514,12 +514,14 @@ ${codeContent}
 
         async function callGrokAPI(prompt) {
             const messages = [{ role: 'user', content: prompt }];
+            // Use maximum token limit to support long code reviews and full code submissions
+            const MAX_TOKENS = 131072;
             for (const model of FALLBACK_MODELS) {
                 try {
                     const response = await fetch(POLLINATIONS_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${POLLINATIONS_API_KEY}` },
-                        body: JSON.stringify({ model: model, messages: messages, temperature: 0.7, seed: Math.floor(Math.random() * 2147483647), max_tokens: 131072 })
+                        body: JSON.stringify({ model: model, messages: messages, temperature: 0.7, seed: Math.floor(Math.random() * 2147483647), max_tokens: MAX_TOKENS })
                     });
                     if (!response.ok) {
                         console.warn(`Model ${model} failed with status ${response.status}, trying next model...`);
@@ -962,6 +964,7 @@ Return ONLY valid JSON:
 
         // ── Code Review History Panel ──────────────────────────────────
         let _crh = { all:[], lastDoc:null, loading:false };
+        const CRH_PAGE_SIZE = 15;
 
         window.openCRHistory = async function() {
             const backdrop = document.getElementById('crHistoryBackdrop');
@@ -979,7 +982,7 @@ Return ONLY valid JSON:
                 const user = window._fbUser;
                 if (!user) { listEl.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:2rem">Please sign in to view history.</p>'; return; }
                 const ref = collection(db, 'users', user.uid, 'history');
-                const q = query(ref, where('tool','==','Code Review'), orderBy('updatedAt','desc'), limit(15));
+                const q = query(ref, where('tool','==','Code Review'), orderBy('updatedAt','desc'), limit(CRH_PAGE_SIZE));
                 const snap = await getDocs(q);
                 _crh.all = snap.docs.map(d => ({id:d.id,...d.data()}));
                 _crh.lastDoc = snap.docs[snap.docs.length-1] || null;
@@ -1008,7 +1011,7 @@ Return ONLY valid JSON:
                 const user = window._fbUser;
                 if (!user) return;
                 const ref = collection(db, 'users', user.uid, 'history');
-                const q = query(ref, where('tool','==','Code Review'), orderBy('updatedAt','desc'), startAfter(_crh.lastDoc), limit(15));
+                const q = query(ref, where('tool','==','Code Review'), orderBy('updatedAt','desc'), startAfter(_crh.lastDoc), limit(CRH_PAGE_SIZE));
                 const snap = await getDocs(q);
                 const more = snap.docs.map(d => ({id:d.id,...d.data()}));
                 _crh.lastDoc = snap.docs[snap.docs.length-1] || null;
