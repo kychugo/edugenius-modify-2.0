@@ -839,22 +839,85 @@
 
             <!-- Input Card -->
             <div class="glass-card p-5 mb-5">
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center justify-between mb-4">
                     <label class="text-xs font-bold uppercase tracking-wider" style="color:var(--text-secondary)">
-                        <i class="fas fa-paste mr-1"></i> Your Answer / Working
+                        <i class="fas fa-clipboard-list mr-1"></i> Analysis Inputs
                     </label>
                     <button onclick="clearEASession()" class="btn-secondary text-xs px-3 py-1.5 rounded-xl flex items-center gap-1">
                         <i class="fas fa-redo mr-1"></i> New Analysis
                     </button>
                 </div>
-                <textarea id="errorAnalysisInput"
-                          rows="7"
-                          class="input-field w-full px-4 py-3 text-sm outline-none resize-y"
-                          placeholder="Paste your answer, working, or code here..."
-                          aria-label="Your answer or working"></textarea>
+
+                <!-- Part 1: Exam Question (optional) -->
+                <div class="mb-3">
+                    <div class="flex items-center gap-1.5 mb-1.5">
+                        <i class="fas fa-question-circle text-xs" style="color:#7c3aed"></i>
+                        <label class="text-xs font-semibold" style="color:var(--text-secondary)">Exam Question <span class="font-normal">(optional)</span></label>
+                    </div>
+                    <textarea id="eaQuestionInput" rows="2"
+                              class="input-field w-full px-4 py-3 text-sm outline-none resize-y"
+                              placeholder="Paste the exam question here (optional)..."
+                              aria-label="Exam question"></textarea>
+                </div>
+
+                <!-- Part 2: Your Answer / Working (required) -->
+                <div class="mb-3">
+                    <div class="flex items-center gap-1.5 mb-1.5">
+                        <i class="fas fa-pen text-xs" style="color:#ef4444"></i>
+                        <label class="text-xs font-semibold" style="color:var(--text-secondary)">Your Answer / Working <span style="color:#ef4444">*</span></label>
+                    </div>
+                    <textarea id="eaAnswerInput" rows="5"
+                              class="input-field w-full px-4 py-3 text-sm outline-none resize-y"
+                              placeholder="Paste your answer, working, or code here..."
+                              aria-label="Your answer or working"></textarea>
+                </div>
+
+                <!-- Part 3: Model Answer (optional) -->
+                <div class="mb-3">
+                    <div class="flex items-center gap-1.5 mb-1.5">
+                        <i class="fas fa-check-circle text-xs" style="color:#10b981"></i>
+                        <label class="text-xs font-semibold" style="color:var(--text-secondary)">Model Answer <span class="font-normal">(optional)</span></label>
+                    </div>
+                    <textarea id="eaModelInput" rows="2"
+                              class="input-field w-full px-4 py-3 text-sm outline-none resize-y"
+                              placeholder="Paste the model / correct answer here (optional)..."
+                              aria-label="Model answer"></textarea>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mb-4">
+                    <div class="flex items-center gap-1.5 mb-1.5">
+                        <i class="fas fa-image text-xs" style="color:#f59e0b"></i>
+                        <label class="text-xs font-semibold" style="color:var(--text-secondary)">Upload Image <span class="font-normal">(optional)</span></label>
+                    </div>
+                    <div id="errorAnalysisImagePreviewContainer" class="hidden relative w-32 mb-2">
+                        <img id="errorAnalysisImagePreview"
+                             class="w-32 h-32 object-cover rounded-xl shadow-lg" alt="Image preview">
+                        <button onclick="clearImagePreview('errorAnalysis')"
+                                class="absolute top-1 right-1 w-6 h-6 flex items-center justify-center rounded-full text-white text-xs"
+                                style="background:rgba(0,0,0,.55)" aria-label="Remove image">✕</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <label for="errorAnalysisPhotoInput" title="Upload Image"
+                               class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary cursor-pointer">
+                            <i class="fas fa-image" style="color:var(--primary)"></i>
+                        </label>
+                        <input type="file" id="errorAnalysisPhotoInput" accept="image/*"
+                               onchange="previewImage('errorAnalysis')" class="hidden">
+                        <button onclick="pasteImage('errorAnalysis')" title="Paste Image from clipboard"
+                                class="w-10 h-10 flex items-center justify-center rounded-xl btn-secondary"
+                                aria-label="Paste image from clipboard">
+                            <i class="fas fa-clipboard" style="color:var(--primary)"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hidden buffer used by sendMessage('errorAnalysis') -->
+                <input type="hidden" id="errorAnalysisInput">
+
                 <button id="errorAnalysisSendBtn"
-                        onclick="sendMessage('errorAnalysis')"
-                        class="w-full mt-4 py-3 rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-all duration-200"
+                        onclick="sendErrorAnalysis()"
+                        class="w-full mt-2 py-3 rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-all duration-200"
                         style="background:linear-gradient(135deg,#ef4444,#dc2626)"
                         aria-label="Analyse my work">
                     <i class="fas fa-search-plus"></i>
@@ -1901,9 +1964,57 @@ IMPORTANT:
             if (followUp) followUp.classList.add('hidden');
             const followInput = document.getElementById('eaFollowUpInput');
             if (followInput) { followInput.value = ''; followInput.style.height = 'auto'; }
+            // Clear structured input fields
+            ['eaQuestionInput', 'eaAnswerInput', 'eaModelInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            const mainInput = document.getElementById('errorAnalysisInput');
+            if (mainInput) mainInput.value = '';
+            // Clear image preview if present
+            try { clearImagePreview('errorAnalysis'); } catch(e) {}
             const systemPrompt = (SUBJECTS[currentSubject] && SUBJECTS[currentSubject].errorAnalysis) || '';
             histories['errorAnalysis'] = [{ role: 'system', content: systemPrompt }];
             if (window.resetHistorySession) window.resetHistorySession('errorAnalysis');
+        }
+
+        // Compose structured analysis from multi-part fields, then send
+        // Marker prefixes used both here and in addUserMessage to detect structured content
+        const EA_MARKER = {
+            QUESTION: '📌 Exam Question:',
+            ANSWER:   '✍️ My Answer / Working:',
+            MODEL:    '✅ Model Answer:'
+        };
+
+        function sendErrorAnalysis() {
+            const question = (document.getElementById('eaQuestionInput')?.value || '').trim();
+            const answer   = (document.getElementById('eaAnswerInput')?.value || '').trim();
+            const model    = (document.getElementById('eaModelInput')?.value || '').trim();
+            const fileInput = document.getElementById('errorAnalysisPhotoInput');
+            const file = fileInput?.files[0];
+
+            if (!answer && !file) {
+                showNotification('Please enter your answer / working or upload an image!', 'warning');
+                return;
+            }
+
+            // Compose structured prompt using shared markers
+            let composed = '';
+            if (question) composed += `${EA_MARKER.QUESTION}\n${question}\n\n`;
+            composed += `${EA_MARKER.ANSWER}\n${answer || '[See uploaded image]'}`;
+            if (model) composed += `\n\n${EA_MARKER.MODEL}\n${model}`;
+
+            // Set into hidden buffer for sendMessage to read
+            const mainInput = document.getElementById('errorAnalysisInput');
+            if (mainInput) mainInput.value = composed;
+
+            // Clear visible fields after composing
+            ['eaQuestionInput', 'eaAnswerInput', 'eaModelInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+
+            sendMessage('errorAnalysis');
         }
 
         function sendEAFollowUp() {
@@ -1932,15 +2043,53 @@ IMPORTANT:
                 imageHTML = `<img src="${imageURL}" class="message-image max-w-full h-32 object-cover rounded-xl mt-2" alt="Uploaded image">`;
             }
 
-            // Error Analysis: show submitted work as a styled card, not a chat bubble
+            // Error Analysis: distinguish initial structured analysis from follow-up questions
             if (type === 'errorAnalysis') {
-                messageDiv.className = '';
-                messageDiv.innerHTML = `
-                    <div style="border:1.5px solid rgba(239,68,68,.25);border-radius:14px;padding:1rem;background:rgba(239,68,68,.04);margin-bottom:.5rem">
-                        <p class="font-bold text-xs mb-2 uppercase tracking-wider" style="color:#ef4444"><i class="fas fa-paste mr-1"></i>Submitted Work</p>
-                        <p class="text-sm" style="color:var(--text-primary);white-space:pre-wrap;word-break:break-word">${content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
-                        ${imageHTML}
-                    </div>`;
+                const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                // Detect structured initial analysis using shared EA_MARKER constants
+                const isStructured = content.startsWith(EA_MARKER.QUESTION) || content.startsWith(EA_MARKER.ANSWER);
+                if (isStructured) {
+                    const qMatch = content.match(/📌 Exam Question:\n([\s\S]*?)(?:\n\n✍️|$)/);
+                    const aMatch = content.match(/✍️ My Answer \/ Working:\n([\s\S]*?)(?:\n\n✅|$)/);
+                    const mMatch = content.match(/✅ Model Answer:\n([\s\S]*)/);
+                    const qText = qMatch ? qMatch[1].trim() : '';
+                    const aText = aMatch ? aMatch[1].trim() : '';
+                    const mText = mMatch ? mMatch[1].trim() : '';
+                    messageDiv.className = '';
+                    messageDiv.innerHTML = `
+                        <div style="border:1.5px solid rgba(239,68,68,.22);border-radius:14px;overflow:hidden;margin-bottom:.5rem">
+                            ${qText ? `<div style="padding:.75rem 1rem;border-bottom:1px solid rgba(124,58,237,.15);background:rgba(124,58,237,.04)">
+                                <p class="font-bold text-xs mb-1 uppercase tracking-wider" style="color:#7c3aed"><i class="fas fa-question-circle mr-1"></i>Exam Question</p>
+                                <p class="text-sm" style="color:var(--text-primary);white-space:pre-wrap;word-break:break-word">${_esc(qText)}</p>
+                            </div>` : ''}
+                            <div style="padding:.75rem 1rem;${mText ? 'border-bottom:1px solid rgba(239,68,68,.12);' : ''}background:rgba(239,68,68,.04)">
+                                <p class="font-bold text-xs mb-1 uppercase tracking-wider" style="color:#ef4444"><i class="fas fa-pen mr-1"></i>My Answer / Working</p>
+                                <p class="text-sm" style="color:var(--text-primary);white-space:pre-wrap;word-break:break-word">${_esc(aText || '[See image below]')}</p>
+                                ${imageHTML}
+                            </div>
+                            ${mText ? `<div style="padding:.75rem 1rem;background:rgba(16,185,129,.04)">
+                                <p class="font-bold text-xs mb-1 uppercase tracking-wider" style="color:#10b981"><i class="fas fa-check-circle mr-1"></i>Model Answer</p>
+                                <p class="text-sm" style="color:var(--text-primary);white-space:pre-wrap;word-break:break-word">${_esc(mText)}</p>
+                            </div>` : ''}
+                        </div>`;
+                } else {
+                    // Follow-up question: display as a normal user chat bubble
+                    messageDiv.className = 'flex justify-end';
+                    messageDiv.innerHTML = `
+                        <div class="message-bubble user-bubble p-4 max-w-xs md:max-w-md lg:max-w-lg">
+                            <div class="flex items-start gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-sm mb-1 text-white opacity-80">You</p>
+                                    <p class="text-sm text-white">${_esc(content).replace(/\n/g,'<br>')}</p>
+                                    ${imageHTML}
+                                </div>
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                                     style="background:rgba(255,255,255,.20)">
+                                    <i class="fas fa-user text-white text-xs"></i>
+                                </div>
+                            </div>
+                        </div>`;
+                }
             } else {
                 messageDiv.className = 'flex justify-end';
                 messageDiv.innerHTML = `
@@ -2416,6 +2565,8 @@ IMPORTANT:
         // ── Inline History Panel ──────────────────────────────────────────
         let _hp = { all:[], filtered:[], lastDoc:null, loading:false, filterTool:'' };
         const _HP_CHAT_TOOL_MAP = { 'Ask AI': 'askAI', 'Dictionary AI': 'dictionaryAI', 'Guide Learning': 'guideLearning', 'Error Analysis': 'errorAnalysis' };
+        // Tools that redirect to their own page when clicked in history
+        const _HP_REDIRECT_MAP = { 'Exam Paper Generator': 'exam.html', 'Vocabulary Generator': 'vocab.html', 'Code Review': 'coding.html' };
 
         function _hpEscape(s) {
             return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -2560,12 +2711,42 @@ IMPORTANT:
                             <span style="font-size:.7rem;color:var(--text-secondary)">${_hpEscape(time)}</span>
                             ${starBtn}
                             ${deleteBtn}
-                            <span style="font-size:.62rem;color:var(--primary);font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:2px"><i class="fas fa-play" style="font-size:.5rem"></i> Continue</span>
+                            <i class="fas fa-play-circle" title="Continue session" style="font-size:1.2rem;color:var(--primary)"></i>
                         </div>
                     </div>
                 </div>`;
             } else {
-                // Non-chat sessions: expand/collapse with dedicated tool-specific content
+                // Check if this tool redirects to a dedicated page
+                const redirectPage = _HP_REDIRECT_MAP[s.tool];
+                if (redirectPage) {
+                    // Redirect tools: clicking opens the page with session content restored
+                    return `
+                <div class="hp-session-card" id="hp-card-${s.id}">
+                    <div class="hp-session-header" onclick="closeHistoryPanel();window.location.href='${redirectPage}?session=${s.id}'"
+                         role="button" tabindex="0"
+                         aria-label="Open ${_hpEscape(s.tool||'')} session"
+                         style="cursor:pointer"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();closeHistoryPanel();window.location.href='${redirectPage}?session=${s.id}'}">
+                        <div class="hp-session-icon" style="background:linear-gradient(135deg,${color},${color}99)">
+                            ${iconHtml}
+                        </div>
+                        <div style="flex:1;min-width:0">
+                            <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                                <span style="font-weight:700;font-size:.8rem;color:var(--text-primary)">${_hpEscape(s.tool||'')}</span>
+                                ${s.subject?`<span style="font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;background:rgba(124,58,237,.12);color:var(--text-primary)">${_hpEscape(s.subject)}</span>`:''}
+                            </div>
+                            <p style="font-size:.72rem;color:var(--text-secondary);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_hpEscape((s.summary||'').substring(0,70))}</p>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+                            <span style="font-size:.7rem;color:var(--text-secondary)">${_hpEscape(time)}</span>
+                            ${starBtn}
+                            ${deleteBtn}
+                            <i class="fas fa-external-link-alt" title="Open in page" style="font-size:.75rem;color:var(--primary)"></i>
+                        </div>
+                    </div>
+                </div>`;
+                }
+                // Non-chat, non-redirect sessions: expand/collapse with dedicated tool-specific content
                 return `
                 <div class="hp-session-card" id="hp-card-${s.id}">
                     <div class="hp-session-header" onclick="toggleHPCard('${s.id}')"
