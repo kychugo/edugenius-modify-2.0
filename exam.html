@@ -217,6 +217,48 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     outline: 3px solid rgba(124,58,237,.5);
     outline-offset: 2px;
 }
+/* Exam History Panel */
+#examHistoryBackdrop {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:900;
+    backdrop-filter:blur(2px); transition:opacity .3s;
+}
+#examHistoryBackdrop.open { opacity:1; }
+#examHistoryPanel {
+    position:fixed; top:0; right:0; bottom:0; z-index:901;
+    width:min(500px,100vw); background:var(--bg-main);
+    border-left:1px solid var(--glass-border);
+    box-shadow:-8px 0 32px rgba(0,0,0,.18);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform .35s cubic-bezier(.16,1,.3,1);
+    overflow:hidden;
+}
+#examHistoryPanel.open { transform:translateX(0); }
+#examHistoryPanelHeader {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1rem 1.25rem; background:var(--glass-bg);
+    border-bottom:1px solid var(--glass-border); flex-shrink:0;
+}
+#examHistoryPanelBody { flex:1; overflow-y:auto; padding:1rem; }
+#examHistoryPanelBody::-webkit-scrollbar { width:4px; }
+#examHistoryPanelBody::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+.exh-card {
+    background:var(--glass-bg); border:1px solid var(--glass-border);
+    border-radius:12px; margin-bottom:.75rem; overflow:hidden;
+    animation:fadeIn .3s ease both;
+}
+.exh-card-header {
+    display:flex; align-items:center; gap:.75rem;
+    padding:.85rem 1rem; cursor:pointer; transition:background .2s;
+}
+.exh-card-header:hover { background:rgba(124,58,237,.06); }
+.exh-card-body {
+    max-height:0; overflow:hidden;
+    transition:max-height .35s ease, padding .2s; padding:0 1rem;
+}
+.exh-card-body.open { max-height:600px; overflow-y:auto; padding:.75rem 1rem; }
+.exh-card-body::-webkit-scrollbar { width:3px; }
+.exh-card-body::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
     </style>
 </head>
 <body>
@@ -236,9 +278,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         <a id="back-btn-link" href="./index.html" class="back-btn" aria-label="Back">
             <i class="fas fa-arrow-left"></i> Back
         </a>
-        <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.1);color:var(--primary);font-size:1rem;transition:all .2s">
-            <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
-        </button>
+        <div style="display:flex;align-items:center;gap:.5rem">
+            <button onclick="openExamHistory()" title="View Exam History" aria-label="View exam history"
+                    style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.1);color:var(--primary);font-size:.95rem;transition:all .2s">
+                <i class="fas fa-history"></i>
+            </button>
+            <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.1);color:var(--primary);font-size:1rem;transition:all .2s">
+                <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
+            </button>
+        </div>
     </div>
 
     <div class="container">
@@ -805,7 +853,7 @@ Requirements:
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, getDoc, getDocs, deleteDoc, query, orderBy, limit, startAfter, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -892,7 +940,183 @@ Requirements:
                 console.warn('History save failed:', e);
             }
         };
+
+        // ── Exam History Panel ──────────────────────────────────────
+        let _exh = { all:[], lastDoc:null, loading:false };
+        const EXH_PAGE_SIZE = 15;
+
+        window.openExamHistory = async function() {
+            const backdrop = document.getElementById('examHistoryBackdrop');
+            const panel = document.getElementById('examHistoryPanel');
+            backdrop.style.display = 'block';
+            requestAnimationFrame(() => {
+                backdrop.classList.add('open');
+                panel.classList.add('open');
+            });
+            _exh = { all:[], lastDoc:null, loading:false };
+            const listEl = document.getElementById('exhList');
+            listEl.innerHTML = `<div style="text-align:center;padding:2rem"><i class="fas fa-spinner fa-spin" style="color:var(--primary);font-size:1.5rem"></i></div>`;
+            document.getElementById('exhLoadMoreWrap').style.display = 'none';
+            try {
+                const user = window._fbUser;
+                if (!user) { listEl.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:2rem">Please sign in to view history.</p>'; return; }
+                const ref = collection(db, 'users', user.uid, 'history');
+                const q = query(ref, where('tool','==','Exam Paper Generator'), orderBy('updatedAt','desc'), limit(EXH_PAGE_SIZE));
+                const snap = await getDocs(q);
+                _exh.all = snap.docs.map(d => ({id:d.id,...d.data()}));
+                _exh.lastDoc = snap.docs[snap.docs.length-1] || null;
+                _exhRender(_exh.all);
+                document.getElementById('exhLoadMoreWrap').style.display = _exh.lastDoc ? 'block' : 'none';
+            } catch(e) {
+                console.error(e);
+                listEl.innerHTML = '<p style="text-align:center;color:#ef4444;font-size:.85rem;padding:2rem">Failed to load history.</p>';
+            }
+        };
+
+        window.closeExamHistory = function() {
+            const backdrop = document.getElementById('examHistoryBackdrop');
+            const panel = document.getElementById('examHistoryPanel');
+            backdrop.classList.remove('open');
+            panel.classList.remove('open');
+            setTimeout(() => { backdrop.style.display = 'none'; }, 380);
+        };
+
+        window.loadMoreEXH = async function() {
+            if (_exh.loading || !_exh.lastDoc) return;
+            _exh.loading = true;
+            const btn = document.getElementById('exhLoadMoreBtn');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Loading…'; }
+            try {
+                const user = window._fbUser;
+                if (!user) return;
+                const ref = collection(db, 'users', user.uid, 'history');
+                const q = query(ref, where('tool','==','Exam Paper Generator'), orderBy('updatedAt','desc'), startAfter(_exh.lastDoc), limit(EXH_PAGE_SIZE));
+                const snap = await getDocs(q);
+                const more = snap.docs.map(d => ({id:d.id,...d.data()}));
+                _exh.lastDoc = snap.docs[snap.docs.length-1] || null;
+                _exh.all = [..._exh.all, ...more];
+                _exhRender(_exh.all);
+                document.getElementById('exhLoadMoreWrap').style.display = _exh.lastDoc ? 'block' : 'none';
+            } catch(e) { console.error(e); }
+            finally {
+                _exh.loading = false;
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Load More'; }
+            }
+        };
+
+        window.deleteEXHSession = async function(id) {
+            if (!confirm('Delete this history entry?')) return;
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                await deleteDoc(doc(db, 'users', user.uid, 'history', id));
+                _exh.all = _exh.all.filter(s => s.id !== id);
+                _exhRender(_exh.all);
+            } catch(e) { alert('Failed to delete. Please try again.'); }
+        };
+
+        function _exhEsc(s) {
+            return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        function _exhFmtTime(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleString('en-HK',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        }
+        window._exhToggle = function(id) {
+            const body = document.getElementById('exh-body-'+id);
+            const chev = document.getElementById('exh-chev-'+id);
+            if (!body) return;
+            const open = body.classList.toggle('open');
+            if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+        };
+
+        function _exhRenderCard(s) {
+            const msgs = s.messages || [];
+            const userMsg = msgs.find(m => m.role === 'user');
+            const aiMsg   = msgs.find(m => m.role === 'assistant');
+            const uc = userMsg ? userMsg.content || '' : '';
+            const subMatch  = uc.match(/Subject:\s*(.+)/);
+            const topicsMatch = uc.match(/Topics:\s*(.+)/);
+            const diffMatch = uc.match(/Difficulty:\s*(.+)/);
+            const subject   = subMatch   ? subMatch[1].trim()   : (s.subject || '');
+            const topics    = topicsMatch ? topicsMatch[1].trim() : '';
+            const difficulty = diffMatch ? diffMatch[1].trim()  : '';
+            const preview   = aiMsg ? (aiMsg.content||'').substring(0,500) : '';
+            const time = _exhFmtTime(s.updatedAt);
+            return `<div class="exh-card" id="exh-card-${s.id}">
+                <div class="exh-card-header" onclick="_exhToggle('${s.id}')" role="button" tabindex="0"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_exhToggle('${s.id}')}">
+                    <div style="width:36px;height:36px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#7c3aed,#06b6d4);flex-shrink:0">
+                        <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius" style="width:100%;height:100%;object-fit:cover">
+                    </div>
+                    <div style="flex:1;min-width:0">
+                        <p style="font-weight:700;font-size:.8rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_exhEsc((s.summary||subject).substring(0,60))}</p>
+                        <p style="font-size:.7rem;color:var(--text-secondary);margin-top:.1rem">${_exhEsc(time)}</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+                        <button onclick="event.stopPropagation();deleteEXHSession('${s.id}')"
+                                style="width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;background:rgba(239,68,68,.12);color:#ef4444;font-size:.7rem;display:flex;align-items:center;justify-content:center"
+                                title="Delete" aria-label="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <i class="fas fa-chevron-down" id="exh-chev-${s.id}" style="font-size:.65rem;color:var(--text-secondary);transition:transform .3s"></i>
+                    </div>
+                </div>
+                <div class="exh-card-body" id="exh-body-${s.id}">
+                    ${subject ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Subject</span><p style="font-size:.8rem;color:var(--text-primary);margin-top:.1rem">${_exhEsc(subject)}</p></div>` : ''}
+                    ${topics ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Topics</span><p style="font-size:.8rem;color:var(--text-primary);margin-top:.1rem">${_exhEsc(topics)}</p></div>` : ''}
+                    ${difficulty ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Difficulty</span><p style="font-size:.8rem;color:var(--text-primary);margin-top:.1rem">${_exhEsc(difficulty)}</p></div>` : ''}
+                    ${preview ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary)">Paper Preview</span><p style="font-size:.78rem;color:var(--text-primary);margin-top:.1rem;white-space:pre-wrap;max-height:200px;overflow-y:auto">${_exhEsc(preview)}</p></div>` : ''}
+                    <div style="padding-bottom:.5rem">
+                        <a href="./exam.html?session=${s.id}" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;color:var(--primary);text-decoration:none;padding:.35rem .85rem;border-radius:8px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2)">
+                            <i class="fas fa-external-link-alt"></i> Restore this session
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function _exhRender(sessions) {
+            const list = document.getElementById('exhList');
+            if (!sessions.length) {
+                list.innerHTML = `<div style="text-align:center;padding:3rem 1rem">
+                    <div style="width:48px;height:48px;border-radius:14px;background:rgba(124,58,237,.10);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                        <i class="fas fa-history" style="color:var(--primary);font-size:1.3rem"></i>
+                    </div>
+                    <p style="font-weight:700;font-size:.9rem;color:var(--text-primary);margin-bottom:.35rem">No history yet</p>
+                    <p style="font-size:.78rem;color:var(--text-secondary)">Generate an exam paper to start building history.</p>
+                </div>`;
+                return;
+            }
+            list.innerHTML = sessions.map(s => _exhRenderCard(s)).join('');
+        }
     </script>
+    <!-- Exam History Panel -->
+    <div id="examHistoryBackdrop" onclick="closeExamHistory()" aria-hidden="true"></div>
+    <div id="examHistoryPanel" role="dialog" aria-modal="true" aria-label="Exam history">
+        <div id="examHistoryPanelHeader">
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <div style="width:28px;height:28px;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#7c3aed,#06b6d4);flex-shrink:0">
+                    <img src="https://i.ibb.co/gMQh9L2S/Edu-Genius-AI.png" alt="EduGenius" style="width:100%;height:100%;object-fit:cover">
+                </div>
+                <span style="font-weight:700;font-size:.95rem;color:var(--text-primary)">Exam History</span>
+            </div>
+            <button onclick="closeExamHistory()" aria-label="Close history"
+                    style="width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.05);color:var(--text-secondary);font-size:.85rem">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="examHistoryPanelBody">
+            <div id="exhList"></div>
+            <div id="exhLoadMoreWrap" style="display:none;text-align:center;padding:.75rem 0">
+                <button id="exhLoadMoreBtn" onclick="loadMoreEXH()"
+                        style="border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-primary);padding:.4rem 1.25rem;border-radius:10px;font-size:.8rem;font-weight:600;cursor:pointer">
+                    <i class="fas fa-chevron-down mr-1"></i> Load More
+                </button>
+            </div>
+        </div>
+    </div>
 <script>
     (function() {
         const params = new URLSearchParams(window.location.search);

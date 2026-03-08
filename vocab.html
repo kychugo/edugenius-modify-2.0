@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduGenius – Vocabulary Tools</title>
     <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <style>
-        /* ============================================================
-           EduGenius Vocabulary Tools
            Self-contained styles – no external dependencies
            ============================================================ */
         *, *::before, *::after {
@@ -820,6 +819,50 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     outline: 3px solid rgba(124,58,237,.5);
     outline-offset: 2px;
 }
+/* Vocab History Panel */
+#vocabHistoryBackdrop {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:900;
+    backdrop-filter:blur(2px); transition:opacity .3s;
+}
+#vocabHistoryBackdrop.open { opacity:1; }
+#vocabHistoryPanel {
+    position:fixed; top:0; right:0; bottom:0; z-index:901;
+    width:min(500px,100vw); background:var(--card-bg);
+    border-left:1px solid var(--border);
+    box-shadow:-8px 0 32px rgba(0,0,0,.18);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform .35s cubic-bezier(.16,1,.3,1);
+    overflow:hidden;
+}
+#vocabHistoryPanel.open { transform:translateX(0); }
+#vocabHistoryPanelHeader {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1rem 1.25rem; background:rgba(255,255,255,.95);
+    border-bottom:1px solid var(--border); flex-shrink:0;
+}
+#vocabHistoryPanelBody { flex:1; overflow-y:auto; padding:1rem; }
+#vocabHistoryPanelBody::-webkit-scrollbar { width:4px; }
+#vocabHistoryPanelBody::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+.voh-card {
+    background:var(--card-bg); border:1px solid var(--border);
+    border-radius:12px; margin-bottom:.75rem; overflow:hidden;
+}
+.voh-card-header {
+    display:flex; align-items:center; gap:.75rem;
+    padding:.85rem 1rem; cursor:pointer; transition:background .2s;
+}
+.voh-card-header:hover { background:rgba(79,70,229,.06); }
+.voh-card-body {
+    max-height:0; overflow:hidden;
+    transition:max-height .35s ease, padding .2s; padding:0 1rem;
+}
+.voh-card-body.open { max-height:600px; overflow-y:auto; padding:.75rem 1rem; }
+.voh-card-body::-webkit-scrollbar { width:3px; }
+.voh-card-body::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+.dark #vocabHistoryPanel { background:rgba(15,15,40,.95); border-left-color:rgba(255,255,255,.08); }
+.dark #vocabHistoryPanelHeader { background:rgba(15,15,40,.85); border-bottom-color:rgba(255,255,255,.08); }
+.dark .voh-card { background:rgba(30,20,60,.8); border-color:rgba(255,255,255,.08); }
     </style>
 <body>
     <!-- Auth guard overlay -->
@@ -843,6 +886,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
             </a>
             <span class="header-subtitle">📚 Vocabulary Tools</span>
             <div style="display:flex;align-items:center;gap:.5rem">
+                <button onclick="openVocabHistory()" title="View Vocabulary History" aria-label="View vocabulary history"
+                        style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(79,70,229,.1);color:var(--primary);font-size:.95rem;transition:all .2s;flex-shrink:0">
+                    <i class="fas fa-history"></i>
+                </button>
                 <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode"
                         style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(79,70,229,.1);color:var(--primary);font-size:1rem;transition:all .2s;flex-shrink:0">
                     <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
@@ -1728,7 +1775,7 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, getDoc, getDocs, deleteDoc, query, orderBy, limit, startAfter, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -1834,7 +1881,174 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
                 console.warn('History save failed:', e);
             }
         };
+
+        // ── Vocabulary History Panel ────────────────────────────────
+        let _voh = { all:[], lastDoc:null, loading:false };
+        const VOH_PAGE_SIZE = 15;
+
+        window.openVocabHistory = async function() {
+            const backdrop = document.getElementById('vocabHistoryBackdrop');
+            const panel = document.getElementById('vocabHistoryPanel');
+            backdrop.style.display = 'block';
+            requestAnimationFrame(() => {
+                backdrop.classList.add('open');
+                panel.classList.add('open');
+            });
+            _voh = { all:[], lastDoc:null, loading:false };
+            const listEl = document.getElementById('vohList');
+            listEl.innerHTML = `<div style="text-align:center;padding:2rem"><i class="fas fa-spinner fa-spin" style="color:var(--primary);font-size:1.5rem"></i></div>`;
+            document.getElementById('vohLoadMoreWrap').style.display = 'none';
+            try {
+                const user = window._fbUser;
+                if (!user) { listEl.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:.85rem;padding:2rem">Please sign in to view history.</p>'; return; }
+                const ref = collection(db, 'users', user.uid, 'history');
+                const q = query(ref, where('tool','==','Vocabulary Generator'), orderBy('updatedAt','desc'), limit(VOH_PAGE_SIZE));
+                const snap = await getDocs(q);
+                _voh.all = snap.docs.map(d => ({id:d.id,...d.data()}));
+                _voh.lastDoc = snap.docs[snap.docs.length-1] || null;
+                _vohRender(_voh.all);
+                document.getElementById('vohLoadMoreWrap').style.display = _voh.lastDoc ? 'block' : 'none';
+            } catch(e) {
+                console.error(e);
+                listEl.innerHTML = '<p style="text-align:center;color:#ef4444;font-size:.85rem;padding:2rem">Failed to load history.</p>';
+            }
+        };
+
+        window.closeVocabHistory = function() {
+            const backdrop = document.getElementById('vocabHistoryBackdrop');
+            const panel = document.getElementById('vocabHistoryPanel');
+            backdrop.classList.remove('open');
+            panel.classList.remove('open');
+            setTimeout(() => { backdrop.style.display = 'none'; }, 380);
+        };
+
+        window.loadMoreVOH = async function() {
+            if (_voh.loading || !_voh.lastDoc) return;
+            _voh.loading = true;
+            const btn = document.getElementById('vohLoadMoreBtn');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading…'; }
+            try {
+                const user = window._fbUser;
+                if (!user) return;
+                const ref = collection(db, 'users', user.uid, 'history');
+                const q = query(ref, where('tool','==','Vocabulary Generator'), orderBy('updatedAt','desc'), startAfter(_voh.lastDoc), limit(VOH_PAGE_SIZE));
+                const snap = await getDocs(q);
+                const more = snap.docs.map(d => ({id:d.id,...d.data()}));
+                _voh.lastDoc = snap.docs[snap.docs.length-1] || null;
+                _voh.all = [..._voh.all, ...more];
+                _vohRender(_voh.all);
+                document.getElementById('vohLoadMoreWrap').style.display = _voh.lastDoc ? 'block' : 'none';
+            } catch(e) { console.error(e); }
+            finally {
+                _voh.loading = false;
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-chevron-down"></i> Load More'; }
+            }
+        };
+
+        window.deleteVOHSession = async function(id) {
+            if (!confirm('Delete this history entry?')) return;
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                await deleteDoc(doc(db, 'users', user.uid, 'history', id));
+                _voh.all = _voh.all.filter(s => s.id !== id);
+                _vohRender(_voh.all);
+            } catch(e) { alert('Failed to delete. Please try again.'); }
+        };
+
+        function _vohEsc(s) {
+            return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        function _vohFmtTime(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleString('en-HK',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        }
+        window._vohToggle = function(id) {
+            const body = document.getElementById('voh-body-'+id);
+            const chev = document.getElementById('voh-chev-'+id);
+            if (!body) return;
+            const open = body.classList.toggle('open');
+            if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+        };
+
+        function _vohRenderCard(s) {
+            const msgs = s.messages || [];
+            const userMsg = msgs.find(m => m.role === 'user');
+            const aiMsg   = msgs.find(m => m.role === 'assistant');
+            const uc = userMsg ? userMsg.content || '' : '';
+            const topicMatch = uc.match(/Topic:\s*(.+)/);
+            const levelMatch = uc.match(/Level:\s*(.+)/);
+            const topic = topicMatch ? topicMatch[1].trim() : (s.summary || '');
+            const level = levelMatch ? levelMatch[1].trim() : '';
+            const preview = aiMsg ? (aiMsg.content||'').substring(0,300) : '';
+            const time = _vohFmtTime(s.updatedAt);
+            return `<div class="voh-card" id="voh-card-${s.id}">
+                <div class="voh-card-header" onclick="_vohToggle('${s.id}')" role="button" tabindex="0"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_vohToggle('${s.id}')}">
+                    <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4f46e5,#7c3aed);flex-shrink:0;font-size:1.1rem">📚</div>
+                    <div style="flex:1;min-width:0">
+                        <p style="font-weight:700;font-size:.8rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_vohEsc(topic.substring(0,60))}${level ? ' · '+_vohEsc(level) : ''}</p>
+                        <p style="font-size:.7rem;color:var(--text-muted);margin-top:.1rem">${_vohEsc(time)}</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+                        <button onclick="event.stopPropagation();deleteVOHSession('${s.id}')"
+                                style="width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;background:rgba(239,68,68,.12);color:#ef4444;font-size:.7rem;display:flex;align-items:center;justify-content:center"
+                                title="Delete" aria-label="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <i class="fas fa-chevron-down" id="voh-chev-${s.id}" style="font-size:.65rem;color:var(--text-muted);transition:transform .3s"></i>
+                    </div>
+                </div>
+                <div class="voh-card-body" id="voh-body-${s.id}">
+                    ${topic ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Topic</span><p style="font-size:.8rem;color:var(--text);margin-top:.1rem">${_vohEsc(topic)}</p></div>` : ''}
+                    ${level ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Level</span><p style="font-size:.8rem;color:var(--text);margin-top:.1rem">${_vohEsc(level)}</p></div>` : ''}
+                    ${preview ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Vocabulary Preview</span><p style="font-size:.78rem;color:var(--text);margin-top:.1rem;white-space:pre-wrap;max-height:160px;overflow-y:auto">${_vohEsc(preview)}</p></div>` : ''}
+                    <div style="padding-bottom:.5rem">
+                        <a href="./vocab.html?session=${s.id}" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;color:var(--primary);text-decoration:none;padding:.35rem .85rem;border-radius:8px;background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.2)">
+                            <i class="fas fa-external-link-alt"></i> Restore this session
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function _vohRender(sessions) {
+            const list = document.getElementById('vohList');
+            if (!sessions.length) {
+                list.innerHTML = `<div style="text-align:center;padding:3rem 1rem">
+                    <div style="width:48px;height:48px;border-radius:14px;background:rgba(79,70,229,.10);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.4rem">📚</div>
+                    <p style="font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:.35rem">No history yet</p>
+                    <p style="font-size:.78rem;color:var(--text-muted)">Generate vocabulary lists to start building history.</p>
+                </div>`;
+                return;
+            }
+            list.innerHTML = sessions.map(s => _vohRenderCard(s)).join('');
+        }
     </script>
+    <!-- Vocab History Panel -->
+    <div id="vocabHistoryBackdrop" onclick="closeVocabHistory()" aria-hidden="true"></div>
+    <div id="vocabHistoryPanel" role="dialog" aria-modal="true" aria-label="Vocabulary history">
+        <div id="vocabHistoryPanelHeader">
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4f46e5,#7c3aed);flex-shrink:0;font-size:.95rem">📚</div>
+                <span style="font-weight:700;font-size:.95rem;color:var(--text)">Vocabulary History</span>
+            </div>
+            <button onclick="closeVocabHistory()" aria-label="Close history"
+                    style="width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.05);color:var(--text-muted);font-size:.85rem">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="vocabHistoryPanelBody">
+            <div id="vohList"></div>
+            <div id="vohLoadMoreWrap" style="display:none;text-align:center;padding:.75rem 0">
+                <button id="vohLoadMoreBtn" onclick="loadMoreVOH()"
+                        style="border:1px solid var(--border);background:var(--card-bg);color:var(--text);padding:.4rem 1.25rem;border-radius:10px;font-size:.8rem;font-weight:600;cursor:pointer">
+                    <i class="fas fa-chevron-down"></i> Load More
+                </button>
+            </div>
+        </div>
+    </div>
 
 <script>
     (function() {
