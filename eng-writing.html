@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduGenius – English Writing Practice</title>
     <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <style>
         /* ============================================================
            EduGenius English Writing Practice
@@ -566,6 +567,50 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     outline: 3px solid rgba(124,58,237,.5);
     outline-offset: 2px;
 }
+/* Writing History Panel */
+#writingHistoryBackdrop {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:900;
+    backdrop-filter:blur(2px); transition:opacity .3s;
+}
+#writingHistoryBackdrop.open { opacity:1; }
+#writingHistoryPanel {
+    position:fixed; top:0; right:0; bottom:0; z-index:901;
+    width:min(500px,100vw); background:var(--card-bg);
+    border-left:1px solid var(--border);
+    box-shadow:-8px 0 32px rgba(0,0,0,.18);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform .35s cubic-bezier(.16,1,.3,1);
+    overflow:hidden;
+}
+#writingHistoryPanel.open { transform:translateX(0); }
+#writingHistoryPanelHeader {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1rem 1.25rem; background:rgba(255,255,255,.95);
+    border-bottom:1px solid var(--border); flex-shrink:0;
+}
+#writingHistoryPanelBody { flex:1; overflow-y:auto; padding:1rem; }
+#writingHistoryPanelBody::-webkit-scrollbar { width:4px; }
+#writingHistoryPanelBody::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+.ewh-card {
+    background:var(--card-bg); border:1px solid var(--border);
+    border-radius:12px; margin-bottom:.75rem; overflow:hidden;
+}
+.ewh-card-header {
+    display:flex; align-items:center; gap:.75rem;
+    padding:.85rem 1rem; cursor:pointer; transition:background .2s;
+}
+.ewh-card-header:hover { background:rgba(79,70,229,.06); }
+.ewh-card-body {
+    max-height:0; overflow:hidden;
+    transition:max-height .35s ease, padding .2s; padding:0 1rem;
+}
+.ewh-card-body.open { max-height:600px; overflow-y:auto; padding:.75rem 1rem; }
+.ewh-card-body::-webkit-scrollbar { width:3px; }
+.ewh-card-body::-webkit-scrollbar-thumb { background:var(--primary); border-radius:99px; }
+.dark #writingHistoryPanel { background:rgba(15,15,40,.95); border-left-color:rgba(255,255,255,.08); }
+.dark #writingHistoryPanelHeader { background:rgba(15,15,40,.85); border-bottom-color:rgba(255,255,255,.08); }
+.dark .ewh-card { background:rgba(30,20,60,.8); border-color:rgba(255,255,255,.08); }
     </style>
 <body>
     <!-- Auth guard overlay -->
@@ -589,6 +634,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
             </a>
             <span class="header-subtitle">✍️ English Writing Practice</span>
             <div style="display:flex;align-items:center;gap:.5rem">
+                <button onclick="openWritingHistory()" title="View Writing History" aria-label="View writing history"
+                        style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(79,70,229,.1);color:var(--primary);font-size:.95rem;transition:all .2s;flex-shrink:0">
+                    <i class="fas fa-history"></i>
+                </button>
                 <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode"
                         style="width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(79,70,229,.1);color:var(--primary);font-size:1rem;transition:all .2s;flex-shrink:0">
                     <span class="theme-moon">🌙</span><span class="theme-sun" style="display:none">☀️</span>
@@ -1145,7 +1194,7 @@ Return ONLY valid JSON (absolutely no other text):
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, updateDoc, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, arrayUnion, getDocs, deleteDoc, query, orderBy, limit, startAfter, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -1202,7 +1251,169 @@ Return ONLY valid JSON (absolutely no other text):
                 console.warn('History save failed:', e);
             }
         };
+
+        // ── Writing History Panel ───────────────────────────────────
+        let _ewh = { all:[], lastDoc:null, loading:false };
+        const EWH_PAGE_SIZE = 15;
+
+        window.openWritingHistory = async function() {
+            const backdrop = document.getElementById('writingHistoryBackdrop');
+            const panel = document.getElementById('writingHistoryPanel');
+            backdrop.style.display = 'block';
+            requestAnimationFrame(() => {
+                backdrop.classList.add('open');
+                panel.classList.add('open');
+            });
+            _ewh = { all:[], lastDoc:null, loading:false };
+            const listEl = document.getElementById('ewhList');
+            listEl.innerHTML = `<div style="text-align:center;padding:2rem"><i class="fas fa-spinner fa-spin" style="color:var(--primary);font-size:1.5rem"></i></div>`;
+            document.getElementById('ewhLoadMoreWrap').style.display = 'none';
+            try {
+                const user = window._fbUser;
+                if (!user) { listEl.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:.85rem;padding:2rem">Please sign in to view history.</p>'; return; }
+                const ref = collection(db, 'users', user.uid, 'history');
+                const q = query(ref, where('tool','==','English Writing'), orderBy('updatedAt','desc'), limit(EWH_PAGE_SIZE));
+                const snap = await getDocs(q);
+                _ewh.all = snap.docs.map(d => ({id:d.id,...d.data()}));
+                _ewh.lastDoc = snap.docs[snap.docs.length-1] || null;
+                _ewhRender(_ewh.all);
+                document.getElementById('ewhLoadMoreWrap').style.display = _ewh.lastDoc ? 'block' : 'none';
+            } catch(e) {
+                console.error(e);
+                listEl.innerHTML = '<p style="text-align:center;color:#ef4444;font-size:.85rem;padding:2rem">Failed to load history.</p>';
+            }
+        };
+
+        window.closeWritingHistory = function() {
+            const backdrop = document.getElementById('writingHistoryBackdrop');
+            const panel = document.getElementById('writingHistoryPanel');
+            backdrop.classList.remove('open');
+            panel.classList.remove('open');
+            setTimeout(() => { backdrop.style.display = 'none'; }, 380);
+        };
+
+        window.loadMoreEWH = async function() {
+            if (_ewh.loading || !_ewh.lastDoc) return;
+            _ewh.loading = true;
+            const btn = document.getElementById('ewhLoadMoreBtn');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading…'; }
+            try {
+                const user = window._fbUser;
+                if (!user) return;
+                const ref = collection(db, 'users', user.uid, 'history');
+                const q = query(ref, where('tool','==','English Writing'), orderBy('updatedAt','desc'), startAfter(_ewh.lastDoc), limit(EWH_PAGE_SIZE));
+                const snap = await getDocs(q);
+                const more = snap.docs.map(d => ({id:d.id,...d.data()}));
+                _ewh.lastDoc = snap.docs[snap.docs.length-1] || null;
+                _ewh.all = [..._ewh.all, ...more];
+                _ewhRender(_ewh.all);
+                document.getElementById('ewhLoadMoreWrap').style.display = _ewh.lastDoc ? 'block' : 'none';
+            } catch(e) { console.error(e); }
+            finally {
+                _ewh.loading = false;
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-chevron-down"></i> Load More'; }
+            }
+        };
+
+        window.deleteEWHSession = async function(id) {
+            if (!confirm('Delete this history entry?')) return;
+            const user = window._fbUser;
+            if (!user) return;
+            try {
+                await deleteDoc(doc(db, 'users', user.uid, 'history', id));
+                _ewh.all = _ewh.all.filter(s => s.id !== id);
+                _ewhRender(_ewh.all);
+            } catch(e) { alert('Failed to delete. Please try again.'); }
+        };
+
+        function _ewhEsc(s) {
+            return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        function _ewhFmtTime(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleString('en-HK',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        }
+        window._ewhToggle = function(id) {
+            const body = document.getElementById('ewh-body-'+id);
+            const chev = document.getElementById('ewh-chev-'+id);
+            if (!body) return;
+            const open = body.classList.toggle('open');
+            if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+        };
+
+        function _ewhRenderCard(s) {
+            const msgs = s.messages || [];
+            const userMsg = msgs.find(m => m.role === 'user');
+            const aiMsg   = msgs.find(m => m.role === 'assistant');
+            const uc = userMsg ? userMsg.content || '' : '';
+            const genreMatch = uc.match(/Genre:\s*(.+)/);
+            const topicMatch = uc.match(/Topic:\s*(.+)/);
+            const genre = genreMatch ? genreMatch[1].trim() : '';
+            const topic = topicMatch ? topicMatch[1].trim() : (s.summary || '');
+            const preview = aiMsg ? (aiMsg.content||'').substring(0,300) : '';
+            const time = _ewhFmtTime(s.updatedAt);
+            return `<div class="ewh-card" id="ewh-card-${s.id}">
+                <div class="ewh-card-header" onclick="_ewhToggle('${s.id}')" role="button" tabindex="0"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_ewhToggle('${s.id}')}">
+                    <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4f46e5,#7c3aed);flex-shrink:0;font-size:1.1rem">✍️</div>
+                    <div style="flex:1;min-width:0">
+                        <p style="font-weight:700;font-size:.8rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_ewhEsc((s.summary||topic).substring(0,60))}</p>
+                        <p style="font-size:.7rem;color:var(--text-muted);margin-top:.1rem">${_ewhEsc(time)}</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+                        <button onclick="event.stopPropagation();deleteEWHSession('${s.id}')"
+                                style="width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;background:rgba(239,68,68,.12);color:#ef4444;font-size:.7rem;display:flex;align-items:center;justify-content:center"
+                                title="Delete" aria-label="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <i class="fas fa-chevron-down" id="ewh-chev-${s.id}" style="font-size:.65rem;color:var(--text-muted);transition:transform .3s"></i>
+                    </div>
+                </div>
+                <div class="ewh-card-body" id="ewh-body-${s.id}">
+                    ${genre ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Genre</span><p style="font-size:.8rem;color:var(--text);margin-top:.1rem">${_ewhEsc(genre)}</p></div>` : ''}
+                    ${topic ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Topic / Context</span><p style="font-size:.8rem;color:var(--text);margin-top:.1rem">${_ewhEsc(topic.substring(0,200))}</p></div>` : ''}
+                    ${preview ? `<div style="margin-bottom:.5rem"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Task Preview</span><p style="font-size:.78rem;color:var(--text);margin-top:.1rem;white-space:pre-wrap;max-height:160px;overflow-y:auto">${_ewhEsc(preview)}</p></div>` : ''}
+                </div>
+            </div>`;
+        }
+
+        function _ewhRender(sessions) {
+            const list = document.getElementById('ewhList');
+            if (!sessions.length) {
+                list.innerHTML = `<div style="text-align:center;padding:3rem 1rem">
+                    <div style="width:48px;height:48px;border-radius:14px;background:rgba(79,70,229,.10);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.4rem">✍️</div>
+                    <p style="font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:.35rem">No history yet</p>
+                    <p style="font-size:.78rem;color:var(--text-muted)">Generate writing tasks to start building history.</p>
+                </div>`;
+                return;
+            }
+            list.innerHTML = sessions.map(s => _ewhRenderCard(s)).join('');
+        }
     </script>
+    <!-- Writing History Panel -->
+    <div id="writingHistoryBackdrop" onclick="closeWritingHistory()" aria-hidden="true"></div>
+    <div id="writingHistoryPanel" role="dialog" aria-modal="true" aria-label="Writing history">
+        <div id="writingHistoryPanelHeader">
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4f46e5,#7c3aed);flex-shrink:0;font-size:.95rem">✍️</div>
+                <span style="font-weight:700;font-size:.95rem;color:var(--text)">Writing History</span>
+            </div>
+            <button onclick="closeWritingHistory()" aria-label="Close history"
+                    style="width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.05);color:var(--text-muted);font-size:.85rem">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="writingHistoryPanelBody">
+            <div id="ewhList"></div>
+            <div id="ewhLoadMoreWrap" style="display:none;text-align:center;padding:.75rem 0">
+                <button id="ewhLoadMoreBtn" onclick="loadMoreEWH()"
+                        style="border:1px solid var(--border);background:var(--card-bg);color:var(--text);padding:.4rem 1.25rem;border-radius:10px;font-size:.8rem;font-weight:600;cursor:pointer">
+                    <i class="fas fa-chevron-down"></i> Load More
+                </button>
+            </div>
+        </div>
+    </div>
 
 <script>
     (function() {

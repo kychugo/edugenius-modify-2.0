@@ -326,6 +326,30 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
                     <h4 class="font-bold text-sm mb-2" style="color:var(--text-primary)">
                         <i class="fas fa-puzzle-piece mr-1" style="color:#10b981"></i>✏️ Code Completion Exercise
                     </h4>
+                    <!-- How it works toggle -->
+                    <div class="mb-2">
+                        <button onclick="toggleCompletionHelp()" id="completion-help-btn"
+                                class="text-xs font-semibold flex items-center gap-1"
+                                style="color:#10b981;background:none;border:none;cursor:pointer;padding:0">
+                            <i class="fas fa-question-circle"></i> How it works?
+                            <i class="fas fa-chevron-down" id="completion-help-chev" style="font-size:.6rem;transition:transform .25s"></i>
+                        </button>
+                        <div id="completion-help-body" style="max-height:0;overflow:hidden;transition:max-height .35s ease">
+                            <div class="mt-2 p-3 rounded-xl text-xs" style="background:rgba(16,185,129,.08);color:var(--text-secondary);line-height:1.6">
+                                <p class="font-semibold mb-1" style="color:var(--text-primary)">📖 How Code Completion Works</p>
+                                <ol style="list-style:decimal;padding-left:1.2rem;margin-bottom:.6rem">
+                                    <li>Type a DSE ICT topic in the box below (or click a sample).</li>
+                                    <li>Click <strong>Generate Exercise</strong> — the AI writes a short Python snippet with <code style="background:rgba(16,185,129,.15);padding:.1rem .3rem;border-radius:4px">___</code> blanks.</li>
+                                    <li>Read the hints and fill each blank with the correct Python expression.</li>
+                                    <li>Click <strong>Check Answers</strong> to see which blanks are correct.</li>
+                                </ol>
+                                <p class="font-semibold mb-1" style="color:var(--text-primary)">💡 Sample Topics</p>
+                                <div id="completion-sample-btns" class="flex flex-wrap gap-1">
+                                    <!-- Populated by script using COMPLETION_SAMPLE_TOPICS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <p class="text-xs mb-3" style="color:var(--text-secondary)">AI generates a code exercise with blanks for you to fill in.</p>
                     <div class="flex gap-2 mb-3 flex-wrap">
                         <input type="text" id="completion-topic" class="input-field text-xs px-3 py-2 rounded-xl flex-1" style="min-width:140px" placeholder="Topic (e.g. linear search, file handling)…">
@@ -515,8 +539,8 @@ ${codeContent}
 
         async function callGrokAPI(prompt) {
             const messages = [{ role: 'user', content: prompt }];
-            // Use maximum token limit to support long code reviews and full code submissions
-            const MAX_TOKENS = 131072;
+            // 65535 is the safe upper limit compatible with all models in the fallback chain
+            const MAX_TOKENS = 65535;
             for (const model of FALLBACK_MODELS) {
                 try {
                     const response = await fetch(POLLINATIONS_API_URL, {
@@ -794,6 +818,41 @@ ${code.substring(0, 2000)}
         // ============================================================
         // 2.5.3 – Interactive Code Completion Exercise
         // ============================================================
+        const COMPLETION_SAMPLE_TOPICS = [
+            'linear search', 'binary search', 'bubble sort', 'selection sort',
+            'file handling', 'function definition', 'stack operations',
+            '2D list', 'string processing', 'while loop'
+        ];
+
+        // Populate sample topic buttons from constant
+        (function() {
+            const container = document.getElementById('completion-sample-btns');
+            if (!container) return;
+            container.innerHTML = COMPLETION_SAMPLE_TOPICS.map(t =>
+                `<button onclick="useCompletionSample('${t.replace(/'/g, "\\'")}')"
+                         class="text-xs px-2 py-0.5 rounded-lg"
+                         style="background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);cursor:pointer;font-weight:600">${t}</button>`
+            ).join('');
+        })();
+
+        function toggleCompletionHelp() {
+            const body = document.getElementById('completion-help-body');
+            const chev = document.getElementById('completion-help-chev');
+            if (!body) return;
+            // Check explicit open state: empty string on first load counts as closed
+            const isOpen = body.style.maxHeight !== '' && body.style.maxHeight !== '0px';
+            body.style.maxHeight = isOpen ? '0px' : body.scrollHeight + 'px';
+            if (chev) chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+        }
+        function useCompletionSample(topic) {
+            const input = document.getElementById('completion-topic');
+            if (input) { input.value = topic; input.focus(); }
+            // Close the help panel after selecting
+            const body = document.getElementById('completion-help-body');
+            const chev = document.getElementById('completion-help-chev');
+            if (body) body.style.maxHeight = '0px';
+            if (chev) chev.style.transform = '';
+        }
         let completionExercise = null;
 
         async function generateCompletion() {
