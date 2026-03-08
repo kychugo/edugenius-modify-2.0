@@ -1086,7 +1086,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         // VOCABULARY GENERATOR
         // ====================================================
 
-        var generatedWords = []; // Store for quiz use (var exposes to window for module access)
+        let generatedWords = []; // Store for quiz use
+        // Expose a setter so module scripts (e.g., session restore) can update this binding
+        window.setGeneratedWords = function(words) { generatedWords = words; };
 
         function parseVocabList(raw) {
             // Try to parse structured sections: WORD / POS / DEFINITION / EXAMPLE / CHINESE
@@ -1796,7 +1798,7 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
                         ${window.renderVocabCards(words)}
                     </div>`;
                     // Set generatedWords so Quiz These Words button works
-                    if (typeof window.generatedWords !== 'undefined') window.generatedWords = words;
+                    if (window.setGeneratedWords) window.setGeneratedWords(words);
                 } else {
                     // Fallback: show raw content
                     genOut.innerHTML = historyBanner + `<div class="card"><pre style="white-space:pre-wrap;font-size:.82rem;color:var(--text)">${esc(raw.substring(0, 3000))}</pre></div>`;

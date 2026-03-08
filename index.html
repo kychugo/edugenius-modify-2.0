@@ -913,7 +913,7 @@
                 </div>
 
                 <!-- Hidden buffer used by sendMessage('errorAnalysis') -->
-                <textarea id="errorAnalysisInput" class="hidden" aria-hidden="true"></textarea>
+                <input type="hidden" id="errorAnalysisInput">
 
                 <button id="errorAnalysisSendBtn"
                         onclick="sendErrorAnalysis()"
@@ -1979,6 +1979,13 @@ IMPORTANT:
         }
 
         // Compose structured analysis from multi-part fields, then send
+        // Marker prefixes used both here and in addUserMessage to detect structured content
+        const EA_MARKER = {
+            QUESTION: '📌 Exam Question:',
+            ANSWER:   '✍️ My Answer / Working:',
+            MODEL:    '✅ Model Answer:'
+        };
+
         function sendErrorAnalysis() {
             const question = (document.getElementById('eaQuestionInput')?.value || '').trim();
             const answer   = (document.getElementById('eaAnswerInput')?.value || '').trim();
@@ -1991,11 +1998,11 @@ IMPORTANT:
                 return;
             }
 
-            // Compose structured prompt
+            // Compose structured prompt using shared markers
             let composed = '';
-            if (question) composed += `📌 Exam Question:\n${question}\n\n`;
-            composed += `✍️ My Answer / Working:\n${answer || '[See uploaded image]'}`;
-            if (model) composed += `\n\n✅ Model Answer:\n${model}`;
+            if (question) composed += `${EA_MARKER.QUESTION}\n${question}\n\n`;
+            composed += `${EA_MARKER.ANSWER}\n${answer || '[See uploaded image]'}`;
+            if (model) composed += `\n\n${EA_MARKER.MODEL}\n${model}`;
 
             // Set into hidden buffer for sendMessage to read
             const mainInput = document.getElementById('errorAnalysisInput');
@@ -2039,8 +2046,8 @@ IMPORTANT:
             // Error Analysis: distinguish initial structured analysis from follow-up questions
             if (type === 'errorAnalysis') {
                 const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                // Detect structured initial analysis by emoji prefix markers
-                const isStructured = content.startsWith('📌 Exam Question:') || content.startsWith('✍️ My Answer');
+                // Detect structured initial analysis using shared EA_MARKER constants
+                const isStructured = content.startsWith(EA_MARKER.QUESTION) || content.startsWith(EA_MARKER.ANSWER);
                 if (isStructured) {
                     const qMatch = content.match(/📌 Exam Question:\n([\s\S]*?)(?:\n\n✍️|$)/);
                     const aMatch = content.match(/✍️ My Answer \/ Working:\n([\s\S]*?)(?:\n\n✅|$)/);
