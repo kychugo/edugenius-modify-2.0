@@ -2635,7 +2635,7 @@ Your task is to provide a thorough, structured analysis:
         let _hp = { all:[], filtered:[], lastDoc:null, loading:false, filterTool:'' };
         const _HP_CHAT_TOOL_MAP = { 'Ask AI': 'askAI', 'Dictionary AI': 'dictionaryAI', 'Guide Learning': 'guideLearning', 'Error Analysis': 'errorAnalysis' };
         // Tools that redirect to their own page when clicked in history
-        const _HP_REDIRECT_MAP = { 'Exam Paper Generator': 'exam.html', 'Vocabulary Generator': 'vocab.html', 'Code Review': 'coding.html' };
+        const _HP_REDIRECT_MAP = { 'Exam Paper Generator': 'exam.html', 'Vocabulary Generator': 'vocab.html', 'Code Review': 'coding.html', 'Code Completion': 'code-completion.html' };
 
         function _hpEscape(s) {
             return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')

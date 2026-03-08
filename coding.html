@@ -97,11 +97,7 @@
         .annotation-code { flex:0 0 50%; color:#e2e8f0; background:#1a1a2e; padding:0.2rem 0.5rem; border-radius:4px; white-space:pre; overflow-x:auto; }
         .annotation-comment { flex:1; color:var(--text-secondary); font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:0.8rem; line-height:1.5; padding:0.1rem 0; }
         .annotation-wrap { background:#1a1a2e; border-radius:12px; padding:0.75rem; max-height:400px; overflow-y:auto; }
-        /* ---- Code Completion ---- */
-        .completion-code { background:#1a1a2e; color:#e2e8f0; padding:1rem; border-radius:10px; font-family:'Monaco','Menlo','Ubuntu Mono',monospace; font-size:0.85rem; white-space:pre; overflow-x:auto; line-height:1.7; margin-bottom:0.75rem; }
-        .completion-blank { background:rgba(124,58,237,.25); border-bottom:2px solid var(--primary); padding:0.1rem 0.4rem; border-radius:4px; color:#a78bfa; font-weight:700; }
-        .completion-input { width:100%; min-height:120px; font-family:'Monaco','Menlo','Ubuntu Mono',monospace; font-size:0.85rem; padding:0.75rem; border-radius:10px; border:1.5px solid rgba(124,58,237,.3); background:#1a1a2e; color:#e2e8f0; resize:vertical; }
-        .completion-input:focus { outline:none; border-color:var(--primary); }
+        /* ---- Code Completion – styles moved to code-completion.html ---- */
 
 .dark {
     --primary: #a78bfa;
@@ -321,43 +317,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
                         <i class="fas fa-align-left mr-2"></i>📝 Annotate Code
                     </button>
                 </div>
-                <!-- Code Completion Exercise -->
+                <!-- Code Completion Exercise – now a dedicated platform -->
                 <div class="rounded-2xl p-4" style="background:rgba(16,185,129,.04);border:1.5px solid rgba(16,185,129,.15)">
                     <h4 class="font-bold text-sm mb-2" style="color:var(--text-primary)">
                         <i class="fas fa-puzzle-piece mr-1" style="color:#10b981"></i>✏️ Code Completion Exercise
                     </h4>
-                    <!-- How it works toggle -->
-                    <div class="mb-2">
-                        <button onclick="toggleCompletionHelp()" id="completion-help-btn"
-                                class="text-xs font-semibold flex items-center gap-1"
-                                style="color:#10b981;background:none;border:none;cursor:pointer;padding:0">
-                            <i class="fas fa-question-circle"></i> How it works?
-                            <i class="fas fa-chevron-down" id="completion-help-chev" style="font-size:.6rem;transition:transform .25s"></i>
-                        </button>
-                        <div id="completion-help-body" style="max-height:0;overflow:hidden;transition:max-height .35s ease">
-                            <div class="mt-2 p-3 rounded-xl text-xs" style="background:rgba(16,185,129,.08);color:var(--text-secondary);line-height:1.6">
-                                <p class="font-semibold mb-1" style="color:var(--text-primary)">📖 How Code Completion Works</p>
-                                <ol style="list-style:decimal;padding-left:1.2rem;margin-bottom:.6rem">
-                                    <li>Type a DSE ICT topic in the box below (or click a sample).</li>
-                                    <li>Click <strong>Generate Exercise</strong> — the AI writes a short Python snippet with <code style="background:rgba(16,185,129,.15);padding:.1rem .3rem;border-radius:4px">___</code> blanks.</li>
-                                    <li>Read the hints and fill each blank with the correct Python expression.</li>
-                                    <li>Click <strong>Check Answers</strong> to see which blanks are correct.</li>
-                                </ol>
-                                <p class="font-semibold mb-1" style="color:var(--text-primary)">💡 Sample Topics</p>
-                                <div id="completion-sample-btns" class="flex flex-wrap gap-1">
-                                    <!-- Populated by script using COMPLETION_SAMPLE_TOPICS -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-xs mb-3" style="color:var(--text-secondary)">AI generates a code exercise with blanks for you to fill in.</p>
-                    <div class="flex gap-2 mb-3 flex-wrap">
-                        <input type="text" id="completion-topic" class="input-field text-xs px-3 py-2 rounded-xl flex-1" style="min-width:140px" placeholder="Topic (e.g. linear search, file handling)…">
-                        <button id="gen-completion-btn" onclick="generateCompletion()" class="btn-success py-2 px-3 text-xs rounded-xl">
-                            <i class="fas fa-puzzle-piece mr-1"></i>Generate Exercise
-                        </button>
-                    </div>
-                    <div id="completion-area" class="text-xs" style="color:var(--text-secondary)">Enter a topic and click Generate Exercise to begin.</div>
+                    <p class="text-xs mb-3" style="color:var(--text-secondary)">
+                        Practice Python with AI-generated fill-in-the-blank exercises. Choose your difficulty,
+                        complete the code, and get instant teacher-style AI feedback on every answer.
+                    </p>
+                    <ul class="text-xs mb-4 space-y-1" style="color:var(--text-secondary)">
+                        <li class="flex items-center gap-1.5"><i class="fas fa-check-circle" style="color:#10b981"></i>Adjustable difficulty (Easy / Medium / Hard)</li>
+                        <li class="flex items-center gap-1.5"><i class="fas fa-check-circle" style="color:#10b981"></i>AI checks semantic correctness — not just exact text</li>
+                        <li class="flex items-center gap-1.5"><i class="fas fa-check-circle" style="color:#10b981"></i>Detailed explanation for every wrong answer</li>
+                    </ul>
+                    <a id="open-completion-link" href="./code-completion.html" target="_blank"
+                       class="btn-success py-2 px-4 text-xs rounded-xl inline-flex items-center gap-2"
+                       style="text-decoration:none">
+                        <i class="fas fa-external-link-alt"></i>Open Code Completion Platform
+                    </a>
                 </div>
             </div>
         </div>
@@ -815,141 +793,7 @@ ${code.substring(0, 2000)}
             return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
-        // ============================================================
-        // 2.5.3 – Interactive Code Completion Exercise
-        // ============================================================
-        const COMPLETION_SAMPLE_TOPICS = [
-            'linear search', 'binary search', 'bubble sort', 'selection sort',
-            'file handling', 'function definition', 'stack operations',
-            '2D list', 'string processing', 'while loop'
-        ];
-
-        // Populate sample topic buttons from constant
-        (function() {
-            const container = document.getElementById('completion-sample-btns');
-            if (!container) return;
-            container.innerHTML = COMPLETION_SAMPLE_TOPICS.map(t =>
-                `<button onclick="useCompletionSample('${t.replace(/'/g, "\\'")}')"
-                         class="text-xs px-2 py-0.5 rounded-lg"
-                         style="background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);cursor:pointer;font-weight:600">${t}</button>`
-            ).join('');
-        })();
-
-        function toggleCompletionHelp() {
-            const body = document.getElementById('completion-help-body');
-            const chev = document.getElementById('completion-help-chev');
-            if (!body) return;
-            // Check explicit open state: empty string on first load counts as closed
-            const isOpen = body.style.maxHeight !== '' && body.style.maxHeight !== '0px';
-            body.style.maxHeight = isOpen ? '0px' : body.scrollHeight + 'px';
-            if (chev) chev.style.transform = isOpen ? '' : 'rotate(180deg)';
-        }
-        function useCompletionSample(topic) {
-            const input = document.getElementById('completion-topic');
-            if (input) { input.value = topic; input.focus(); }
-            // Close the help panel after selecting
-            const body = document.getElementById('completion-help-body');
-            const chev = document.getElementById('completion-help-chev');
-            if (body) body.style.maxHeight = '0px';
-            if (chev) chev.style.transform = '';
-        }
-        let completionExercise = null;
-
-        async function generateCompletion() {
-            const topic = document.getElementById('completion-topic').value.trim() || 'list operations';
-            const genBtn = document.getElementById('gen-completion-btn');
-            if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating…'; }
-            document.getElementById('completion-area').innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem"></i><p style="margin-top:.5rem;font-size:.875rem">Generating exercise…</p></div>';
-
-            const prompt = `Create a Python code completion exercise for Hong Kong DSE ICT students about "${topic}".
-
-Return ONLY valid JSON:
-{
-  "title": "Exercise: List Searching",
-  "description": "Complete the Python code to perform linear search on a list.",
-  "codeWithBlanks": "def linear_search(lst, target):\\n    for i in ___:\\n        if lst[i] == ___:\\n            return i\\n    return ___",
-  "blanks": [
-    { "position": 1, "answer": "range(len(lst))", "hint": "What should we iterate over?" },
-    { "position": 2, "answer": "target", "hint": "What are we looking for?" },
-    { "position": 3, "answer": "-1", "hint": "What do we return if not found?" }
-  ],
-  "explanation": "This implements a linear search algorithm that returns the index of the target, or -1 if not found."
-}`;
-
-            try {
-                const raw = await callGrokAPI(prompt);
-                if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = '<i class="fas fa-puzzle-piece mr-2"></i>Generate Exercise'; }
-
-                let parsed = null;
-                try {
-                    const m = raw.match(/\{[\s\S]*\}/);
-                    if (m) parsed = JSON.parse(m[0]);
-                } catch (_) {}
-
-                if (!parsed?.codeWithBlanks) {
-                    document.getElementById('completion-area').innerHTML = '<p style="color:#dc2626;padding:1rem">Could not generate exercise. Please try again.</p>';
-                    return;
-                }
-
-                completionExercise = parsed;
-                renderCompletionExercise(parsed);
-            } catch (err) {
-                if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = '<i class="fas fa-puzzle-piece mr-2"></i>Generate Exercise'; }
-                document.getElementById('completion-area').innerHTML = `<p style="color:#dc2626;padding:1rem">Error: ${err.message}</p>`;
-            }
-        }
-
-        function renderCompletionExercise(ex) {
-            const blanksHtml = ex.blanks.map((b, i) => `
-                <div style="margin-bottom:0.5rem">
-                    <label style="font-size:.78rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:.2rem">Blank ${b.position} – Hint: ${escapeAnnotation(b.hint || '')}</label>
-                    <input type="text" id="blank-${i}" class="input-field" style="padding:.4rem .75rem;font-family:'Monaco','Menlo','Ubuntu Mono',monospace;font-size:.875rem;width:100%"
-                           placeholder="Fill in blank ${b.position}…" aria-label="Blank ${b.position}">
-                </div>`).join('');
-
-            document.getElementById('completion-area').innerHTML = `
-                <div>
-                    <h3 style="font-size:.95rem;font-weight:700;color:var(--text-primary);margin-bottom:.4rem">${escapeAnnotation(ex.title || 'Code Completion')}</h3>
-                    <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:.75rem">${escapeAnnotation(ex.description || '')}</p>
-                    <div class="completion-code">${escapeAnnotation(ex.codeWithBlanks || '').replace(/___/g, '<span class="completion-blank">___</span>')}</div>
-                    <div style="margin-bottom:.75rem">${blanksHtml}</div>
-                    <button onclick="checkCompletion()" class="btn-success py-2 px-4 text-sm rounded-xl" style="display:inline-flex;align-items:center;gap:.4rem">
-                        <i class="fas fa-check mr-1"></i>Check Answers
-                    </button>
-                    <div id="completion-result" style="margin-top:.75rem"></div>
-                    <div style="margin-top:.5rem;padding:.625rem;background:rgba(124,58,237,.06);border-radius:8px;font-size:.8rem;color:var(--text-secondary)">
-                        <strong>Explanation:</strong> ${escapeAnnotation(ex.explanation || '')}
-                    </div>
-                </div>`;
-        }
-
-        function checkCompletion() {
-            if (!completionExercise) return;
-            const results = completionExercise.blanks.map((b, i) => {
-                const input = document.getElementById(`blank-${i}`);
-                const userAnswer = (input ? input.value.trim() : '').toLowerCase().replace(/\s+/g, ' ');
-                const correct = (b.answer || '').toLowerCase().replace(/\s+/g, ' ');
-                const isCorrect = userAnswer === correct;
-                if (input) {
-                    input.style.borderColor = isCorrect ? '#10b981' : '#ef4444';
-                    input.style.background = isCorrect ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)';
-                }
-                return { isCorrect, correct: b.answer, position: b.position };
-            });
-            const passed = results.filter(r => r.isCorrect).length;
-            const total = results.length;
-            const resultDiv = document.getElementById('completion-result');
-            if (resultDiv) {
-                const allCorrect = passed === total;
-                const wrongDetails = results
-                    .filter(r => !r.isCorrect)
-                    .map(r => `Blank ${r.position}: answer is <code>${escapeAnnotation(r.correct)}</code>`)
-                    .join(' | ');
-                resultDiv.innerHTML = `<div style="padding:.625rem;border-radius:8px;font-size:.875rem;font-weight:600;background:${allCorrect ? '#d1fae5' : '#fef3c7'};color:${allCorrect ? '#065f46' : '#92400e'}">
-                    ${allCorrect ? '🎉 Perfect! All blanks correct!' : `${passed}/${total} correct. ${wrongDetails}`}
-                </div>`;
-            }
-        }
+        // Code Completion Exercise has been moved to code-completion.html
     </script>
     <!-- Code Review History Panel -->
     <div id="crHistoryBackdrop" onclick="closeCRHistory()" aria-hidden="true"></div>
@@ -1214,6 +1058,11 @@ Return ONLY valid JSON:
         const link = document.getElementById('back-btn-link');
         if (link) {
             link.href = './index.html' + (back ? '?openSubject=' + encodeURIComponent(back) : '');
+        }
+        // Pass ?back= through to the Code Completion platform link
+        const ccLink = document.getElementById('open-completion-link');
+        if (ccLink && back) {
+            ccLink.href = './code-completion.html?back=' + encodeURIComponent(back);
         }
     })();
 </script>
