@@ -403,6 +403,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
             }
         });
         codeEditor.setValue("# Paste your Python code here...\ndef example_function():\n    return 'Hello, World!'");
+        window.codeEditor = codeEditor; // Expose for module scripts (session restore)
 
         async function submitCode() {
             const question = document.getElementById('question').value.trim();
@@ -921,7 +922,7 @@ Return ONLY valid JSON:
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, limit, startAfter, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, query, orderBy, limit, startAfter, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -933,14 +934,56 @@ Return ONLY valid JSON:
         const auth = getAuth(app);
         const db = getFirestore(app);
         const overlay = document.getElementById('auth-guard-overlay');
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (overlay) overlay.style.display = 'none';
                 window._fbUser = user;
+                // Restore from history if session ID is in URL
+                const sessionId = new URLSearchParams(window.location.search).get('session');
+                if (sessionId) await _loadCodingSession(db, user, sessionId);
             } else {
                 window.location.replace('./index.html');
             }
         });
+
+        async function _loadCodingSession(db, user, sessionId) {
+            try {
+                const snap = await getDoc(doc(db, 'users', user.uid, 'history', sessionId));
+                if (!snap.exists()) return;
+                const data = snap.data();
+                const msgs = data.messages || [];
+                const userMsg = msgs.find(m => m.role === 'user');
+                const aiMsg   = msgs.find(m => m.role === 'assistant');
+                if (!aiMsg) return;
+
+                // Parse question and code from stored user message
+                const uc = userMsg ? (userMsg.content || '') : '';
+                const qMatch = uc.match(/^Question:\s*([\s\S]*?)(?:\n\nCode:|$)/);
+                const cMatch = uc.match(/\n\nCode:\n([\s\S]*)/);
+                const question = qMatch ? qMatch[1].trim() : '';
+                const code     = cMatch ? cMatch[1].trim() : '';
+
+                // Populate the question field
+                const questionEl = document.getElementById('question');
+                if (questionEl && question) questionEl.value = question;
+
+                // Populate CodeMirror editor
+                if (code && window.codeEditor) window.codeEditor.setValue(code);
+
+                // Display the AI feedback
+                if (window.displayFeedback) {
+                    const banner = `> **📜 Restored from history** — ${(data.summary || '').replace(/</g,'&lt;')}\n\n`;
+                    window.displayFeedback(banner + aiMsg.content, 'success');
+                }
+
+                // Scroll feedback into view
+                const feedbackEl = document.getElementById('feedback');
+                if (feedbackEl) feedbackEl.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) {
+                console.warn('Failed to load coding history session:', e);
+            }
+        }
+
         window.saveHistoryRecord = async function(question, codeSnippet, feedback) {
             const user = window._fbUser;
             if (!user) return;

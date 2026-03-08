@@ -805,7 +805,7 @@ Requirements:
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -817,14 +817,61 @@ Requirements:
         const auth = getAuth(app);
         const db = getFirestore(app);
         const overlay = document.getElementById('auth-guard-overlay');
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (overlay) overlay.style.display = 'none';
                 window._fbUser = user;
+                // Restore from history if session ID is in URL
+                const sessionId = new URLSearchParams(window.location.search).get('session');
+                if (sessionId) await _loadExamSession(db, user, sessionId);
             } else {
                 window.location.replace('./index.html');
             }
         });
+
+        async function _loadExamSession(db, user, sessionId) {
+            try {
+                const snap = await getDoc(doc(db, 'users', user.uid, 'history', sessionId));
+                if (!snap.exists()) return;
+                const data = snap.data();
+                const msgs = data.messages || [];
+                const userMsg = msgs.find(m => m.role === 'user');
+                const aiMsg   = msgs.find(m => m.role === 'assistant');
+                if (!aiMsg) return;
+
+                // Restore form fields from stored user message
+                const uc = userMsg ? (userMsg.content || '') : '';
+                const subMatch  = uc.match(/Subject:\s*(.+)/);
+                const diffMatch = uc.match(/Difficulty:\s*(.+)/);
+                if (subMatch) {
+                    const sel = document.getElementById('subject');
+                    if (sel) { sel.value = subMatch[1].trim(); if (window.populateTopics) window.populateTopics(); }
+                }
+                if (diffMatch) {
+                    const sel = document.getElementById('difficulty');
+                    if (sel) sel.value = diffMatch[1].trim().toLowerCase();
+                }
+
+                // Render the generated paper
+                const outputDiv = document.getElementById('output');
+                if (!outputDiv) return;
+                const historyBanner = `<div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:12px;padding:.6rem 1rem;margin-bottom:1.25rem;font-size:.8rem;color:#5b21b6;display:flex;align-items:center;gap:.5rem">
+                    <i class="fas fa-history"></i> <span>Restored from history &mdash; ${(data.summary || '').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+                </div>`;
+                if (window.formatResponse) {
+                    outputDiv.innerHTML = historyBanner + window.formatResponse(aiMsg.content);
+                } else {
+                    outputDiv.innerHTML = historyBanner + '<pre style="white-space:pre-wrap;font-size:.85rem">' + aiMsg.content.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>';
+                }
+                const exportBtn = document.getElementById('export');
+                if (exportBtn) exportBtn.disabled = false;
+                if (window.MathJax) MathJax.typesetPromise([outputDiv]).catch(() => {});
+                outputDiv.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) {
+                console.warn('Failed to load exam history session:', e);
+            }
+        }
+
         window.saveHistoryRecord = async function(subject, topics, difficulty, content) {
             const user = window._fbUser;
             if (!user) return;

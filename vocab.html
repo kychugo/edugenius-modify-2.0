@@ -1086,7 +1086,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         // VOCABULARY GENERATOR
         // ====================================================
 
-        let generatedWords = []; // Store for quiz use
+        var generatedWords = []; // Store for quiz use (var exposes to window for module access)
 
         function parseVocabList(raw) {
             // Try to parse structured sections: WORD / POS / DEFINITION / EXAMPLE / CHINESE
@@ -1726,7 +1726,7 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         const app = initializeApp({
             apiKey: "AIzaSyAXCSDsibC9yTJed3cbRjmWmOIMv1A2cr8",
             authDomain: "login-system-9c566.firebaseapp.com",
@@ -1738,14 +1738,80 @@ Mix question types: definitions, fill-in-the-blank usage, synonyms, and contextu
         const auth = getAuth(app);
         const db = getFirestore(app);
         const overlay = document.getElementById('auth-guard-overlay');
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (overlay) overlay.style.display = 'none';
                 window._fbUser = user;
+                // Restore from history if session ID is in URL
+                const sessionId = new URLSearchParams(window.location.search).get('session');
+                if (sessionId) await _loadVocabSession(db, user, sessionId);
             } else {
                 window.location.replace('./index.html');
             }
         });
+
+        async function _loadVocabSession(db, user, sessionId) {
+            try {
+                const snap = await getDoc(doc(db, 'users', user.uid, 'history', sessionId));
+                if (!snap.exists()) return;
+                const data = snap.data();
+                const msgs = data.messages || [];
+                const userMsg = msgs.find(m => m.role === 'user');
+                const aiMsg   = msgs.find(m => m.role === 'assistant');
+                if (!aiMsg) return;
+
+                const raw = aiMsg.content || '';
+                // Parse topic/level from stored user message
+                const uc = userMsg ? (userMsg.content || '') : '';
+                const topicMatch = uc.match(/Topic:\s*(.+)/);
+                const levelMatch = uc.match(/Level:\s*(.+)/);
+                const topic = topicMatch ? topicMatch[1].trim() : (data.summary || 'Unknown');
+                const level = levelMatch ? levelMatch[1].trim() : '';
+
+                // Restore form fields
+                const topicEl = document.getElementById('genTopic');
+                const levelEl = document.getElementById('genLevel');
+                if (topicEl) topicEl.value = topic;
+                if (levelEl && level) levelEl.value = level;
+
+                // Parse and render vocab
+                const words = window.parseVocabList ? window.parseVocabList(raw) : [];
+                const genOut = document.getElementById('genOutput');
+                if (!genOut) return;
+
+                const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                const historyBanner = `<div style="background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.22);border-radius:12px;padding:.6rem 1rem;margin-bottom:1rem;font-size:.8rem;color:#4f46e5;display:flex;align-items:center;gap:.5rem">
+                    📜 <span>Restored from history &mdash; ${esc(topic)}${level ? ' (' + esc(level) + ')' : ''}</span>
+                </div>`;
+
+                if (words.length && window.renderVocabCards) {
+                    genOut.innerHTML = historyBanner + `<div class="card">
+                        <div class="card-header">
+                            <div class="card-icon icon-yellow">📚</div>
+                            <div>
+                                <div class="card-title">${words.length} Words: ${esc(topic)}</div>
+                                <div class="card-hint">${esc(level)} level — restored from history</div>
+                            </div>
+                        </div>
+                        ${window.renderVocabCards(words)}
+                    </div>`;
+                    // Set generatedWords so Quiz These Words button works
+                    if (typeof window.generatedWords !== 'undefined') window.generatedWords = words;
+                } else {
+                    // Fallback: show raw content
+                    genOut.innerHTML = historyBanner + `<div class="card"><pre style="white-space:pre-wrap;font-size:.82rem;color:var(--text)">${esc(raw.substring(0, 3000))}</pre></div>`;
+                }
+
+                // Show quiz button
+                const quizBtn = document.getElementById('startQuizFromGenBtn');
+                if (quizBtn) quizBtn.classList.remove('hidden');
+
+                genOut.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) {
+                console.warn('Failed to load vocab history session:', e);
+            }
+        }
+
         window.saveHistoryRecord = async function(tool, topic, level, content) {
             const user = window._fbUser;
             if (!user) return;
