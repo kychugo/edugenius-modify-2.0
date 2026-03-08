@@ -570,7 +570,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
         // Format AI response with HTML tags (Corrected version)
         function formatResponse(content) {
-            let processedContent = content
+            // Handle fenced code blocks (```lang ... ```) before any other processing
+            let processedContent = content.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+                const escapedCode = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+                return `<pre style="background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:.75rem 1rem;overflow-x:auto;font-family:monospace;font-size:.85rem;line-height:1.6;white-space:pre"><code>${escapedCode}</code></pre>`;
+            });
+
+            processedContent = processedContent
                 .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.+?)\*/g, '<em>$1</em>')
                 .replace(/`(.+?)`/g, '<code>$1</code>')
@@ -581,6 +587,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
             const htmlBlocks = blocks.map(block => {
                 const trimmedBlock = block.trim();
+                if (trimmedBlock.startsWith('<pre')) {
+                    return trimmedBlock;
+                }
                 if (trimmedBlock.startsWith('#')) {
                     if (trimmedBlock.startsWith('####')) return `<h4>${trimmedBlock.substring(4).trim()}</h4>`;
                     if (trimmedBlock.startsWith('###')) return `<h3>${trimmedBlock.substring(3).trim()}</h3>`;

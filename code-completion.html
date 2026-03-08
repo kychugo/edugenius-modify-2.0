@@ -618,10 +618,19 @@
         'queue operations', '2D list', 'string processing', 'while loop',
         'for loop', 'recursion', 'dictionary operations'
     ];
+    const ICT_AI_TOPICS = [
+        'ICT AI Tools', 'machine learning concepts', 'data preprocessing',
+        'neural network basics', 'decision tree', 'k-nearest neighbour',
+        'data classification', 'training and testing data', 'accuracy evaluation',
+        'chatbot logic', 'recommendation system', 'image recognition basics',
+        'natural language processing', 'linear search', 'binary search'
+    ];
     (function buildTopicChips() {
         const c = document.getElementById('topic-chips');
         if (!c) return;
-        c.innerHTML = SAMPLE_TOPICS.map(t =>
+        const back = new URLSearchParams(window.location.search).get('back') || '';
+        const topics = back.toUpperCase() === 'ICT' ? ICT_AI_TOPICS : SAMPLE_TOPICS;
+        c.innerHTML = topics.map(t =>
             `<button class="topic-chip" onclick="selectTopic('${t.replace(/'/g,"\\'")}')">${t}</button>`
         ).join('');
     })();
@@ -1013,6 +1022,9 @@ Return ONLY valid JSON (no markdown fences):
             </div>`;
 
         // Per-blank result cards
+        // Build a lookup map from blankPosition → studentAnswer index for O(n) lookup
+        const blankPosToIdx = {};
+        ex.blanks.forEach((b, idx) => { blankPosToIdx[b.position] = idx; });
         const cards = (marking.results || []).map((r, i) => {
             const statusClass = r.isCorrect ? 'correct' : r.isPartial ? 'partial' : 'wrong';
             const iconHtml = r.isCorrect
@@ -1022,6 +1034,10 @@ Return ONLY valid JSON (no markdown fences):
                     : '<i class="fas fa-times-circle" style="color:#ef4444"></i>';
             const label = r.isCorrect ? 'Correct' : r.isPartial ? 'Partially Correct' : 'Incorrect';
             const labelColor = r.isCorrect ? '#10b981' : r.isPartial ? '#d97706' : '#ef4444';
+
+            // Use the actual student answer collected from the input (not the AI's interpretation)
+            const blankIdx = blankPosToIdx[r.blankPosition] ?? -1;
+            const actualStudentAnswer = blankIdx !== -1 ? (studentAnswers[blankIdx] || '') : '';
 
             return `
             <div class="result-card ${statusClass}" style="animation-delay:${i * .08}s">
@@ -1036,7 +1052,7 @@ Return ONLY valid JSON (no markdown fences):
                         <div class="flex flex-wrap gap-3 mb-2 text-xs">
                             <div>
                                 <span class="section-label" style="margin-bottom:2px">Your Answer</span>
-                                <code style="background:rgba(0,0,0,.06);padding:.2rem .5rem;border-radius:6px;font-family:var(--mono);font-size:.8rem;display:block;color:${r.isCorrect ? '#10b981' : '#ef4444'}">${esc(r.studentAnswer || '(empty)')}</code>
+                                <code style="background:rgba(0,0,0,.06);padding:.2rem .5rem;border-radius:6px;font-family:var(--mono);font-size:.8rem;display:block;color:${r.isCorrect ? '#10b981' : '#ef4444'}">${esc(actualStudentAnswer || '(empty)')}</code>
                             </div>
                             ${!r.isCorrect ? `<div>
                                 <span class="section-label" style="margin-bottom:2px">Correct Answer</span>
