@@ -516,7 +516,7 @@
                         <h2 class="text-2xl font-extrabold mb-1" style="color:var(--text-primary)">ICT</h2>
                         <p class="text-sm mb-4" style="color:var(--text-secondary)">Programming, networking, databases &amp; cybersecurity</p>
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
-                              style="background:rgba(99,102,241,.12);color:#6366f1">4 AI Tools</span>
+                              style="background:rgba(99,102,241,.12);color:#6366f1">5 AI Tools</span>
                     </div>
                 </div>
             </div>
@@ -1539,6 +1539,14 @@ Your task is to provide a thorough, structured analysis:
                     color: 'from-cyan-400 to-cyan-500',
                     iconColorClass: 'text-cyan-900 dark:text-white'
                 });
+                tools.push({
+                    name: 'Code Completion Exercise',
+                    icon: 'fas fa-puzzle-piece',
+                    description: 'Fill-in-the-blank Python exercises with AI feedback',
+                    action: () => window.open('./code-completion.html?back=' + encodeURIComponent(subject), '_blank'),
+                    color: 'from-emerald-400 to-emerald-600',
+                    iconColorClass: 'text-white'
+                });
             }
 
             aiOptions.innerHTML = tools.map((tool, idx) => `
@@ -1575,6 +1583,8 @@ Your task is to provide a thorough, structured analysis:
                 showAI(subject, 'errorAnalysis');
             } else if (toolName === 'ICT Coding Review Platform') {
                 window.open('./coding.html?back=' + encodeURIComponent(subject), '_blank');
+            } else if (toolName === 'Code Completion Exercise') {
+                window.open('./code-completion.html?back=' + encodeURIComponent(subject), '_blank');
             } else if (toolName === 'Exam Paper Generator') {
                 window.open('./exam.html?back=' + encodeURIComponent(subject), '_blank');
             } else if (toolName === 'Vocabulary Generator') {
